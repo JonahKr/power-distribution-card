@@ -1,0 +1,31 @@
+{
+  "name": "e3dc-card",
+  "version": "1.0.0",
+  "description": "A Lovelace Plugin with the standard E3-DC overview pannel.",
+  "main": "e3dc-card.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JonahKr/e3dc-card.git"
+  },
+  "keywords": [
+    "e3dc",
+    "lovelace",
+    "hacs",
+    "home assistant"
+  ],
+  "author": "Jonah Kraushaar",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JonahKr/e3dc-card/issues"
+  },
+  "homepage": "https://github.com/JonahKr/e3dc-card#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^7.5.0",
+    "eslint-config-prettier": "^6.11.0",
+    "prettier": "^2.0.5"
+  }
+}
