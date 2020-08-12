@@ -1,0 +1,64 @@
+* {
+  box-sizing: border-box;
+}
+.e3dc-card {
+  width: 380px;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: 130px 100px 130px;
+  gap: 0.5em;
+  padding: 1em;
+}
+
+p {
+  text-align: center;
+  margin: 4px 0 4px 0;
+}
+
+.grid-header {
+  visibility: hidden;
+  grid-column-start: 1;
+  grid-column-end: 4;
+}
+
+.overview {
+  grid-column: 2;
+  grid-row-start: 2;
+  grid-row-end: 4;
+}
+
+.bar-container {
+  display: block;
+  width: 100%;
+  height: 50%;
+}
+
+.bar-container > div {
+  display: inline-block;
+  width: 45%;
+  vertical-align: middle;
+}
+
+.item > div {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.icon {
+  width: 50%;
+  border: gray 1px solid;
+  border-radius: 1em;
+}
+
+.icon > svg {
+  width: 40px;
+  display: block;
+  margin: 0.25em auto 0 auto;
+}
+
+.value > img {
+  max-width: 90%;
+  height: 1.2em;
+}
