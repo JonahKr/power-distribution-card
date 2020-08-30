@@ -71,7 +71,7 @@ class e3dcPowerWheelCard extends LitElement {
           float: left;
         }
 
-        .icon > svg {
+        .icon > ha-icon {
           width: 40px;
           display: block;
           margin: 0.25em auto 0 auto;
@@ -222,6 +222,7 @@ class e3dcPowerWheelCard extends LitElement {
     return html`
       <div class="item" id="${id}">
         <div class="icon">
+          <ha-icon icon="mdi:transmission-tower"></ha-icon>
           <p class="subtitle">${id}</p>
         </div>
         <div class="value">
