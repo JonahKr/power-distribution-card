@@ -50,6 +50,7 @@ p {
   width: 50%;
   border: gray 1px solid;
   border-radius: 1em;
+  float: left;
 }
 
 .icon > svg {
@@ -58,41 +59,45 @@ p {
   margin: 0.25em auto 0 auto;
 }
 
-.value > img {
-  max-width: 90%;
-  height: 1.2em;
+.value {
+  padding: 0 0 0 4px;
 }
 
-/*
+.item:nth-child(2n) > .icon {
+  float: right;
+}
+
+/**************
 ARROW ANIMATION
-*/
-.arrow > div{
+**************/
+.arrow > div {
   display: inline-block;
 }
 
 .triangle-right {
-	width: 0;
-	height: 0;
-	border-top: 8px solid transparent;
-	border-left: 17px solid #e3e3e3;
-	border-bottom: 8px solid transparent;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-left: 17px solid #e3e3e3;
+  border-bottom: 8px solid transparent;
 }
 
 .triangle-left {
-	width: 0;
-	height: 0;
-	border-top: 8px solid transparent;
-	border-right: 17px solid #e3e3e3;
-	border-bottom: 8px solid transparent;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-right: 17px solid #e3e3e3;
+  border-bottom: 8px solid transparent;
 }
 
 @keyframes flash_triangles {
-  0%, 66% {
+  0%,
+  66% {
     border-left-color: #e3e3e3;
     border-right-color: #e3e3e3;
   }
   33% {
-    border-left-color:#555;
+    border-left-color: #555;
     border-right-color: #555;
   }
 }
