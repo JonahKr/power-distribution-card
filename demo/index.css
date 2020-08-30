@@ -3,13 +3,15 @@
 }
 .e3dc-card {
   width: 380px;
+  margin: auto;
+  padding: 2em 0 2em 0;
 }
 
 .grid-container {
   display: grid;
   grid-template-columns: 130px 100px 130px;
   gap: 0.5em;
-  padding: 1em;
+  margin: auto;
 }
 
 p {
@@ -70,6 +72,14 @@ p {
 /**************
 ARROW ANIMATION
 **************/
+
+.blank {
+  height: 4px;
+  width: 54px;
+  background-color: #e3e3e3;
+  margin: 8px auto 8px auto;
+}
+
 .arrow > div {
   display: inline-block;
 }

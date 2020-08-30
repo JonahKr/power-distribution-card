@@ -19,13 +19,15 @@ class e3dcPowerWheelCard extends LitElement {
         }
         .e3dc-card {
           width: 380px;
+          margin: auto;
+          padding: 2em 0 2em 0;
         }
 
         .grid-container {
           display: grid;
           grid-template-columns: 130px 100px 130px;
           gap: 0.5em;
-          padding: 1em;
+          margin: auto;
         }
 
         p {
@@ -90,6 +92,13 @@ class e3dcPowerWheelCard extends LitElement {
           display: inline-block;
         }
 
+        .blank {
+          height: 4px;
+          width: 54px;
+          background-color: #e3e3e3;
+          margin: 8px auto 8px auto;
+        }
+
         .triangle-right {
           width: 0;
           height: 0;
@@ -132,6 +141,11 @@ class e3dcPowerWheelCard extends LitElement {
     ];
   }
 
+  constructor() {
+    super();
+    this.entities = {};
+  }
+
   setConfig(config) {
     config = { ...config };
 
@@ -145,7 +159,7 @@ class e3dcPowerWheelCard extends LitElement {
     if (!config.entities || config.entities.length == 0) {
       throw new Error("You need to define entities such as battery or solar!");
     } else {
-      acceptedEntities = [
+      var acceptedEntities = [
         "solar_power",
         "grid_power",
         "battery_power",
@@ -154,7 +168,7 @@ class e3dcPowerWheelCard extends LitElement {
         "ratio",
       ];
       acceptedEntities.forEach((e) =>
-        config.entities[e] ? (this.entities[e] = config.entities[e]) : None
+        config.entities[e] ? (this.entities[e] = config.entities[e]) : null
       );
     }
 
@@ -172,10 +186,26 @@ class e3dcPowerWheelCard extends LitElement {
             <div class="grid-header">
               custom header 123
             </div>
-            ${self._render_item("solar", "solar_power")}
-            ${self._render_item("grid", "grid_power")}
-            ${self._render_item("battery", "battery_power")}
-            ${self._render_item("home", "home_consumption")}
+            <div class="overview">
+              <p id="ratio">ratio</p>
+              <div class="bar-container">
+                <div class="ratio-bar">
+                  <p id="ratio-percentage">100%</p>
+                  <div class="bar">Bar</div>
+                </div>
+                <div class="autarky-bar">
+                  <p id="autarky-percentage">78%</p>
+                  <div class="bar">Bar</div>
+                </div>
+              </div>
+              <p id="autarky">
+                autarky
+              </p>
+            </div>
+            ${this._render_item("solar", this.entities["solar_power"])}
+            ${this._render_item("grid", this.entities["grid_power"])}
+            ${this._render_item("battery", this.entities["battery_power"])}
+            ${this._render_item("home", this.entities["home_consumption"])}
           </div>
         </div>
       </ha-card>
@@ -187,14 +217,15 @@ class e3dcPowerWheelCard extends LitElement {
    */
 
   _render_item(id, entity) {
-    state = this.hass.states[entity];
+    var state = this.hass.states[entity].state;
+    console.log(state);
     return html`
       <div class="item" id="${id}">
         <div class="icon">
           <p class="subtitle">${id}</p>
         </div>
         <div class="value">
-          <p>${abs(state)} W</p>
+          <p>${Math.abs(state)} W</p>
           ${state < 0
             ? this._render_arrow(2)
             : state == 0
@@ -210,8 +241,7 @@ class e3dcPowerWheelCard extends LitElement {
   _render_arrow(direction) {
     switch (direction) {
       case 0: //Equals no Arrows at all
-        //TODO create css line for no movement
-        break;
+        return html` <div class="blank"></div> `;
       case 1: //Right Moving Arrows
         return html`
           <div class="arrow">
@@ -220,7 +250,6 @@ class e3dcPowerWheelCard extends LitElement {
             <div class="triangle-right" id="arrow_3"></div>
           </div>
         `;
-        break;
       case 2: //Left moving Arrows
         return html`
           <div class="arrow">
@@ -229,7 +258,6 @@ class e3dcPowerWheelCard extends LitElement {
             <div class="triangle-left" id="arrow_1"></div>
           </div>
         `;
-        break;
     }
   }
 }
