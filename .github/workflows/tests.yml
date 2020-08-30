@@ -39,8 +39,8 @@ jobs:
       - name: Lint
         run: ./node_modules/.bin/eslint -c .eslintrc.json --ext .js --ext .jsx
 
-      - name: Prettier
-        run: ./node_modules/.bin/prettier --check "*.js" --end-of-line lf
+      #- name: Prettier
+      #  run: ./node_modules/.bin/prettier --check "*.js" --end-of-line lf
 
       - name: Version check
         run: if (node -pe "require('./package.json').version" == cat ./VERSION); then exit 0; else exit 1; fi
