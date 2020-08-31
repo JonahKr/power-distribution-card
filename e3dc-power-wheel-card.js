@@ -141,6 +141,23 @@ class e3dcPowerWheelCard extends LitElement {
     ];
   }
 
+  static get defaultConfig() {
+    return {
+      solar: {
+        icon: "mdi:solar-power",
+      },
+      grid: {
+        icon: "mdi:transmission-tower",
+      },
+      battery: {
+        icon: "mdi:battery-outline",
+      },
+      home: {
+        icon: "mdi:home-assistant",
+      },
+    };
+  }
+
   constructor() {
     super();
     this.entities = {};
@@ -179,12 +196,20 @@ class e3dcPowerWheelCard extends LitElement {
     acceptedEntities.forEach((e) => {
       if (config.entities[e]) this.entities[e]["entity"] = config.entities[e];
       //TODO check wether its possible to copy the settings directly instead of looping them
-      //Logic: If the extra elements exist and either
       if (config[e] && (this.entities[e]["entity"] || config[e]["entity"]))
-        config[e].forEach((g) => (this.entities[e][g] = config[e][g]));
+        config[e].forEach((setting) => {
+          this.entities[e][setting] = config[e][setting];
+        });
     });
-
-    //TODO enable more configuration options: Color, Icons, Autocalc of autarky / ratio
+    //Applying default values if not set by the user
+    defConf = this.defaultConfig()
+    for (const e in defConf){
+      for(const set in defConf[e]){
+        if(this.entities[e] && !this.entities[e][set]) this.entities[e][set] = defConf[e][set]
+      }
+    }
+    //TODO enable more configuration options: Color, Autocalc of autarky / ratio
+    //TODO Add a card Title
     config.title = config.title ? config.title : "";
 
     this.config = config;
