@@ -257,7 +257,7 @@ class e3dcPowerWheelCard extends LitElement {
     return html`
       <div class="item" id="${entity}">
         <div class="icon">
-          <ha-icon icon="mdi:transmission-tower"></ha-icon>
+          <ha-icon icon="${this.entities[entity].icon}"></ha-icon>
           <p class="subtitle">${entity}</p>
         </div>
         <div class="value">
