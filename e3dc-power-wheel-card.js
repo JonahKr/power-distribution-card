@@ -147,30 +147,42 @@ class e3dcPowerWheelCard extends LitElement {
   }
 
   setConfig(config) {
-    config = { ...config };
+    /************************
+     * Example Configuration: Simple and Advanced can be combined aslong a entity is passed
+     ************************
+     * Simple:
+     *********
+     * type: custom:e3dc-power-wheel-card
+     * entities:
+     *   battery: sensor.e3dc-battery
+     *   solar: sensor.e3dc-solar
+     *
+     ***********
+     * Advanced:
+     ***********
+     * type: custom: e3dc-power-wheel-card
+     * solar:
+     *   entity: sensor.e3dc-solar
+     *   inverted: true
+     *   icon: 'mdi:solar'
+     */
 
-    // Example configuration:
-    //
-    // type: custom:e3dc-power-wheel-card
-    // entities:
-    //   battery_power: sensor.e3dc-battery
-    //   solar_power: sensor.e3dc-solar
-    //
-    if (!config.entities || config.entities.length == 0) {
-      throw new Error("You need to define entities such as battery or solar!");
-    } else {
-      var acceptedEntities = [
-        "solar_power",
-        "grid_power",
-        "battery_power",
-        "home_consumption",
-        "autarky",
-        "ratio",
-      ];
-      acceptedEntities.forEach((e) =>
-        config.entities[e] ? (this.entities[e] = config.entities[e]) : null
-      );
-    }
+    config = { ...config };
+    var acceptedEntities = [
+      "solar",
+      "grid",
+      "battery",
+      "home",
+      "autarky",
+      "ratio",
+    ];
+    acceptedEntities.forEach((e) => {
+      if (config.entities[e]) this.entities[e]["entity"] = config.entities[e];
+      //TODO check wether its possible to copy the settings directly instead of looping them
+      //Logic: If the extra elements exist and either
+      if (config[e] && (this.entities[e]["entity"] || config[e]["entity"]))
+        config[e].forEach((g) => (this.entities[e][g] = config[e][g]));
+    });
 
     //TODO enable more configuration options: Color, Icons, Autocalc of autarky / ratio
     config.title = config.title ? config.title : "";
@@ -202,10 +214,8 @@ class e3dcPowerWheelCard extends LitElement {
                 autarky
               </p>
             </div>
-            ${this._render_item("solar", this.entities["solar_power"])}
-            ${this._render_item("grid", this.entities["grid_power"])}
-            ${this._render_item("battery", this.entities["battery_power"])}
-            ${this._render_item("home", this.entities["home_consumption"])}
+            ${this._render_item("solar")} ${this._render_item("grid")}
+            ${this._render_item("battery")} ${this._render_item("home")}
           </div>
         </div>
       </ha-card>
@@ -216,14 +226,14 @@ class e3dcPowerWheelCard extends LitElement {
    * Render Support Functions
    */
 
-  _render_item(id, entity) {
+  _render_item(entity) {
+    if (!this.entities[entity]) return null;
     var state = this.hass.states[entity].state;
-    console.log(state);
     return html`
-      <div class="item" id="${id}">
+      <div class="item" id="${entity}">
         <div class="icon">
           <ha-icon icon="mdi:transmission-tower"></ha-icon>
-          <p class="subtitle">${id}</p>
+          <p class="subtitle">${entity}</p>
         </div>
         <div class="value">
           <p>${Math.abs(state)} W</p>
