@@ -219,6 +219,9 @@ class e3dcPowerWheelCard extends LitElement {
     return html`
       <ha-card>
         <div class="e3dc-card">
+          <div id="title" class="header">
+            ${this.config.title}
+          </div>
           <div class="grid-container">
             <div class="grid-header">
               custom header 123
@@ -246,7 +249,18 @@ class e3dcPowerWheelCard extends LitElement {
       </ha-card>
     `;
   }
+  /**
+   * Calculating Functions
+   */
+  _calculate_autarky(grid, home){
+    //Because of very little power is consumed from/feeded into the grid, we need to adjust the 1% range
+    devd = grid/home
+    return devd >= 0.005 ? Math.round(devd) : 0.001
+  }
 
+  _calculate_ratio(){
+
+  }
   /**
    * Render Support Functions
    */
