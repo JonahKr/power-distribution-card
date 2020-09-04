@@ -7,7 +7,8 @@ class e3dcPowerWheelCard extends LitElement {
     return {
       hass: { type: Object },
       config: { type: Object },
-      entities: { type: Array },
+      entities: { type: Object },
+      defaultConfig: { type: Object },
     };
   }
 
@@ -59,33 +60,39 @@ class e3dcPowerWheelCard extends LitElement {
           vertical-align: middle;
         }
 
-        .item > div {
+        item > div {
           display: inline-block;
           vertical-align: middle;
         }
 
-        .icon {
+        badge {
           width: 50%;
           border: gray 1px solid;
           border-radius: 1em;
           float: left;
+          padding: 4px;
         }
 
-        .icon > ha-icon {
-          width: 40px;
+        badge > icon {
+          width: 100%;
+          display: inline-block;
+        }
+
+        icon > ha-icon {
           display: block;
-          margin: 0.25em auto 0 auto;
+          width: 24px;
+          margin: 0 auto;
         }
 
         .value {
           padding: 0 0 0 4px;
         }
 
-        .item:nth-child(2n) > .icon {
+        item:nth-child(2n) > badge {
           float: right;
         }
 
-        /**************
+      /**************
       ARROW ANIMATION
       **************/
         .arrow > div {
@@ -141,7 +148,7 @@ class e3dcPowerWheelCard extends LitElement {
     ];
   }
 
-  static get defaultConfig() {
+  get DefaultConfig() {
     return {
       solar: {
         icon: "mdi:solar-power",
@@ -194,24 +201,26 @@ class e3dcPowerWheelCard extends LitElement {
       "ratio",
     ];
     acceptedEntities.forEach((e) => {
-      if (config.entities[e]) this.entities[e]["entity"] = config.entities[e];
+      var cache = {};
+      if (config.entities[e]) cache.entity = config.entities[e];
       //TODO check wether its possible to copy the settings directly instead of looping them
-      if (config[e] && (this.entities[e]["entity"] || config[e]["entity"]))
-        config[e].forEach((setting) => {
-          this.entities[e][setting] = config[e][setting];
-        });
+      if (config[e] && (cache.entity || config[e].entity))
+        for (var setting in config[e]) {
+          cache[setting] = config[e][setting];
+        }
+      this.entities[e] = cache;
     });
     //Applying default values if not set by the user
-    defConf = this.defaultConfig()
-    for (const e in defConf){
-      for(const set in defConf[e]){
-        if(this.entities[e] && !this.entities[e][set]) this.entities[e][set] = defConf[e][set]
+    var defConf = this.DefaultConfig;
+    for (const e in defConf) {
+      for (const set in defConf[e]) {
+        if (this.entities[e] && !this.entities[e][set])
+          this.entities[e][set] = defConf[e][set];
       }
     }
     //TODO enable more configuration options: Color, Autocalc of autarky / ratio
     //TODO Add a card Title
     config.title = config.title ? config.title : "";
-
     this.config = config;
   }
 
@@ -252,28 +261,29 @@ class e3dcPowerWheelCard extends LitElement {
   /**
    * Calculating Functions
    */
-  _calculate_autarky(grid, home){
+  _calculate_autarky(grid, home) {
     //Because of very little power is consumed from/feeded into the grid, we need to adjust the 1% range
-    devd = grid/home
-    return devd >= 0.005 ? Math.round(devd) : 0.001
+    var devd = grid / home;
+    return devd >= 0.005 ? Math.round(devd) : 0.001;
   }
 
-  _calculate_ratio(){
-
-  }
+  _calculate_ratio() {}
   /**
    * Render Support Functions
    */
 
   _render_item(entity) {
     if (!this.entities[entity]) return null;
-    var state = this.hass.states[entity].state;
+    var item = this.entities[entity];
+    var state = this.hass.states[item.entity].state;
     return html`
-      <div class="item" id="${entity}">
-        <div class="icon">
-          <ha-icon icon="${this.entities[entity].icon}"></ha-icon>
+      <item id="${entity}">
+        <badge>
+          <icon>
+            <ha-icon icon="${item.icon}"></ha-icon>
+          </icon>
           <p class="subtitle">${entity}</p>
-        </div>
+        </badge>
         <div class="value">
           <p>${Math.abs(state)} W</p>
           ${state < 0
@@ -282,7 +292,7 @@ class e3dcPowerWheelCard extends LitElement {
             ? this._render_arrow(0)
             : this._render_arrow(1)}
         </div>
-      </div>
+      </item>
     `;
   }
 
