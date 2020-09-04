@@ -18,16 +18,17 @@ class e3dcPowerWheelCard extends LitElement {
         * {
           box-sizing: border-box;
         }
+
         .e3dc-card {
           width: 380px;
           margin: auto;
-          padding: 2em 0 2em 0;
+          padding: 0 0 2em 0;
         }
 
         .grid-container {
           display: grid;
           grid-template-columns: 130px 100px 130px;
-          gap: 0.5em;
+          gap: 1em;
           margin: auto;
         }
 
@@ -40,6 +41,7 @@ class e3dcPowerWheelCard extends LitElement {
           visibility: hidden;
           grid-column-start: 1;
           grid-column-end: 4;
+          height: 0;
         }
 
         .overview {
@@ -92,7 +94,7 @@ class e3dcPowerWheelCard extends LitElement {
           float: right;
         }
 
-      /**************
+        /**************
       ARROW ANIMATION
       **************/
         .arrow > div {
@@ -220,17 +222,14 @@ class e3dcPowerWheelCard extends LitElement {
     }
     //TODO enable more configuration options: Color, Autocalc of autarky / ratio
     //TODO Add a card Title
-    config.title = config.title ? config.title : "";
+    config.title = config.title ? config.title : null;
     this.config = config;
   }
 
   render() {
     return html`
-      <ha-card>
+      <ha-card .header=${this.config.title}>
         <div class="e3dc-card">
-          <div id="title" class="header">
-            ${this.config.title}
-          </div>
           <div class="grid-container">
             <div class="grid-header">
               custom header 123
@@ -276,6 +275,7 @@ class e3dcPowerWheelCard extends LitElement {
     if (!this.entities[entity]) return null;
     var item = this.entities[entity];
     var state = this.hass.states[item.entity].state;
+    if (item.inverted) state *= -1;
     return html`
       <item id="${entity}">
         <badge>

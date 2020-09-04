@@ -1,6 +1,6 @@
 {
   "name": "e3dc-card",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A Lovelace Plugin with the standard E3-DC overview pannel.",
   "main": "e3dc-card.js",
   "scripts": {
