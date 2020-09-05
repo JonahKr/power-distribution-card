@@ -9,6 +9,7 @@ class e3dcPowerWheelCard extends LitElement {
       config: { type: Object },
       entities: { type: Object },
       defaultConfig: { type: Object },
+      title: { type: String },
     };
   }
 
@@ -19,15 +20,9 @@ class e3dcPowerWheelCard extends LitElement {
           box-sizing: border-box;
         }
 
-        .e3dc-card {
-          width: 380px;
-          margin: auto;
-          padding: 0 0 2em 0;
-        }
-
         .grid-container {
           display: grid;
-          grid-template-columns: 130px 100px 130px;
+          grid-template-columns: 35%-0.5em 30%-1em 35%-0.5em;
           gap: 1em;
           margin: auto;
         }
@@ -62,11 +57,6 @@ class e3dcPowerWheelCard extends LitElement {
           vertical-align: middle;
         }
 
-        item > div {
-          display: inline-block;
-          vertical-align: middle;
-        }
-
         badge {
           width: 50%;
           border: gray 1px solid;
@@ -86,12 +76,16 @@ class e3dcPowerWheelCard extends LitElement {
           margin: 0 auto;
         }
 
-        .value {
-          padding: 0 0 0 4px;
+        value {
+          float: right;
         }
 
         item:nth-child(2n) > badge {
           float: right;
+        }
+
+        item:nth-child(2n) > value {
+          float: left;
         }
 
         /**************
@@ -220,16 +214,15 @@ class e3dcPowerWheelCard extends LitElement {
           this.entities[e][set] = defConf[e][set];
       }
     }
-    //TODO enable more configuration options: Color, Autocalc of autarky / ratio
-    //TODO Add a card Title
-    config.title = config.title ? config.title : null;
+    //TODO enable more configuration options: Color
+    this.title = config.title ? config.title : null;
     this.config = config;
   }
 
   render() {
     return html`
-      <ha-card .header=${this.config.title}>
-        <div class="e3dc-card">
+      <ha-card .header=${this.title}>
+        <div class="card-content">
           <div class="grid-container">
             <div class="grid-header">
               custom header 123
@@ -250,8 +243,12 @@ class e3dcPowerWheelCard extends LitElement {
                 autarky
               </p>
             </div>
-            ${this._render_item("solar")} ${this._render_item("grid")}
-            ${this._render_item("battery")} ${this._render_item("home")}
+            ${this.entities.solar.entity ? this._render_item("solar") : null}
+            ${this.entities.grid ? this._render_item("grid") : null}
+            ${this.entities.battery.entity
+              ? this._render_item("battery")
+              : null}
+            ${this.entities.home.entity ? this._render_item("home") : null}
           </div>
         </div>
       </ha-card>
@@ -284,14 +281,16 @@ class e3dcPowerWheelCard extends LitElement {
           </icon>
           <p class="subtitle">${entity}</p>
         </badge>
-        <div class="value">
+        <value>
           <p>${Math.abs(state)} W</p>
-          ${state < 0
-            ? this._render_arrow(2)
-            : state == 0
-            ? this._render_arrow(0)
-            : this._render_arrow(1)}
-        </div>
+          ${
+            state < 0
+              ? this._render_arrow(2)
+              : state == 0
+              ? this._render_arrow(0)
+              : this._render_arrow(1)
+          }
+        <value
       </item>
     `;
   }
