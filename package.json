@@ -1,14 +1,14 @@
 {
-  "name": "e3dc-card",
+  "name": "e3dc-power-card",
   "version": "1.2.0",
   "description": "A Lovelace Plugin with the standard E3-DC overview pannel.",
-  "main": "e3dc-card.js",
+  "main": "e3dc-power-card.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JonahKr/e3dc-card.git"
+    "url": "git+https://github.com/JonahKr/e3dc-power-card.git"
   },
   "keywords": [
     "e3dc",
@@ -19,9 +19,9 @@
   "author": "Jonah Kraushaar",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/JonahKr/e3dc-card/issues"
+    "url": "https://github.com/JonahKr/e3dc-power-card/issues"
   },
-  "homepage": "https://github.com/JonahKr/e3dc-card#readme",
+  "homepage": "https://github.com/JonahKr/e3dc-power-card#readme",
   "dependencies": {},
   "devDependencies": {
     "eslint": "^7.5.0",

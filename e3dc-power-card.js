@@ -10,6 +10,7 @@ class e3dcPowerWheelCard extends LitElement {
       entities: { type: Object },
       defaultConfig: { type: Object },
       title: { type: String },
+      animation: { type: Object },
     };
   }
 
@@ -49,12 +50,18 @@ class e3dcPowerWheelCard extends LitElement {
           display: block;
           width: 100%;
           height: 50%;
+          position: relative;
         }
 
         .bar-container > div {
           display: inline-block;
           width: 45%;
           vertical-align: middle;
+        }
+
+        .bar {
+          position: absolute;
+          bottom: 0px;
         }
 
         badge {
@@ -164,6 +171,7 @@ class e3dcPowerWheelCard extends LitElement {
   constructor() {
     super();
     this.entities = {};
+    this.animation = {};
   }
 
   setConfig(config) {
@@ -196,6 +204,7 @@ class e3dcPowerWheelCard extends LitElement {
       "autarky",
       "ratio",
     ];
+
     acceptedEntities.forEach((e) => {
       var cache = {};
       if (config.entities[e]) cache.entity = config.entities[e];
@@ -214,7 +223,7 @@ class e3dcPowerWheelCard extends LitElement {
           this.entities[e][set] = defConf[e][set];
       }
     }
-    //TODO enable more configuration options: Color
+    //TODO enable more configuration options: Color, Autocalc of autarky / ratio
     this.title = config.title ? config.title : null;
     this.config = config;
   }
@@ -227,28 +236,19 @@ class e3dcPowerWheelCard extends LitElement {
             <div class="grid-header">
               custom header 123
             </div>
-            <div class="overview">
-              <p id="ratio">ratio</p>
-              <div class="bar-container">
-                <div class="ratio-bar">
-                  <p id="ratio-percentage">100%</p>
-                  <div class="bar">Bar</div>
-                </div>
-                <div class="autarky-bar">
-                  <p id="autarky-percentage">78%</p>
-                  <div class="bar">Bar</div>
-                </div>
-              </div>
-              <p id="autarky">
-                autarky
-              </p>
-            </div>
-            ${this.entities.solar.entity ? this._render_item("solar") : null}
-            ${this.entities.grid ? this._render_item("grid") : null}
-            ${this.entities.battery.entity
-              ? this._render_item("battery")
+            ${this._render_bars()}
+            ${this.entities.solar.entity
+              ? this._render_item(this.solar_val, "solar")
               : null}
-            ${this.entities.home.entity ? this._render_item("home") : null}
+            ${this.entities.grid
+              ? this._render_item(this.grid_val, "grid")
+              : null}
+            ${this.entities.battery.entity
+              ? this._render_item(this.battery_val, "battery")
+              : null}
+            ${this.entities.home.entity
+              ? this._render_item(this.home_val, "home")
+              : null}
           </div>
         </div>
       </ha-card>
@@ -257,10 +257,43 @@ class e3dcPowerWheelCard extends LitElement {
   /**
    * Calculating Functions
    */
-  _calculate_autarky(grid, home) {
+
+  get solar_val() {
+    return this.entities.solar.entity
+      ? Number(this.hass.states[this.entities.solar.entity].state)
+      : 0;
+  }
+  get grid_val() {
+    return this.entities.grid.entity
+      ? Number(this.hass.states[this.entities.grid.entity].state)
+      : 0;
+  }
+  get battery_val() {
+    return this.entities.battery.entity
+      ? Number(this.hass.states[this.entities.battery.entity].state)
+      : 0;
+  }
+  get home_val() {
+    return this.entities.home.entity
+      ? Number(this.hass.states[this.entities.home.entity].state)
+      : 0;
+  }
+  get autarky_val() {
+    return this.entities.autarky.entity
+      ? Number(this.hass.states[this.entities.autarky.entity].state)
+      : 0;
+  }
+  get ratio_val() {
+    return this.entities.ratio.entity
+      ? Number(this.hass.states[this.entities.ratio.entity].state)
+      : 0;
+  }
+
+  _calculate_autarky() {
+    //Formula: Autarky in % = Total Consumption / Production *100
     //Because of very little power is consumed from/feeded into the grid, we need to adjust the 1% range
-    var devd = grid / home;
-    return devd >= 0.005 ? Math.round(devd) : 0.001;
+    var autarky = 0.5; //TODO try some different formulas to get the best examples...
+    return autarky >= 0.005 ? Math.round(autarky) : 0.01;
   }
 
   _calculate_ratio() {}
@@ -268,18 +301,47 @@ class e3dcPowerWheelCard extends LitElement {
    * Render Support Functions
    */
 
-  _render_item(entity) {
-    if (!this.entities[entity]) return null;
-    var item = this.entities[entity];
-    var state = this.hass.states[item.entity].state;
+  _render_bars() {
+    var autarky = this.entities.autarky.entity
+      ? this.autarky_val
+      : this._calculate_autarky() * 100;
+    var ratio = this.entities.ratio.entity
+      ? this.ratio_val
+      : this._calculate_ratio() * 100;
+
+    return html`
+      <div class="overview">
+        <p id="ratio">ratio</p>
+        <div class="bar-container">
+          <div class="ratio-bar">
+            <p id="ratio-percentage">${ratio}%</p>
+            <div class="bar"></div>
+          </div>
+          <div class="autarky-bar">
+            <p id="autarky-percentage">${autarky}%</p>
+            <div
+              class="bar"
+              style="height:${autarky}%,; background-color:#555;"
+            ></div>
+          </div>
+        </div>
+        <p id="autarky">
+          autarky
+        </p>
+      </div>
+    `;
+  }
+
+  _render_item(state, name) {
+    var item = this.entities[name];
     if (item.inverted) state *= -1;
     return html`
-      <item id="${entity}">
+      <item id="${name}">
         <badge>
           <icon>
             <ha-icon icon="${item.icon}"></ha-icon>
           </icon>
-          <p class="subtitle">${entity}</p>
+          <p class="subtitle">${name}</p>
         </badge>
         <value>
           <p>${Math.abs(state)} W</p>
@@ -304,17 +366,17 @@ class e3dcPowerWheelCard extends LitElement {
       case 1: //Right Moving Arrows
         return html`
           <div class="arrow">
-            <div class="triangle-right" id="arrow_1"></div>
-            <div class="triangle-right" id="arrow_2"></div>
-            <div class="triangle-right" id="arrow_3"></div>
+            <div class="triangle-right animated" id="arrow_1"></div>
+            <div class="triangle-right animated" id="arrow_2"></div>
+            <div class="triangle-right animated" id="arrow_3"></div>
           </div>
         `;
       case 2: //Left moving Arrows
         return html`
           <div class="arrow">
-            <div class="triangle-left" id="arrow_3"></div>
-            <div class="triangle-left" id="arrow_2"></div>
-            <div class="triangle-left" id="arrow_1"></div>
+            <div class="triangle-left animated" id="arrow_3"></div>
+            <div class="triangle-left animated" id="arrow_2"></div>
+            <div class="triangle-left animated" id="arrow_1"></div>
           </div>
         `;
     }
