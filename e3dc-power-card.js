@@ -291,17 +291,30 @@ class e3dcPowerWheelCard extends LitElement {
 
   _calculate_autarky() {
     //Formula: Autarky in % = Total Consumption / Production *100
+    var consumption =
+      (this.battery_val > 0 ? this.battery_val : 0) + this.home_val;
+    var production =
+      (this.battery_val < 0 ? Math.abs(this.battery_val) : 0) + this.solar_val;
+    var autarky = production != 0 ? consumption / production : 0;
     //Because of very little power is consumed from/feeded into the grid, we need to adjust the 1% range
-    var autarky = 0.5; //TODO try some different formulas to get the best examples...
-    return autarky >= 0.005 ? Math.round(autarky) : 0.01;
+    return autarky >= 0.005 ? Math.round(autarky, 2) : autarky == 0 ? 0 : 0.01;
   }
 
-  _calculate_ratio() {}
+  _calculate_ratio() {
+    //Formula: Autarky in % = Total Consumption / total usage *100
+    var consumption =
+      (this.battery_val > 0 ? this.battery_val : 0) + this.home_val;
+    var total_usage =
+      consumption + (this.grid_val < 0 ? Math.abs(this.grid_val) : 0);
+    var ratio = total_usage != 0 ? consumption / total_usage : 0;
+    return ratio >= 0.005 ? Math.round(ratio, 2) : ratio == 0 ? 0 : 0.01;
+  }
   /**
    * Render Support Functions
    */
 
   _render_bars() {
+    console.log(this.autarky_val);
     var autarky = this.entities.autarky.entity
       ? this.autarky_val
       : this._calculate_autarky() * 100;
