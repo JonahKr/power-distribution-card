@@ -1,0 +1,31 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    name: Prepare release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      #Checking if the Versions in package.json and VERSION equal
+      - name: Version check
+        run: if (node -pe "require('./package.json').version" == cat ./VERSION); then exit 0; else exit 1; fi
+      # Build
+      - name: Build the file
+        run: |
+          cd /home/runner/work/e3dc-power-card/e3dc-power-card
+          yarn install
+          npm run build
+      # Upload build file to the releas as an asset.
+      - name: Upload zip to release
+        uses: svenstaro/upload-release-action@v1-release
+
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: /home/runner/work/e3dc-power-card/e3dc-power-card/dist/e3dc-power-card.js
+          asset_name: e3dc-power-card.js
+          tag: ${{ github.ref }}
+          overwrite: true
