@@ -1,6 +1,6 @@
 {
-  "name": "e3dc card",
+  "name": "power-distribution-card",
   "render_readme": true,
   "content_in_root": false,
-  "filename": "e3dc-power-card.js"
+  "filename": "power-distribution-card.js"
 }

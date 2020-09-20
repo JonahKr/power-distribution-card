@@ -1,6 +1,6 @@
 {
-  "name": "e3dc-power-card",
-  "version": "1.2.0",
+  "name": "power-distribution-card",
+  "version": "1.2.1",
   "license": "MIT",
   "author": "JonahKr",
   "description": "A Lovelace Plugin with the standard E3-DC overview pannel.",
@@ -10,15 +10,15 @@
     "hacs",
     "home assistant"
   ],
-  "module": "e3dc-power-card.js",
+  "module": "power-distribution-card.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JonahKr/e3dc-power-card.git"
+    "url": "git+https://github.com/JonahKr/power-distribution-card.git"
   },
   "bugs": {
-    "url": "https://github.com/JonahKr/e3dc-power-card/issues"
+    "url": "https://github.com/JonahKr/power-distribution-card/issues"
   },
-  "homepage": "https://github.com/JonahKr/e3dc-power-card#readme",
+  "homepage": "https://github.com/JonahKr/power-distribution-card#readme",
   "scripts": {
     "start": "rollup -c --watch",
     "build": "npm run lint && npm run rollup",

@@ -1,4 +1,4 @@
-const LitElement = Object.getPrototypeOf(customElements.get("hui-view"));
+const LitElement = Object.getPrototypeOf(customElements.get('hui-view'));
 const html = LitElement.prototype.html;
 const css = LitElement.prototype.css;
 
@@ -154,16 +154,16 @@ class e3dcPowerWheelCard extends LitElement {
   get DefaultConfig() {
     return {
       solar: {
-        icon: "mdi:solar-power",
+        icon: 'mdi:solar-power',
       },
       grid: {
-        icon: "mdi:transmission-tower",
+        icon: 'mdi:transmission-tower',
       },
       battery: {
-        icon: "mdi:battery-outline",
+        icon: 'mdi:battery-outline',
       },
       home: {
-        icon: "mdi:home-assistant",
+        icon: 'mdi:home-assistant',
       },
     };
   }
@@ -196,14 +196,7 @@ class e3dcPowerWheelCard extends LitElement {
      */
 
     config = { ...config };
-    var acceptedEntities = [
-      "solar",
-      "grid",
-      "battery",
-      "home",
-      "autarky",
-      "ratio",
-    ];
+    var acceptedEntities = ['solar', 'grid', 'battery', 'home', 'autarky', 'ratio'];
 
     acceptedEntities.forEach((e) => {
       var cache = {};
@@ -219,8 +212,7 @@ class e3dcPowerWheelCard extends LitElement {
     var defConf = this.DefaultConfig;
     for (const e in defConf) {
       for (const set in defConf[e]) {
-        if (this.entities[e] && !this.entities[e][set])
-          this.entities[e][set] = defConf[e][set];
+        if (this.entities[e] && !this.entities[e][set]) this.entities[e][set] = defConf[e][set];
       }
     }
     //TODO enable more configuration options: Color, Autocalc of autarky / ratio
@@ -233,68 +225,44 @@ class e3dcPowerWheelCard extends LitElement {
       <ha-card .header=${this.title}>
         <div class="card-content">
           <div class="grid-container">
-            <div class="grid-header">
-              custom header 123
-            </div>
-            ${this._render_bars()}
-            ${this.entities.solar.entity
-              ? this._render_item(this.solar_val, "solar")
-              : null}
-            ${this.entities.grid
-              ? this._render_item(this.grid_val, "grid")
-              : null}
-            ${this.entities.battery.entity
-              ? this._render_item(this.battery_val, "battery")
-              : null}
-            ${this.entities.home.entity
-              ? this._render_item(this.home_val, "home")
-              : null}
+            <div class="grid-header">custom header 123</div>
+            ${this._render_bars()} ${this.entities.solar.entity ? this._render_item(this.solar_val, 'solar') : null}
+            ${this.entities.grid ? this._render_item(this.grid_val, 'grid') : null}
+            ${this.entities.battery.entity ? this._render_item(this.battery_val, 'battery') : null}
+            ${this.entities.home.entity ? this._render_item(this.home_val, 'home') : null}
           </div>
         </div>
       </ha-card>
     `;
   }
   /**
+   *
    * Calculating Functions
    */
 
   get solar_val() {
-    return this.entities.solar.entity
-      ? Number(this.hass.states[this.entities.solar.entity].state)
-      : 0;
+    return this.entities.solar.entity ? Number(this.hass.states[this.entities.solar.entity].state) : 0;
   }
   get grid_val() {
-    return this.entities.grid.entity
-      ? Number(this.hass.states[this.entities.grid.entity].state)
-      : 0;
+    return this.entities.grid.entity ? Number(this.hass.states[this.entities.grid.entity].state) : 0;
   }
   get battery_val() {
-    return this.entities.battery.entity
-      ? Number(this.hass.states[this.entities.battery.entity].state)
-      : 0;
+    return this.entities.battery.entity ? Number(this.hass.states[this.entities.battery.entity].state) : 0;
   }
   get home_val() {
-    return this.entities.home.entity
-      ? Number(this.hass.states[this.entities.home.entity].state)
-      : 0;
+    return this.entities.home.entity ? Number(this.hass.states[this.entities.home.entity].state) : 0;
   }
   get autarky_val() {
-    return this.entities.autarky.entity
-      ? Number(this.hass.states[this.entities.autarky.entity].state)
-      : 0;
+    return this.entities.autarky.entity ? Number(this.hass.states[this.entities.autarky.entity].state) : 0;
   }
   get ratio_val() {
-    return this.entities.ratio.entity
-      ? Number(this.hass.states[this.entities.ratio.entity].state)
-      : 0;
+    return this.entities.ratio.entity ? Number(this.hass.states[this.entities.ratio.entity].state) : 0;
   }
 
   _calculate_autarky() {
     //Formula: Autarky in % = Total Consumption / Production *100
-    var consumption =
-      (this.battery_val > 0 ? this.battery_val : 0) + this.home_val;
-    var production =
-      (this.battery_val < 0 ? Math.abs(this.battery_val) : 0) + this.solar_val;
+    var consumption = (this.battery_val > 0 ? this.battery_val : 0) + this.home_val;
+    var production = (this.battery_val < 0 ? Math.abs(this.battery_val) : 0) + this.solar_val;
     var autarky = production != 0 ? consumption / production : 0;
     //Because of very little power is consumed from/feeded into the grid, we need to adjust the 1% range
     return autarky >= 0.005 ? Math.round(autarky, 2) : autarky == 0 ? 0 : 0.01;
@@ -302,10 +270,8 @@ class e3dcPowerWheelCard extends LitElement {
 
   _calculate_ratio() {
     //Formula: Autarky in % = Total Consumption / total usage *100
-    var consumption =
-      (this.battery_val > 0 ? this.battery_val : 0) + this.home_val;
-    var total_usage =
-      consumption + (this.grid_val < 0 ? Math.abs(this.grid_val) : 0);
+    var consumption = (this.battery_val > 0 ? this.battery_val : 0) + this.home_val;
+    var total_usage = consumption + (this.grid_val < 0 ? Math.abs(this.grid_val) : 0);
     var ratio = total_usage != 0 ? consumption / total_usage : 0;
     return ratio >= 0.005 ? Math.round(ratio, 2) : ratio == 0 ? 0 : 0.01;
   }
@@ -315,12 +281,8 @@ class e3dcPowerWheelCard extends LitElement {
 
   _render_bars() {
     console.log(this.autarky_val);
-    var autarky = this.entities.autarky.entity
-      ? this.autarky_val
-      : this._calculate_autarky() * 100;
-    var ratio = this.entities.ratio.entity
-      ? this.ratio_val
-      : this._calculate_ratio() * 100;
+    var autarky = this.entities.autarky.entity ? this.autarky_val : this._calculate_autarky() * 100;
+    var ratio = this.entities.ratio.entity ? this.ratio_val : this._calculate_ratio() * 100;
 
     return html`
       <div class="overview">
@@ -332,15 +294,10 @@ class e3dcPowerWheelCard extends LitElement {
           </div>
           <div class="autarky-bar">
             <p id="autarky-percentage">${autarky}%</p>
-            <div
-              class="bar"
-              style="height:${autarky}%,; background-color:#555;"
-            ></div>
+            <div class="bar" style="height:${autarky}%,; background-color:#555;"></div>
           </div>
         </div>
-        <p id="autarky">
-          autarky
-        </p>
+        <p id="autarky">autarky</p>
       </div>
     `;
   }
@@ -358,13 +315,7 @@ class e3dcPowerWheelCard extends LitElement {
         </badge>
         <value>
           <p>${Math.abs(state)} W</p>
-          ${
-            state < 0
-              ? this._render_arrow(2)
-              : state == 0
-              ? this._render_arrow(0)
-              : this._render_arrow(1)
-          }
+          ${state < 0 ? this._render_arrow(2) : state == 0 ? this._render_arrow(0) : this._render_arrow(1)}
         <value
       </item>
     `;
@@ -396,4 +347,4 @@ class e3dcPowerWheelCard extends LitElement {
   }
 }
 
-customElements.define("e3dc-power-wheel-card", e3dcPowerWheelCard);
+customElements.define('e3dc-power-wheel-card', e3dcPowerWheelCard);

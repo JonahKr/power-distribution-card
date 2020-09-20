@@ -32,7 +32,7 @@ const plugins = [
 
 export default [
   {
-    input: 'src/e3dc-power-card.ts',
+    input: 'src/power-distribution-card.ts',
     output: {
       dir: 'dist',
       format: 'es',
