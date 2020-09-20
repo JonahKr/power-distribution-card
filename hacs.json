@@ -1,6 +1,6 @@
 {
-    "name": "e3dc card",
-    "render_readme": true,
-    "content_in_root": false,
-    "filename": "e3dc-power-card.js"
-  }
+  "name": "e3dc card",
+  "render_readme": true,
+  "content_in_root": false,
+  "filename": "e3dc-power-card.js"
+}
