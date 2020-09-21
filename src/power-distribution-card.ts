@@ -4,7 +4,7 @@ import { HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
 
 import './editor';
 
-import { PDCConfig, PDCInternalConfig, AcceptedEntitiesList, EntitySettings, ArrowStates } from './types';
+import { PDCConfig, PDCInternalConfig, EntitySettings, ArrowStates } from './types';
 import styles from './styles';
 import DefaultConfig from './default-config';
 
@@ -56,8 +56,7 @@ export class PowerDistributionCard extends LitElement {
         _config[key]._active = config[key]._active ? config[key]._active : true;
       }
     }
-    //Now we need to check if a calculation of autarky and/or ratio is possible
-    console.log(_config);
+    //TODO:Now we need to check if a calculation of autarky and/or ratio is possible
 
     this._config = _config;
   }
