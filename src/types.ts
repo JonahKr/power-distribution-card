@@ -6,21 +6,29 @@ export type PDCConfig = {
 };
 
 export type AcceptedEntities = typeof AcceptedEntitiesList[number];
+export type AcceptedDataEntities = typeof AcceptedDataEntitiesList[number];
+export type AcceptedCalcEntities = typeof AcceptedCalcEntitiesList[number];
 
-export const AcceptedDataEntities = ['solar', 'grid', 'battery', 'home'] as const;
-export const AcceptedCalcEntities = ['autarky', 'ratio'] as const;
-export const AcceptedEntitiesList = [...AcceptedDataEntities, ...AcceptedCalcEntities] as const;
+export const AcceptedDataEntitiesList = ['solar', 'grid', 'battery', 'home'] as const;
+export const AcceptedCalcEntitiesList = ['autarky', 'ratio'] as const;
+export const AcceptedEntitiesList = [...AcceptedDataEntitiesList, ...AcceptedCalcEntitiesList] as const;
 
 export interface EntitySettings {
   _active: boolean;
   entity?: string;
   icon?: string;
-  inverted?: boolean;
+  invert_value?: boolean;
+  invert_arrow?: boolean;
+  name?: string;
 }
 
 //Because of different setup methods, this is necessary to merge all possible options
 export type PDCInternalConfig = {
-  title?: string;
+  title?: string | null;
+  autarky_calc: boolean;
+  ratio_calc: boolean;
 } & {
-  [key in AcceptedEntities]?: EntitySettings;
+  [key in AcceptedEntities]: EntitySettings;
 };
+
+export type ArrowStates = 'right' | 'left' | 'none';
