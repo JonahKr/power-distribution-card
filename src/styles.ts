@@ -7,8 +7,8 @@ export const styles = css`
 
   .grid-container {
     display: grid;
-    grid-template-columns: 35%-0.5em 30%-1em 35%-0.5em;
-    gap: 1em;
+    grid-template-columns: 1.5fr 1fr 1.5fr;
+    gap: 10px;
     margin: auto;
   }
 
@@ -28,30 +28,35 @@ export const styles = css`
     grid-column: 2;
     grid-row-start: 2;
     grid-row-end: 4;
-    min(90%, 160px)
   }
 
-  #ratio , #autarky {
+  #ratio,
+  #autarky {
     margin: 0;
     text-align: center;
   }
 
   .bar-container {
-    display: block;
-    width: 100%;
-    height: min(90%, 120px);
+    display: flex;
+    flex-wrap:wrap;
+    height: 100%;
   }
 
   .bar-container > div {
-    display: inline-block;
-    width: 45%;
-    height: 100%;
+    flex-basis:50%;
+    display: flex;
+    flex-flow: column;
     vertical-align: middle;
   }
 
+  .bar-container > div > p {
+    flex: 0 1 auto;
+  }
+
   .bar-wrapper {
+    flex: 1 1 auto;
     position: relative;
-    height: calc(100% - 28px);
+  }ight: calc(100% - 28px);
   }
 
   bar {
