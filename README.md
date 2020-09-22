@@ -31,6 +31,8 @@ ratio: sensor.ratio
 You really want to make this card your own? Here you go!
 These are all the settings. You can apply them to certain items only as well as all items at once!
 
+**Generally: negative Values mean consumption, positive Values production**
+
 | Setting       | type          | description  |
 | ------------- |:-------------:| :-----|
 | entity        | string        | You can specify the entity_id here aswell. |

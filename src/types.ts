@@ -25,8 +25,6 @@ export interface EntitySettings {
 //Because of different setup methods, this is necessary to merge all possible options
 export type PDCInternalConfig = {
   title?: string | null;
-  autarky_calc: boolean;
-  ratio_calc: boolean;
 } & {
   [key in AcceptedEntities]: EntitySettings;
 };

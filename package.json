@@ -5,10 +5,12 @@
   "author": "JonahKr",
   "description": "A Lovelace Plugin with the standard E3-DC overview pannel.",
   "keywords": [
-    "e3dc",
+    "power",
+    "distribution",
     "lovelace",
     "hacs",
-    "home assistant"
+    "home assistant",
+    "e3dc"
   ],
   "module": "power-distribution-card.js",
   "repository": {

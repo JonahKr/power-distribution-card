@@ -23,13 +23,11 @@ export const DefaultConfig: PDCInternalConfig = {
     name: 'home',
   },
   autarky: {
-    _active: false,
+    _active: true,
   },
   ratio: {
-    _active: false,
+    _active: true,
   },
-  autarky_calc: false,
-  ratio_calc: false,
 };
 
 export default DefaultConfig;

@@ -28,24 +28,39 @@ export const styles = css`
     grid-column: 2;
     grid-row-start: 2;
     grid-row-end: 4;
+    min(90%, 160px)
+  }
+
+  #ratio , #autarky {
+    margin: 0;
+    text-align: center;
   }
 
   .bar-container {
     display: block;
     width: 100%;
-    height: 50%;
-    position: relative;
+    height: min(90%, 120px);
   }
 
   .bar-container > div {
     display: inline-block;
     width: 45%;
+    height: 100%;
     vertical-align: middle;
   }
 
-  .bar {
+  .bar-wrapper {
+    position: relative;
+    height: calc(100% - 28px);
+  }
+
+  bar {
     position: absolute;
     bottom: 0px;
+    left: 0;
+    right: 0;
+    margin: auto;
+    width: 50%;
   }
 
   badge {

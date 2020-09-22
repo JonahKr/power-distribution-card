@@ -98,9 +98,8 @@ export class PowerDistributionCard extends LitElement {
     if (this._config.autarky._active) {
       if (this._config.autarky.entity) {
         return Number(this.hass.states[this._config.autarky.entity].state) * inv;
-      } else if (this._config.autarky_calc) {
-        return this._calculate_autarky();
       }
+      return this._calculate_autarky() * 100;
     }
     return 0;
   }
@@ -109,9 +108,8 @@ export class PowerDistributionCard extends LitElement {
     if (this._config.ratio._active) {
       if (this._config.ratio.entity) {
         return Number(this.hass.states[this._config.ratio.entity].state) * inv;
-      } else if (this._config.ratio) {
-        return this._calculate_ratio();
       }
+      return this._calculate_ratio() * 100;
     }
     return 0;
   }
@@ -139,7 +137,7 @@ export class PowerDistributionCard extends LitElement {
     const production = (this.battery_val < 0 ? Math.abs(this.battery_val) : 0) + this.solar_val;
     const autarky = production != 0 ? consumption / production : 0;
     //Because of very little power is consumed from/feeded into the grid, we need to adjust the 1% range
-    return autarky >= 0.005 ? +autarky.toFixed(2) : autarky == 0 ? 0 : 0.01;
+    return autarky >= 0.005 ? Math.min(+autarky.toFixed(2), 1) : autarky == 0 ? 0 : 0.01;
   }
 
   private _calculate_ratio(): number {
@@ -147,7 +145,7 @@ export class PowerDistributionCard extends LitElement {
     const consumption = (this.battery_val > 0 ? this.battery_val : 0) + this.home_val;
     const total_usage = consumption + (this.grid_val < 0 ? Math.abs(this.grid_val) : 0);
     const ratio = total_usage != 0 ? consumption / total_usage : 0;
-    return ratio >= 0.005 ? +ratio.toFixed(2) : ratio == 0 ? 0 : 0.01;
+    return ratio >= 0.005 ? Math.min(+ratio.toFixed(2), 1) : ratio == 0 ? 0 : 0.01;
   }
   /**
    * Render Support Functions
@@ -159,18 +157,22 @@ export class PowerDistributionCard extends LitElement {
 
     return html`
       <div class="overview">
-        <p id="ratio">ratio</p>
         <div class="bar-container">
           <div class="ratio-bar">
             <p id="ratio-percentage">${ratio}%</p>
-            <div class="bar"></div>
+            <div class="bar-wrapper">
+              <bar style="height:${ratio}%; background-color:#555;" />
+            </div>
+            <p id="ratio">ratio</p>
           </div>
           <div class="autarky-bar">
             <p id="autarky-percentage">${autarky}%</p>
-            <div class="bar" style="height:${autarky}%,; background-color:#555;"></div>
+            <div class="bar-wrapper">
+              <bar style="height:${autarky}%; background-color:#555;" />
+            </div>
+            <p id="autarky">autarky</p>
           </div>
         </div>
-        <p id="autarky">autarky</p>
       </div>
     `;
   }
