@@ -85,6 +85,7 @@ export const styles = css`
     display: block;
     width: 24px;
     margin: 0 auto;
+    color: var(--paper-item-icon-color)
   }
 
   value {
@@ -109,7 +110,7 @@ ARROW ANIMATION
   .blank {
     height: 4px;
     width: 54px;
-    background-color: #e3e3e3;
+    background-color: var(--secondary-background-color);
     margin: 8px auto 8px auto;
   }
 
@@ -117,7 +118,7 @@ ARROW ANIMATION
     width: 0;
     height: 0;
     border-top: 8px solid transparent;
-    border-left: 17px solid #e3e3e3;
+    border-left: 17px solid var(--secondary-background-color);
     border-bottom: 8px solid transparent;
   }
 
@@ -125,19 +126,20 @@ ARROW ANIMATION
     width: 0;
     height: 0;
     border-top: 8px solid transparent;
-    border-right: 17px solid #e3e3e3;
+    border-right: 17px solid var(--secondary-background-color);
     border-bottom: 8px solid transparent;
   }
 
   @keyframes flash_triangles {
     0%,
     66% {
-      border-left-color: #e3e3e3;
-      border-right-color: #e3e3e3;
+      border-left-color: var(--secondary-background-color);
+      border-right-color: var(--secondary-background-color);
     }
     33% {
-      border-left-color: #555;
-      border-right-color: #555;
+      border-left-color: var(--primary-color);
+      border-right-color: var(--primary-color);
+      filter: grayscale(1);
     }
   }
   #arrow_1 {

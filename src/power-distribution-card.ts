@@ -184,7 +184,7 @@ export class PowerDistributionCard extends LitElement {
       <item id="${name}">
         <badge>
           <icon>
-            <ha-icon icon="${item.icon}"></ha-icon>
+            <ha-icon data-state="${state == 0 ? 'unavaiable' : 'on'}" icon="${item.icon}"></ha-icon>
           </icon>
           <p class="subtitle">${name}</p>
         </badge>
