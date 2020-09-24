@@ -9,7 +9,6 @@ export const styles = css`
     display: grid;
     grid-template-columns: 1.5fr 1fr 1.5fr;
     gap: 10px;
-    margin: auto;
   }
 
   p {
@@ -24,12 +23,6 @@ export const styles = css`
     height: 0;
   }
 
-  .overview {
-    grid-column: 2;
-    grid-row-start: 2;
-    grid-row-end: 4;
-  }
-
   #ratio,
   #autarky {
     margin: 0;
@@ -37,13 +30,17 @@ export const styles = css`
   }
 
   .bar-container {
+    grid-column: 2;
+    grid-row-start: 2;
+    grid-row-end: 4;
+
     display: flex;
-    flex-wrap:wrap;
+    flex-wrap: wrap;
     height: 100%;
   }
 
   .bar-container > div {
-    flex-basis:50%;
+    flex-basis: 50%;
     display: flex;
     flex-flow: column;
     vertical-align: middle;
@@ -56,16 +53,15 @@ export const styles = css`
   .bar-wrapper {
     flex: 1 1 auto;
     position: relative;
-  }ight: calc(100% - 28px);
+    width: 50%;
+    margin: auto;
   }
 
   bar {
     position: absolute;
-    bottom: 0px;
+    bottom: 0;
     left: 0;
     right: 0;
-    margin: auto;
-    width: 50%;
   }
 
   badge {
@@ -76,33 +72,53 @@ export const styles = css`
     padding: 4px;
   }
 
-  badge > icon {
-    width: 100%;
-    display: inline-block;
-  }
-
   icon > ha-icon {
     display: block;
     width: 24px;
     margin: 0 auto;
-    color: var(--paper-item-icon-color)
+    color: var(--dark-color);
   }
 
   value {
     float: right;
   }
 
-  item:nth-child(2n) > badge {
-    float: right;
+  .pointer {
+    cursor: pointer;
   }
 
-  item:nth-child(2n) > value {
-    float: left;
+  /**********
+  Mobile View
+  **********/
+  @media only screen and (max-width: 450px) {
+    .grid-container {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+    item > badge,
+    item > value {
+      display: block;
+      float: none;
+      width: 72px;
+      margin: 0 auto;
+    }
+
+    .arrow {
+      width: max-content;
+      margin: 0 auto;
+    }
+  }
+  @media not screen and (max-width: 450px) {
+    item:nth-child(2n) > badge {
+      float: right;
+    }
+    item:nth-child(2n) > value {
+      float: left;
+    }
   }
 
   /**************
-ARROW ANIMATION
-**************/
+  ARROW ANIMATION
+  **************/
   .arrow > div {
     display: inline-block;
   }

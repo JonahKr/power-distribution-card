@@ -1,6 +1,6 @@
 import { LitElement, html, customElement, property, CSSResult, TemplateResult } from 'lit-element';
 
-import { HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
+import { HomeAssistant, LovelaceCardEditor, fireEvent } from 'custom-card-helpers';
 
 import './editor';
 
@@ -42,7 +42,7 @@ export class PowerDistributionCard extends LitElement {
         _config[key] = config[key];
         continue;
       }
-      //This is to enable the simpler setup method to pass the entityid directly instead of further details
+      //This is to enable the simpler setup method to pass the entityid directly instead of subsettings
       if (typeof config[key] === 'string') {
         _config[key].entity = config[key];
         _config[key]._active = true;
@@ -53,10 +53,9 @@ export class PowerDistributionCard extends LitElement {
         for (const setting in config[key]) {
           _config[key][setting] = config[key][setting];
         }
-        _config[key]._active = config[key]._active ? config[key]._active : true;
+        _config[key]._active = _config[key].entity ? true : false;
       }
     }
-    //TODO:Now we need to check if a calculation of autarky and/or ratio is possible
 
     this._config = _config;
   }
@@ -133,8 +132,9 @@ export class PowerDistributionCard extends LitElement {
 
   private _calculate_autarky(): number {
     //Formula: Autarky in % = Total Consumption / Production *100
-    const consumption = (this.battery_val > 0 ? this.battery_val : 0) + this.home_val;
-    const production = (this.battery_val < 0 ? Math.abs(this.battery_val) : 0) + this.solar_val;
+    const consumption =
+      (this.battery_val < 0 ? Math.abs(this.battery_val) : 0) + (this.home_val < 0 ? Math.abs(this.home_val) : 0);
+    const production = (this.battery_val > 0 ? this.battery_val : 0) + (this.solar_val > 0 ? this.solar_val : 0);
     const autarky = production != 0 ? consumption / production : 0;
     //Because of very little power is consumed from/feeded into the grid, we need to adjust the 1% range
     return autarky >= 0.005 ? Math.min(+autarky.toFixed(2), 1) : autarky == 0 ? 0 : 0.01;
@@ -142,7 +142,8 @@ export class PowerDistributionCard extends LitElement {
 
   private _calculate_ratio(): number {
     //Formula: Autarky in % = Total Consumption / total usage *100
-    const consumption = (this.battery_val > 0 ? this.battery_val : 0) + this.home_val;
+    const consumption =
+      (this.battery_val < 0 ? Math.abs(this.battery_val) : 0) + (this.home_val < 0 ? Math.abs(this.home_val) : 0);
     const total_usage = consumption + (this.grid_val < 0 ? Math.abs(this.grid_val) : 0);
     const ratio = total_usage != 0 ? consumption / total_usage : 0;
     return ratio >= 0.005 ? Math.min(+ratio.toFixed(2), 1) : ratio == 0 ? 0 : 0.01;
@@ -156,32 +157,45 @@ export class PowerDistributionCard extends LitElement {
     const ratio = this.ratio_val;
 
     return html`
-      <div class="overview">
-        <div class="bar-container">
-          <div class="ratio-bar">
-            <p id="ratio-percentage">${ratio}%</p>
-            <div class="bar-wrapper">
-              <bar style="height:${ratio}%; background-color:#555;" />
-            </div>
-            <p id="ratio">ratio</p>
+      <div class="bar-container">
+        <div class="ratio-bar">
+          <p id="ratio-percentage">${ratio}%</p>
+          <div class="bar-wrapper">
+            <bar
+              style="height:${ratio}%; background-color:${this._config.ratio.bar_color
+                ? this._config.ratio.bar_color
+                : 'var(--dark-color)'};"
+            />
           </div>
-          <div class="autarky-bar">
-            <p id="autarky-percentage">${autarky}%</p>
-            <div class="bar-wrapper">
-              <bar style="height:${autarky}%; background-color:#555;" />
-            </div>
-            <p id="autarky">autarky</p>
+          <p id="ratio">ratio</p>
+        </div>
+        <div class="autarky-bar">
+          <p id="autarky-percentage">${autarky}%</p>
+          <div class="bar-wrapper">
+            <bar
+              style="height:${autarky}%; background-color:${this._config.autarky.bar_color
+                ? this._config.autarky.bar_color
+                : 'var(--dark-color)'};"
+            />
           </div>
+          <p id="autarky">autarky</p>
         </div>
       </div>
     `;
+  }
+
+  private _moreInfo(ev: CustomEvent): void {
+    console.log(ev.currentTarget);
+    fireEvent(this, 'hass-more-info', {
+      entityId: (ev.currentTarget as any).entity,
+    });
   }
 
   _render_item(state: number, item: EntitySettings): TemplateResult {
     const name = item.name ? item.name : '';
     state *= item.invert_arrow ? -1 : 1;
     return html`
-      <item id="${name}">
+      <item id="${name}" class="pointer" .entity=${item.entity} @click="${this._moreInfo}">
         <badge>
           <icon>
             <ha-icon data-state="${state == 0 ? 'unavaiable' : 'on'}" icon="${item.icon}"></ha-icon>
@@ -189,7 +203,7 @@ export class PowerDistributionCard extends LitElement {
           <p class="subtitle">${name}</p>
         </badge>
         <value>
-          <p>${Math.abs(state)} W</p>
+          <p>${Math.floor(Math.abs(state))} W</p>
           ${
             state < 0
               ? this._render_arrow('left')

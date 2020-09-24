@@ -4,9 +4,13 @@
 [![GitHub license](https://img.shields.io/github/license/JonahKr/power-distribution-card)](https://img.shields.io/github/license/JonahKr/power-distribution-card/blob/master/LICENSE) 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
 
-*Inspired by [E3DC](https://www.e3dc.com/#Intro)*
+*Inspired by [E3DC](https://www.e3dc.com/)*
 
 A Lovelace Plugin with the standard E3-DC overview pannel.
+---  
+
+![all](examples/Example_1.4.PNG)
+
 --- 
 
 ## Configuration
@@ -28,10 +32,11 @@ ratio: sensor.ratio
 ```
 
 ### Advanced Configuration
+
+**positive sensor values = production, negative values = consumption !**
+
 You really want to make this card your own? Here you go!
 These are all the settings. You can apply them to certain items only as well as all items at once!
-
-**Generally: negative Values mean consumption, positive Values production**
 
 | Setting       | type          | description  |
 | ------------- |:-------------:| :-----|
@@ -40,6 +45,7 @@ These are all the settings. You can apply them to certain items only as well as 
 | invert_arrow  | bool          | This will change the *arrows* direction to the oposite one. |
 | invert_value  | bool          | This will invert the value recieved from HASS. This affects calculations aswell! |
 | name          | string        | Feel free to change the name of the element. |
+| bar_color     | string        | You can pass any string that CSS will accept as a color. | 
 | *more*        | *will*        | *come* |
 
 ___
@@ -73,6 +79,8 @@ grid:
     - url: /local/power-distribution-card.js
       type: module
   ```
+  Or alternatively set it up via the UI: 
+  `Configuration -> Lovelace Dashboards -> Resources (TAB)`
 
 ### Installation via [HACS](https://hacs.xyz/)
 *To Be Continued*

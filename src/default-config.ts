@@ -21,6 +21,7 @@ export const DefaultConfig: PDCInternalConfig = {
     _active: false,
     icon: 'mdi:home-assistant',
     name: 'home',
+    invert_value: true,
   },
   autarky: {
     _active: true,

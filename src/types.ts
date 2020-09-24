@@ -15,6 +15,7 @@ export const AcceptedEntitiesList = [...AcceptedDataEntitiesList, ...AcceptedCal
 
 export interface EntitySettings {
   _active: boolean;
+  bar_color?: string;
   entity?: string;
   icon?: string;
   invert_value?: boolean;
