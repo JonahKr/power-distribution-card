@@ -2,11 +2,19 @@ import { LitElement, html, customElement, property, CSSResult, TemplateResult } 
 
 import { HomeAssistant, LovelaceCardEditor, fireEvent } from 'custom-card-helpers';
 
+import { version } from '../package.json';
+
 import './editor';
 
 import { PDCConfig, PDCInternalConfig, EntitySettings, ArrowStates } from './types';
 import styles from './styles';
 import DefaultConfig from './default-config';
+
+console.info(
+  `%c POWER-DISTRIBUTION-CARD %c Version:${version} `,
+  `font-weight: 500; color: white; background: #03a9f4;`,
+  `font-weight: 500; color: #03a9f4; background: white;`,
+);
 
 @customElement('power-distribution-card')
 export class PowerDistributionCard extends LitElement {
@@ -185,7 +193,6 @@ export class PowerDistributionCard extends LitElement {
   }
 
   private _moreInfo(ev: CustomEvent): void {
-    console.log(ev.currentTarget);
     fireEvent(this, 'hass-more-info', {
       entityId: (ev.currentTarget as any).entity,
     });
