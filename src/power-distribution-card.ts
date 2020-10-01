@@ -6,9 +6,8 @@ import { version } from '../package.json';
 
 import './editor';
 
-import { PDCConfig, PDCInternalConfig, EntitySettings, ArrowStates } from './types';
+import { PDCConfig, EntitySettings, ArrowStates } from './types';
 import styles from './styles';
-import DefaultConfig from './default-config';
 
 console.info(
   `%c POWER-DISTRIBUTION-CARD %c Version:${version} `,
@@ -19,17 +18,17 @@ console.info(
 @customElement('power-distribution-card')
 export class PowerDistributionCard extends LitElement {
   //TODO Write Card Editor
-  public static async getConfigElement(): Promise<LovelaceCardEditor> {
+  private static async getConfigElement(): Promise<LovelaceCardEditor> {
     return document.createElement('boilerplate-card-editor') as LovelaceCardEditor;
   }
   //TODO Write a stub config to enable the card type picker in Lovelace (return type Object -> needs interface)
-  public static getStubConfig(): any {
+  private static getStubConfig(): any {
     return {};
   }
 
   @property() public hass!: HomeAssistant;
 
-  private _config!: PDCInternalConfig;
+  private _config!: PDCConfig;
 
   private _initial_setup_complete = false;
 
@@ -38,106 +37,70 @@ export class PowerDistributionCard extends LitElement {
   }
   //TODO: Allow custom consumers/producers
   public setConfig(config: PDCConfig): void {
-    if (!config) {
-      throw new Error('No Configuration passed!');
-    }
+    const _config: PDCConfig = {};
 
-    const _config: PDCInternalConfig = DefaultConfig;
+    _config.title = config.title ? config.title : undefined;
+    _config.disable_animation = config.disable_animation ? config.disable_animation : false;
 
-    for (const key in config) {
-      //TODO: To ensure the simple Setup with the Planned Expansion Feature, All Settings need to be typesafed
-      if (key === 'title' || key === 'type') {
-        _config[key] = config[key];
-        continue;
-      }
-      //This is to enable the simpler setup method to pass the entityid directly instead of subsettings
-      if (typeof config[key] === 'string') {
-        _config[key].entity = config[key];
-        _config[key]._active = true;
-        continue;
-      }
-      //The Advanced Setup method
-      if (typeof config[key].entity === 'string') {
-        for (const setting in config[key]) {
-          _config[key][setting] = config[key][setting];
-        }
-        _config[key]._active = _config[key].entity ? true : false;
-      }
-    }
+    _config.entities = [];
+    //FIXME remove ternary operator
+    config.entities?.forEach((item) => {
+      //TODO entityid check
+      item.name ? undefined : (item.name = '');
+
+      item._active = item.entity ? true : false;
+      item._active ? _config.entities?.push(item) : undefined;
+    });
 
     this._config = _config;
   }
 
-  get solar_val(): number {
-    const inv = this._config.solar.invert_value ? -1 : 1;
-    return this._config.solar._active && this._config.solar.entity
-      ? Number(this.hass.states[this._config.solar.entity].state) * inv
-      : 0;
-  }
-  get grid_val(): number {
-    const inv = this._config.grid.invert_value ? -1 : 1;
-    return this._config.grid._active && this._config.grid.entity
-      ? Number(this.hass.states[this._config.grid.entity].state) * inv
-      : 0;
-  }
-  get battery_val(): number {
-    const inv = this._config.battery.invert_value ? -1 : 1;
-    return this._config.battery._active && this._config.battery.entity
-      ? Number(this.hass.states[this._config.battery.entity].state) * inv
-      : 0;
-  }
-  get home_val(): number {
-    const inv = this._config.home.invert_value ? -1 : 1;
-    return this._config.home._active && this._config.home.entity
-      ? Number(this.hass.states[this._config.home.entity].state) * inv
-      : 0;
-  }
   //General Value-Function  TODO: Generalize Value functions
-  private val(name: string): number {
-    const inv = this._config[name].invert_value ? -1 : 1;
-    return this._config[name]._active && this._config[name].entity
-      ? Number(this.hass.states[this._config[name].entity].state) * inv
-      : 0;
+  private val(item: EntitySettings): number {
+    const inv = item.invert_value ? -1 : 1;
+    return item.entity ? Number(this.hass.states[item.entity].state) * inv : 0;
   }
   //For the following two we need to differentiate because the values can be calculated aswell as passed from a sensor
   get autarky_val(): number {
-    const inv = this._config.solar?.invert_value ? -1 : 1;
+    /*const inv = this._config.?.invert_value ? -1 : 1;
     if (this._config.autarky._active) {
       if (this._config.autarky.entity) {
         return Number(this.hass.states[this._config.autarky.entity].state) * inv;
       }
       return this._calculate_autarky() * 100;
     }
+    */
     return 0;
   }
   get ratio_val(): number {
-    const inv = this._config.solar?.invert_value ? -1 : 1;
+    /*const inv = this._config.solar?.invert_value ? -1 : 1;
     if (this._config.ratio._active) {
       if (this._config.ratio.entity) {
         return Number(this.hass.states[this._config.ratio.entity].state) * inv;
       }
       return this._calculate_ratio() * 100;
     }
+    */
     return 0;
   }
 
   protected render(): TemplateResult {
+    let items = '';
+    this._config.entities?.forEach((item) => {
+      items += this._render_item(this.val(item), item);
+    });
     return html`
       <ha-card .header=${this._config.title}>
         <div class="card-content">
           <div class="grid-container">
             <div class="grid-header">custom header 123</div>
-            ${this._render_bars()}
-            ${this._config.solar._active ? this._render_item(this.solar_val, this._config.solar) : null}
-            ${this._config.grid._active ? this._render_item(this.grid_val, this._config.grid) : null}
-            ${this._config.battery._active ? this._render_item(this.battery_val, this._config.battery) : null}
-            ${this._config.home._active ? this._render_item(this.home_val, this._config.home) : null}
+            ${this._render_bars()} ${items}
           </div>
         </div>
       </ha-card>
     `;
   }
-
+  /*
   private _calculate_autarky(): number {
     //Formula: Autarky in % = Total Consumption / Production *100
     const consumption =
@@ -156,6 +119,7 @@ export class PowerDistributionCard extends LitElement {
     const ratio = total_usage != 0 ? consumption / total_usage : 0;
     return ratio >= 0.005 ? Math.min(+ratio.toFixed(2), 1) : ratio == 0 ? 0 : 0.01;
   }
+  */
   /**
    * Render Support Functions
    */
@@ -170,8 +134,8 @@ export class PowerDistributionCard extends LitElement {
           <p id="ratio-percentage">${ratio}%</p>
           <div class="bar-wrapper">
             <bar
-              style="height:${ratio}%; background-color:${this._config.ratio.bar_color
-                ? this._config.ratio.bar_color
+              style="height:${ratio}%; background-color:${false //this._config.ratio.bar_color
+                ? undefined //this._config.ratio.bar_color
                 : 'var(--dark-color)'};"
             />
           </div>
@@ -181,8 +145,8 @@ export class PowerDistributionCard extends LitElement {
           <p id="autarky-percentage">${autarky}%</p>
           <div class="bar-wrapper">
             <bar
-              style="height:${autarky}%; background-color:${this._config.autarky.bar_color
-                ? this._config.autarky.bar_color
+              style="height:${autarky}%; background-color:${false //this._config.autarky.bar_color
+                ? undefined //this._config.autarky.bar_color
                 : 'var(--dark-color)'};"
             />
           </div>
