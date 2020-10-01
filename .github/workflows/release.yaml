@@ -10,9 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      #Checking if the Versions in package.json and VERSION equal
-      - name: Version check
-        run: if (node -pe "require('./package.json').version" == cat ./VERSION); then exit 0; else exit 1; fi
       # Build
       - name: Build the file
         run: |
