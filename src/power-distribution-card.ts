@@ -189,23 +189,25 @@ export class PowerDistributionCard extends LitElement {
   //This generates Animated Arrows depending on the state
   //0 is 0; 1 equals right; 2 equals left
   _render_arrow(direction: ArrowStates): TemplateResult {
+    console.log(a);
+    const a = this._config.disable_animation;
     switch (direction) {
       case 'none': //Equals no Arrows at all
         return html` <div class="blank"></div> `;
       case 'right': //Right Moving Arrows
         return html`
           <div class="arrow">
-            <div class="triangle-right animated" id="arrow_1"></div>
-            <div class="triangle-right animated" id="arrow_2"></div>
-            <div class="triangle-right animated" id="arrow_3"></div>
+            <div class="triangle-right ${a ? null : 'animated'}" id="arrow_1"></div>
+            <div class="triangle-right ${a ? null : 'animated'}" id="arrow_2"></div>
+            <div class="triangle-right ${a ? null : 'animated'}" id="arrow_3"></div>
           </div>
         `;
       case 'left': //Left moving Arrows
         return html`
           <div class="arrow">
-            <div class="triangle-left animated" id="arrow_3"></div>
-            <div class="triangle-left animated" id="arrow_2"></div>
-            <div class="triangle-left animated" id="arrow_1"></div>
+            <div class="triangle-left ${a ? null : 'animated'}" id="arrow_3"></div>
+            <div class="triangle-left ${a ? null : 'animated'}" id="arrow_2"></div>
+            <div class="triangle-left ${a ? null : 'animated'}" id="arrow_1"></div>
           </div>
         `;
     }

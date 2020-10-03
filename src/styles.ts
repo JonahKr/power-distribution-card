@@ -158,15 +158,24 @@ export const styles = css`
       filter: grayscale(1);
     }
   }
-  #arrow_1 {
+
+  #arrow_1,
+  #arrow_2,
+  #arrow_3 {
+    border-left-color: var(--primary-color);
+    border-right-color: var(--primary-color);
+    filter: grayscale(1);
+  }
+
+  #arrow_1.animated {
     animation: flash_triangles 3s infinite steps(1);
   }
 
-  #arrow_2 {
+  #arrow_2.animated {
     animation: flash_triangles 3s infinite 1s steps(1);
   }
 
-  #arrow_3 {
+  #arrow_3.animated {
     animation: flash_triangles 3s infinite 2s steps(1);
   }
 `;
