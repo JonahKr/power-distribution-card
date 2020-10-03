@@ -8,7 +8,7 @@ export type PDCConfig = {
 //TODO: enable top level entity settings
 
 export interface EntitySettings {
-  _active: boolean;
+  _active?: boolean;
   bar_color?: string;
   entity?: string;
   icon?: string;

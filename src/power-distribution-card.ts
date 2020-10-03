@@ -10,7 +10,7 @@ import { PDCConfig, EntitySettings, ArrowStates } from './types';
 import styles from './styles';
 
 console.info(
-  `%c POWER-DISTRIBUTION-CARD %c Version:${version} `,
+  `%c POWER-DISTRIBUTION-CARD %c ${version} `,
   `font-weight: 500; color: white; background: #03a9f4;`,
   `font-weight: 500; color: #03a9f4; background: white;`,
 );
@@ -35,7 +35,7 @@ export class PowerDistributionCard extends LitElement {
   static get styles(): CSSResult {
     return styles;
   }
-  //TODO: Allow custom consumers/producers
+
   public setConfig(config: PDCConfig): void {
     const _config: PDCConfig = {};
 
@@ -43,19 +43,23 @@ export class PowerDistributionCard extends LitElement {
     _config.disable_animation = config.disable_animation ? config.disable_animation : false;
 
     _config.entities = [];
-    //FIXME remove ternary operator
-    config.entities?.forEach((item) => {
-      //TODO entityid check
-      item.name ? undefined : (item.name = '');
+    if (config.entities) {
+      config.entities.forEach((item) => {
+        const _item: any = {};
+        Object.assign(_item, item);
 
-      item._active = item.entity ? true : false;
-      item._active ? _config.entities?.push(item) : undefined;
-    });
+        //TODO entityid check
+        _item.name ? undefined : (_item.name = '');
+
+        _item._active = item.entity ? true : false;
+        _item._active ? _config.entities?.push(_item) : undefined;
+      });
+    }
 
     this._config = _config;
+    console.dir(this._config);
   }
 
-  //General Value-Function  TODO: Generalize Value functions
   private val(item: EntitySettings): number {
     const inv = item.invert_value ? -1 : 1;
     return item.entity ? Number(this.hass.states[item.entity].state) * inv : 0;
@@ -85,16 +89,13 @@ export class PowerDistributionCard extends LitElement {
   }
 
   protected render(): TemplateResult {
-    let items = '';
-    this._config.entities?.forEach((item) => {
-      items += this._render_item(this.val(item), item);
-    });
     return html`
       <ha-card .header=${this._config.title}>
         <div class="card-content">
           <div class="grid-container">
             <div class="grid-header">custom header 123</div>
-            ${this._render_bars()} ${items}
+            ${this._render_bars()}
+            ${this._config.entities?.map((item, index) => html`${this._render_item(this.val(item), item, index)}`)}
           </div>
         </div>
       </ha-card>
@@ -162,26 +163,24 @@ export class PowerDistributionCard extends LitElement {
     });
   }
 
-  _render_item(state: number, item: EntitySettings): TemplateResult {
-    const name = item.name ? item.name : '';
+  _render_item(state: number, item: EntitySettings, index: number): TemplateResult {
     state *= item.invert_arrow ? -1 : 1;
+
     return html`
-      <item id="${name}" class="pointer" .entity=${item.entity} @click="${this._moreInfo}">
+      <item id="${item.name}" class="pointer" .entity=${item.entity} @click="${this._moreInfo}">
         <badge>
           <icon>
             <ha-icon data-state="${state == 0 ? 'unavaiable' : 'on'}" icon="${item.icon}"></ha-icon>
           </icon>
-          <p class="subtitle">${name}</p>
+          <p class="subtitle">${item.name}</p>
         </badge>
         <value>
           <p>${Math.floor(Math.abs(state))} W</p>
-          ${
-            state < 0
-              ? this._render_arrow('left')
-              : state == 0
-              ? this._render_arrow('none')
-              : this._render_arrow('right')
-          }
+          ${this._render_arrow(
+            //I am so sorry... but you have to admit it's beautifull
+            //Jokes aside: This takes the side the item is on (index even = left) into account for the arrows
+            state == 0 ? 'none' : index % 2 == 0 ? (state > 0 ? 'right' : 'left') : state > 0 ? 'left' : 'right',
+          )}
         <value
       </item>
     `;
