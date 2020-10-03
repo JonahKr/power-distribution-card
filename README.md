@@ -2,14 +2,14 @@
 [![GitHub package.json version](https://img.shields.io/github/package-json/v/JonahKr/power-distribution-card)](https://github.com/JonahKr/power-distribution-card/blob/master/VERSION)
 [![Actions Status](https://github.com/JonahKr/power-distribution-card/workflows/Tests/badge.svg)](https://github.com/Jonah/power-distribution-card/actions)
 [![GitHub license](https://img.shields.io/github/license/JonahKr/power-distribution-card)](https://img.shields.io/github/license/JonahKr/power-distribution-card/blob/master/LICENSE) 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
 *Inspired by [E3DC](https://www.e3dc.com/)*
 
-A Lovelace Plugin with the standard E3-DC overview pannel.
+A Lovelace Card for visualizing power distributions.
 ---  
 
-![all](examples/Example_1.4.PNG)
+![all](https://raw.githubusercontent.com/JonahKr/power-distribution-card/master/examples/Example_1.4.PNG)
 
 --- 
 
@@ -80,7 +80,10 @@ grid:
       type: module
   ```
   Or alternatively set it up via the UI: 
-  `Configuration -> Lovelace Dashboards -> Resources (TAB)`
-
+  `Configuration -> Lovelace Dashboards -> Resources (TAB)` 
+ 
 ### Installation via [HACS](https://hacs.xyz/)
-*To Be Continued*
+
+1. Make sure the [HACS](https://github.com/custom-components/hacs) custom component is installed and working.
+2. Search for `power-distribution-card` and add it through HACS
+3. Refresh home-assistant.

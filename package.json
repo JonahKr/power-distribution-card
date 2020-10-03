@@ -3,7 +3,7 @@
   "version": "1.4.0",
   "license": "MIT",
   "author": "JonahKr",
-  "description": "A Lovelace Plugin with the standard E3-DC overview pannel.",
+  "description": "A Lovelace Card for visualizing power distributions.",
   "keywords": [
     "power",
     "distribution",
