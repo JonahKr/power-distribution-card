@@ -22,7 +22,7 @@ The items `autarky` and `ratio` are optional and will be calculated automaticall
 
 Example:
 ```yaml
-titel: Overview
+title: Overview
 battery: sensor.battery
 home: sensor.home
 solar: sensor.solar
@@ -55,7 +55,7 @@ ___
 
 Example:
 ```yaml
-titel: E3DC Overview
+title: E3DC Overview
 battery: sensor.e3dc_battery
 home: sensor.e3dc_home
 autarky: sensor.e3dc_autarky
