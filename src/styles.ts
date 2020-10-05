@@ -76,7 +76,7 @@ export const styles = css`
     display: block;
     width: 24px;
     margin: 0 auto;
-    color: var(--dark-color);
+    color: var(--paper-item-icon-color);
   }
 
   value {
@@ -149,22 +149,20 @@ export const styles = css`
   @keyframes flash_triangles {
     0%,
     66% {
-      border-left-color: var(--secondary-background-color);
-      border-right-color: var(--secondary-background-color);
+      border-left-color: var(--switch-unchecked-button-color);
+      border-right-color: var(--switch-unchecked-button-color);
     }
     33% {
-      border-left-color: var(--primary-color);
-      border-right-color: var(--primary-color);
-      filter: grayscale(1);
+      border-left-color: var(--switch-unchecked-track-color);
+      border-right-color: var(--switch-unchecked-track-color);
     }
   }
 
   #arrow_1,
   #arrow_2,
   #arrow_3 {
-    border-left-color: var(--primary-color);
-    border-right-color: var(--primary-color);
-    filter: grayscale(1);
+    border-left-color: var(--switch-unchecked-track-color);
+    border-right-color: var(--switch-unchecked-track-color);
   }
 
   #arrow_1.animated {

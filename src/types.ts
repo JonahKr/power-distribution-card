@@ -2,7 +2,7 @@ export type PDCConfig = {
   type?: string;
   title?: string;
   disable_animation?: boolean;
-  entities?: EntitySettings[];
+  entities: EntitySettings[];
 };
 
 //TODO: enable top level entity settings
@@ -15,6 +15,9 @@ export interface EntitySettings {
   invert_value?: boolean;
   invert_arrow?: boolean;
   name: string;
+  preset?: Presets;
 }
 
 export type ArrowStates = 'right' | 'left' | 'none';
+
+export type Presets = 'grid' | 'solar' | 'home';

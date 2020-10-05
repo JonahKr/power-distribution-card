@@ -22,7 +22,7 @@ export class PowerDistributionCard extends LitElement {
     return document.createElement('boilerplate-card-editor') as LovelaceCardEditor;
   }
   //TODO Write a stub config to enable the card type picker in Lovelace (return type Object -> needs interface)
-  private static getStubConfig(): any {
+  private static getStubConfig(): Record<string, unknown> {
     return {};
   }
 
@@ -30,72 +30,45 @@ export class PowerDistributionCard extends LitElement {
 
   private _config!: PDCConfig;
 
-  private _initial_setup_complete = false;
-
   static get styles(): CSSResult {
     return styles;
   }
 
   public setConfig(config: PDCConfig): void {
-    const _config: PDCConfig = {};
+    //TODO warn if the same sensor has been configured twice
+    const _config: PDCConfig = { entities: [] };
 
     _config.title = config.title ? config.title : undefined;
     _config.disable_animation = config.disable_animation ? config.disable_animation : false;
 
     _config.entities = [];
-    if (config.entities) {
-      config.entities.forEach((item) => {
-        const _item: any = {};
-        Object.assign(_item, item);
+    config.entities.forEach((item) => {
+      const _item: EntitySettings = { name: '' };
+      Object.assign(_item, item);
 
-        //TODO entityid check
-        _item.name ? undefined : (_item.name = '');
+      _item.name ? undefined : (_item.name = '');
 
-        _item._active = item.entity ? true : false;
-        _item._active ? _config.entities?.push(_item) : undefined;
-      });
-    }
+      _item._active = item.entity ? true : false;
+      _item._active ? _config.entities.push(_item) : undefined;
+    });
 
     this._config = _config;
-    console.dir(this._config);
   }
 
-  private val(item: EntitySettings): number {
+  private _val(item: EntitySettings): number {
     const inv = item.invert_value ? -1 : 1;
     return item.entity ? Number(this.hass.states[item.entity].state) * inv : 0;
   }
-  //For the following two we need to differentiate because the values can be calculated aswell as passed from a sensor
-  get autarky_val(): number {
-    /*const inv = this._config.?.invert_value ? -1 : 1;
-    if (this._config.autarky._active) {
-      if (this._config.autarky.entity) {
-        return Number(this.hass.states[this._config.autarky.entity].state) * inv;
-      }
-      return this._calculate_autarky() * 100;
-    }
-    */
-    return 0;
-  }
-  get ratio_val(): number {
-    /*const inv = this._config.solar?.invert_value ? -1 : 1;
-    if (this._config.ratio._active) {
-      if (this._config.ratio.entity) {
-        return Number(this.hass.states[this._config.ratio.entity].state) * inv;
-      }
-      return this._calculate_ratio() * 100;
-    }
-    */
-    return 0;
-  }
 
   protected render(): TemplateResult {
+    const valueList = this._config.entities.map((item) => this._val(item));
     return html`
       <ha-card .header=${this._config.title}>
         <div class="card-content">
           <div class="grid-container">
             <div class="grid-header">custom header 123</div>
-            ${this._render_bars()}
-            ${this._config.entities?.map((item, index) => html`${this._render_item(this.val(item), item, index)}`)}
+            ${this._render_bars(valueList)}
+            ${this._config.entities?.map((item, index) => html`${this._render_item(valueList[index], item, index)}`)}
           </div>
         </div>
       </ha-card>
@@ -125,9 +98,25 @@ export class PowerDistributionCard extends LitElement {
    * Render Support Functions
    */
 
-  _render_bars(): TemplateResult {
-    const autarky = this.autarky_val;
-    const ratio = this.ratio_val;
+  _render_bars(valueList: number[]): TemplateResult {
+    let production = 0;
+    let consumption = 0;
+    console.log(valueList);
+
+    for (const item of valueList) {
+      if (item > 0) {
+        production += item;
+      } else {
+        //FIXME  plus minus addition !
+        consumption -= item;
+      }
+    }
+    console.log(production);
+    console.log(consumption);
+    //TODO fix Calculations
+    const ratio = 1;
+    const autarky = Math.min(+(consumption / production).toFixed(2), 2);
+    console.log(autarky);
 
     return html`
       <div class="bar-container">
@@ -189,7 +178,6 @@ export class PowerDistributionCard extends LitElement {
   //This generates Animated Arrows depending on the state
   //0 is 0; 1 equals right; 2 equals left
   _render_arrow(direction: ArrowStates): TemplateResult {
-    console.log(a);
     const a = this._config.disable_animation;
     switch (direction) {
       case 'none': //Equals no Arrows at all
