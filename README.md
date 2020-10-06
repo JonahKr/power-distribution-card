@@ -1,5 +1,5 @@
 # power-distribution-card
-[![GitHub package.json version](https://img.shields.io/github/package-json/v/JonahKr/power-distribution-card)](https://github.com/JonahKr/power-distribution-card/blob/master/VERSION)
+[![GitHub package.json version](https://img.shields.io/github/package-json/v/JonahKr/power-distribution-card)](https://github.com/JonahKr/power-distribution-card/blob/master/package.json)
 [![Actions Status](https://github.com/JonahKr/power-distribution-card/workflows/Tests/badge.svg)](https://github.com/Jonah/power-distribution-card/actions)
 [![GitHub license](https://img.shields.io/github/license/JonahKr/power-distribution-card)](https://img.shields.io/github/license/JonahKr/power-distribution-card/blob/master/LICENSE) 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
@@ -62,10 +62,10 @@ autarky: sensor.e3dc_autarky
 ratio: sensor.e3dc_ratio
 solar:
   entity: sensor.e3dc_solar
-  inverted: true
+  invert_value: true
   icon: mdi:solar-panel
 grid:
-  inverted: true
+  invert_value: true
 ```
 ***
 ## Installation
