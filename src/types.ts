@@ -3,20 +3,23 @@ import { PresetType } from './presets';
 export type PDCConfig = {
   title?: string;
   disable_animation?: boolean;
-  entities: { [key: string]: EntitySettings }[];
+  entities: { [key: string]: EntitySettings | BarSettings | string }[];
 };
 
 export type PDCConfigInternal = {
   title?: string;
   disable_animation?: boolean;
   entities: EntitySettings[];
+
+  autarky?: BarSettings;
+  ratio?: BarSettings;
 };
 
 //TODO: enable top level entity settings
 export interface EntitySettings {
-  bar_color?: string;
   calc_excluded?: boolean;
   consumer?: boolean;
+  display_abs?: boolean;
   entity?: string;
   icon?: string;
   invert_value?: boolean;
@@ -24,6 +27,15 @@ export interface EntitySettings {
   name: string | undefined;
   preset?: PresetType;
   producer?: boolean;
+  unit_of_measurement?: string;
+}
+
+export const BarList = ['autarky', 'ratio'];
+export interface BarSettings {
+  bar_color?: string;
+  entity?: string;
+  invert_value?: boolean;
+  name?: string | undefined;
 }
 
 export type ArrowStates = 'right' | 'left' | 'none';

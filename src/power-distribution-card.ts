@@ -4,9 +4,7 @@ import { HomeAssistant, fireEvent } from 'custom-card-helpers';
 
 import { version } from '../package.json';
 
-import './editor';
-
-import { PDCConfig, PDCConfigInternal, EntitySettings, ArrowStates } from './types';
+import { PDCConfig, PDCConfigInternal, EntitySettings, ArrowStates, BarList, BarSettings } from './types';
 import { PresetList, PresetObject, PresetType } from './presets';
 import styles from './styles';
 
@@ -16,7 +14,7 @@ console.info(
   `font-weight: 500; color: #03a9f4; background: white;`,
 );
 
-@customElement('power-distribution')
+@customElement('power-distribution-card')
 export class PowerDistributionCard extends LitElement {
   //TODO Write Card Editor
   /*
@@ -41,27 +39,36 @@ export class PowerDistributionCard extends LitElement {
     //TODO warn if the same sensor has been configured twice
     const _config: PDCConfigInternal = { entities: [] };
 
-    _config.title = config.title ? config.title : undefined;
-    _config.disable_animation = config.disable_animation ? config.disable_animation : false;
+    _config.title = config.title || undefined;
+    _config.disable_animation = config.disable_animation || false;
 
-    //TODO enable easy config again by using presets
     config.entities.forEach((item) => {
-      for (const [preset, settings] of Object.entries(item)) {
+      // eslint-disable-next-line prefer-const
+      for (let [preset, settings] of Object.entries(item)) {
         //TODO Warnings would be apropriate here
-        if (!PresetList.includes(<PresetType>preset)) continue;
+        if (!PresetList.includes(<PresetType>preset)) {
+          if (BarList.includes(preset)) {
+            typeof settings === 'string'
+              ? (_config[preset] = { entity: settings })
+              : (_config[preset] = <BarSettings>settings);
+          }
+          continue;
+        }
+        if (typeof settings === 'string') settings = { entity: settings } as EntitySettings;
         if (!settings.entity) continue;
 
         const _item: EntitySettings = Object.assign({}, PresetObject[preset], settings);
 
         _item.preset = <PresetType>preset;
+        _item.display_abs == false ? undefined : (_item.display_abs = true);
+
         _config.entities.push(_item);
       }
     });
-    console.log(_config);
     this._config = _config;
   }
 
-  private _val(item: EntitySettings): number {
+  private _val(item: EntitySettings | BarSettings): number {
     const inv = item.invert_value ? -1 : 1;
     return item.entity ? Number(this.hass.states[item.entity].state) * inv : 0;
   }
@@ -69,7 +76,7 @@ export class PowerDistributionCard extends LitElement {
   protected render(): TemplateResult {
     const valueList: number[] = [];
 
-    let total_consumption = 0;
+    //let total_consumption = 0;
     let consumption = 0;
     let production = 0;
     this._config.entities.forEach((item, index) => {
@@ -80,20 +87,26 @@ export class PowerDistributionCard extends LitElement {
           production += item.producer ? value : 0;
         } else if (item.consumer) {
           consumption -= value;
-          total_consumption -= value;
+          //total_consumption -= value;
         }
       }
     });
 
     //Just to clarify. The formulas for this can differ widely, so i have decided to take the most suitable ones in my opinion
-    //Ratio in Percent = Home Consumption / Home Production(Solar, Battery)*100
-    const ratio = production != 0 ? Math.min(Math.round((Math.abs(consumption) * 100) / production), 100) : 0;
-    //Autarky in Percent = Home Production(Solar, Battery)*100 / Home Consumption
-    const autarky = consumption != 0 ? Math.min(production / Math.round(Math.abs(consumption) * 100), 100) : 0;
-
-    console.log('Total Con: ' + total_consumption);
-    console.log('Con: ' + consumption);
-    console.log('Prod: ' + production);
+    let ratio;
+    if (!this._config.ratio?.entity) {
+      //Ratio in Percent = Home Consumption / Home Production(Solar, Battery)*100
+      ratio = production != 0 ? Math.min(Math.round((Math.abs(consumption) * 100) / production), 100) : 0;
+    } else {
+      ratio = this._val(this._config.ratio);
+    }
+    let autarky;
+    if (!this._config.autarky?.entity) {
+      //Autarky in Percent = Home Production(Solar, Battery)*100 / Home Consumption
+      autarky = consumption != 0 ? Math.min(production / Math.round(Math.abs(consumption) * 100), 100) : 0;
+    } else {
+      autarky = this._val(this._config.autarky);
+    }
 
     return html`
       <ha-card .header=${this._config.title}>
@@ -107,56 +120,29 @@ export class PowerDistributionCard extends LitElement {
       </ha-card>
     `;
   }
-  /*
-  private _calculate_autarky(): number {
-    //Formula: Autarky in % = Total Consumption / Production *100
-    const consumption =
-      (this.battery_val < 0 ? Math.abs(this.battery_val) : 0) + (this.home_val < 0 ? Math.abs(this.home_val) : 0);
-    const production = (this.battery_val > 0 ? this.battery_val : 0) + (this.solar_val > 0 ? this.solar_val : 0);
-    const autarky = production != 0 ? consumption / production : 0;
-    //Because of very little power is consumed from/feeded into the grid, we need to adjust the 1% range
-    return autarky >= 0.005 ? Math.min(+autarky.toFixed(2), 1) : autarky == 0 ? 0 : 0.01;
-  }
-
-  private _calculate_ratio(): number {
-    //Formula: Autarky in % = Total Consumption / total usage *100
-    const consumption =
-      (this.battery_val < 0 ? Math.abs(this.battery_val) : 0) + (this.home_val < 0 ? Math.abs(this.home_val) : 0);
-    const total_usage = consumption + (this.grid_val < 0 ? Math.abs(this.grid_val) : 0);
-    const ratio = total_usage != 0 ? consumption / total_usage : 0;
-    return ratio >= 0.005 ? Math.min(+ratio.toFixed(2), 1) : ratio == 0 ? 0 : 0.01;
-  }
-  */
 
   /**
    * Render Support Functions
    */
 
   _render_bars(ratio: number, autarky: number): TemplateResult {
-    //TODO make autarky and ratio names changable
     return html`
       <div class="bar-container">
         <div class="ratio-bar">
           <p id="ratio-percentage">${ratio}%</p>
           <div class="bar-wrapper">
-            <bar
-              style="height:${ratio}%; background-color:${false //this._config.ratio.bar_color
-                ? undefined //this._config.ratio.bar_color
-                : 'var(--dark-color)'};"
-            />
+            <bar style="height:${ratio}%; background-color:${this._config.ratio?.bar_color || 'var(--dark-color)'};" />
           </div>
-          <p id="ratio">ratio</p>
+          <p id="ratio">${this._config.ratio?.name || 'ratio'}</p>
         </div>
         <div class="autarky-bar">
           <p id="autarky-percentage">${autarky}%</p>
           <div class="bar-wrapper">
             <bar
-              style="height:${autarky}%; background-color:${false //this._config.autarky.bar_color
-                ? undefined //this._config.autarky.bar_color
-                : 'var(--dark-color)'};"
+              style="height:${autarky}%; background-color:${this._config.autarky?.bar_color || 'var(--dark-color)'};"
             />
           </div>
-          <p id="autarky">autarky</p>
+          <p id="autarky">${this._config.autarky?.name || 'ratio'}</p>
         </div>
       </div>
     `;
@@ -169,22 +155,21 @@ export class PowerDistributionCard extends LitElement {
     });
   }
 
-  _render_item(state: number, item: EntitySettings, index: number): TemplateResult {
-    state *= item.invert_arrow ? -1 : 1;
-
+  _render_item(value: number, item: EntitySettings, index: number): TemplateResult {
+    const state = item.invert_arrow ? value * -1 : value;
+    value = item.display_abs ? Math.abs(value) : value;
     return html`
       <item id="${item.name}" class="pointer" .entity=${item.entity} @click="${this._moreInfo}">
         <badge>
           <icon>
-            <ha-icon data-state="${state == 0 ? 'unavaiable' : 'on'}" icon="${item.icon}"></ha-icon>
+            <ha-icon data-state="${value == 0 ? 'unavaiable' : 'on'}" icon="${item.icon}"></ha-icon>
           </icon>
           <p class="subtitle">${item.name}</p>
         </badge>
         <value>
-          <p>${Math.floor(Math.abs(state))} W</p>
+          <p>${value} ${item.unit_of_measurement || 'W'}</p>
           ${this._render_arrow(
-            //I am so sorry... but you have to admit it's beautifull
-            //Jokes aside: This takes the side the item is on (index even = left) into account for the arrows
+            //This takes the side the item is on (index even = left) into account for the arrows
             state == 0 ? 'none' : index % 2 == 0 ? (state > 0 ? 'right' : 'left') : state > 0 ? 'left' : 'right',
           )}
         <value
@@ -193,7 +178,6 @@ export class PowerDistributionCard extends LitElement {
   }
 
   //This generates Animated Arrows depending on the state
-  //0 is 0; 1 equals right; 2 equals left
   _render_arrow(direction: ArrowStates): TemplateResult {
     const a = this._config.disable_animation;
     switch (direction) {
