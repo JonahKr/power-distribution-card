@@ -10,6 +10,7 @@ export const PresetList = [
   'home',
   'hydro',
   'pool',
+  'producer',
   'solar',
   'wind',
 ] as const;
@@ -49,6 +50,11 @@ export const PresetObject: { [key: string]: EntitySettings } = {
     consumer: true,
     icon: 'mdi:pool',
     name: 'pool',
+  },
+  producer: {
+    icon: 'mdi:lightning-bolt-outline',
+    name: 'producer',
+    producer: true,
   },
   solar: {
     icon: 'mdi:solar-power',
