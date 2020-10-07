@@ -66,7 +66,8 @@ export const styles = css`
 
   badge {
     width: 50%;
-    border: gray 1px solid;
+    border: 1px solid;
+    border-color: var(--disabled-text-color);
     border-radius: 1em;
     float: left;
     padding: 4px;
@@ -126,7 +127,8 @@ export const styles = css`
   .blank {
     height: 4px;
     width: 54px;
-    background-color: var(--secondary-background-color);
+    opacity: 0.3;
+    background-color: var(--secondary-text-color);
     margin: 8px auto 8px auto;
   }
 
@@ -134,7 +136,7 @@ export const styles = css`
     width: 0;
     height: 0;
     border-top: 8px solid transparent;
-    border-left: 17px solid var(--secondary-background-color);
+    border-left: 17px solid;
     border-bottom: 8px solid transparent;
   }
 
@@ -142,27 +144,30 @@ export const styles = css`
     width: 0;
     height: 0;
     border-top: 8px solid transparent;
-    border-right: 17px solid var(--secondary-background-color);
+    border-right: 17px solid;
     border-bottom: 8px solid transparent;
   }
 
   @keyframes flash_triangles {
     0%,
     66% {
-      border-left-color: var(--switch-unchecked-button-color);
-      border-right-color: var(--switch-unchecked-button-color);
+      opacity: 0.3;
+      border-left-color: var(--secondary-text-color);
+      border-right-color: var(--secondary-text-color);
     }
     33% {
-      border-left-color: var(--switch-unchecked-track-color);
-      border-right-color: var(--switch-unchecked-track-color);
+      opacity: 0.8;
+      border-left-color: var(--secondary-text-color);
+      border-right-color: var(--secondary-text-color);
     }
   }
 
   #arrow_1,
   #arrow_2,
   #arrow_3 {
-    border-left-color: var(--switch-unchecked-track-color);
-    border-right-color: var(--switch-unchecked-track-color);
+    opacity: 0.3;
+    border-left-color: var(--secondary-text-color);
+    border-right-color: var(--secondary-text-color);
   }
 
   #arrow_1.animated {

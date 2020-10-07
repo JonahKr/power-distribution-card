@@ -1,12 +1,13 @@
 import { LitElement, html, customElement, property, CSSResult, TemplateResult } from 'lit-element';
 
-import { HomeAssistant, LovelaceCardEditor, fireEvent } from 'custom-card-helpers';
+import { HomeAssistant, fireEvent } from 'custom-card-helpers';
 
 import { version } from '../package.json';
 
 import './editor';
 
-import { PDCConfig, EntitySettings, ArrowStates } from './types';
+import { PDCConfig, PDCConfigInternal, EntitySettings, ArrowStates } from './types';
+import { PresetList, PresetObject, PresetType } from './presets';
 import styles from './styles';
 
 console.info(
@@ -15,12 +16,14 @@ console.info(
   `font-weight: 500; color: #03a9f4; background: white;`,
 );
 
-@customElement('power-distribution-card')
+@customElement('power-distribution')
 export class PowerDistributionCard extends LitElement {
   //TODO Write Card Editor
+  /*
   private static async getConfigElement(): Promise<LovelaceCardEditor> {
     return document.createElement('boilerplate-card-editor') as LovelaceCardEditor;
   }
+  */
   //TODO Write a stub config to enable the card type picker in Lovelace (return type Object -> needs interface)
   private static getStubConfig(): Record<string, unknown> {
     return {};
@@ -28,7 +31,7 @@ export class PowerDistributionCard extends LitElement {
 
   @property() public hass!: HomeAssistant;
 
-  private _config!: PDCConfig;
+  private _config!: PDCConfigInternal;
 
   static get styles(): CSSResult {
     return styles;
@@ -36,22 +39,25 @@ export class PowerDistributionCard extends LitElement {
 
   public setConfig(config: PDCConfig): void {
     //TODO warn if the same sensor has been configured twice
-    const _config: PDCConfig = { entities: [] };
+    const _config: PDCConfigInternal = { entities: [] };
 
     _config.title = config.title ? config.title : undefined;
     _config.disable_animation = config.disable_animation ? config.disable_animation : false;
 
-    _config.entities = [];
+    //TODO enable easy config again by using presets
     config.entities.forEach((item) => {
-      const _item: EntitySettings = { name: '' };
-      Object.assign(_item, item);
+      for (const [preset, settings] of Object.entries(item)) {
+        //TODO Warnings would be apropriate here
+        if (!PresetList.includes(<PresetType>preset)) continue;
+        if (!settings.entity) continue;
 
-      _item.name ? undefined : (_item.name = '');
+        const _item: EntitySettings = Object.assign({}, PresetObject[preset], settings);
 
-      _item._active = item.entity ? true : false;
-      _item._active ? _config.entities.push(_item) : undefined;
+        _item.preset = <PresetType>preset;
+        _config.entities.push(_item);
+      }
     });
-
+    console.log(_config);
     this._config = _config;
   }
 
@@ -61,13 +67,40 @@ export class PowerDistributionCard extends LitElement {
   }
 
   protected render(): TemplateResult {
-    const valueList = this._config.entities.map((item) => this._val(item));
+    const valueList: number[] = [];
+
+    let total_consumption = 0;
+    let consumption = 0;
+    let production = 0;
+    this._config.entities.forEach((item, index) => {
+      const value = this._val(item);
+      valueList[index] = value;
+      if (!item.calc_excluded) {
+        if (valueList[index] > 0) {
+          production += item.producer ? value : 0;
+        } else if (item.consumer) {
+          consumption -= value;
+          total_consumption -= value;
+        }
+      }
+    });
+
+    //Just to clarify. The formulas for this can differ widely, so i have decided to take the most suitable ones in my opinion
+    //Ratio in Percent = Home Consumption / Home Production(Solar, Battery)*100
+    const ratio = production != 0 ? Math.min(Math.round((Math.abs(consumption) * 100) / production), 100) : 0;
+    //Autarky in Percent = Home Production(Solar, Battery)*100 / Home Consumption
+    const autarky = consumption != 0 ? Math.min(production / Math.round(Math.abs(consumption) * 100), 100) : 0;
+
+    console.log('Total Con: ' + total_consumption);
+    console.log('Con: ' + consumption);
+    console.log('Prod: ' + production);
+
     return html`
       <ha-card .header=${this._config.title}>
         <div class="card-content">
           <div class="grid-container">
             <div class="grid-header">custom header 123</div>
-            ${this._render_bars(valueList)}
+            ${this._render_bars(ratio, autarky)}
             ${this._config.entities?.map((item, index) => html`${this._render_item(valueList[index], item, index)}`)}
           </div>
         </div>
@@ -94,30 +127,13 @@ export class PowerDistributionCard extends LitElement {
     return ratio >= 0.005 ? Math.min(+ratio.toFixed(2), 1) : ratio == 0 ? 0 : 0.01;
   }
   */
+
   /**
    * Render Support Functions
    */
 
-  _render_bars(valueList: number[]): TemplateResult {
-    let production = 0;
-    let consumption = 0;
-    console.log(valueList);
-
-    for (const item of valueList) {
-      if (item > 0) {
-        production += item;
-      } else {
-        //FIXME  plus minus addition !
-        consumption -= item;
-      }
-    }
-    console.log(production);
-    console.log(consumption);
-    //TODO fix Calculations
-    const ratio = 1;
-    const autarky = Math.min(+(consumption / production).toFixed(2), 2);
-    console.log(autarky);
-
+  _render_bars(ratio: number, autarky: number): TemplateResult {
+    //TODO make autarky and ratio names changable
     return html`
       <div class="bar-container">
         <div class="ratio-bar">
@@ -148,6 +164,7 @@ export class PowerDistributionCard extends LitElement {
 
   private _moreInfo(ev: CustomEvent): void {
     fireEvent(this, 'hass-more-info', {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       entityId: (ev.currentTarget as any).entity,
     });
   }
