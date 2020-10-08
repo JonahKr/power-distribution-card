@@ -76,18 +76,17 @@ export class PowerDistributionCard extends LitElement {
   protected render(): TemplateResult {
     const valueList: number[] = [];
 
-    //let total_consumption = 0;
     let consumption = 0;
     let production = 0;
     this._config.entities.forEach((item, index) => {
       const value = this._val(item);
       valueList[index] = value;
       if (!item.calc_excluded) {
-        if (valueList[index] > 0) {
-          production += item.producer ? value : 0;
-        } else if (item.consumer) {
+        if (item.producer && valueList[index] > 0) {
+          production += value;
+        }
+        if (item.consumer && valueList[index] < 0) {
           consumption -= value;
-          //total_consumption -= value;
         }
       }
     });
@@ -103,7 +102,7 @@ export class PowerDistributionCard extends LitElement {
     let autarky;
     if (!this._config.autarky?.entity) {
       //Autarky in Percent = Home Production(Solar, Battery)*100 / Home Consumption
-      autarky = consumption != 0 ? Math.min(production / Math.round(Math.abs(consumption) * 100), 100) : 0;
+      autarky = consumption != 0 ? Math.min((production * 100) / Math.round(Math.abs(consumption)), 100) : 0;
     } else {
       autarky = this._val(this._config.autarky);
     }
@@ -142,7 +141,7 @@ export class PowerDistributionCard extends LitElement {
               style="height:${autarky}%; background-color:${this._config.autarky?.bar_color || 'var(--dark-color)'};"
             />
           </div>
-          <p id="autarky">${this._config.autarky?.name || 'ratio'}</p>
+          <p id="autarky">${this._config.autarky?.name || 'autarky'}</p>
         </div>
       </div>
     `;
