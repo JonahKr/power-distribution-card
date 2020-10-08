@@ -27,6 +27,7 @@ export interface EntitySettings {
   name: string | undefined;
   preset?: PresetType;
   producer?: boolean;
+  unit_of_display?: string;
   unit_of_measurement?: string;
 }
 

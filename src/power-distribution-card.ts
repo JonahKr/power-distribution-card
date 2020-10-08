@@ -31,6 +31,8 @@ export class PowerDistributionCard extends LitElement {
 
   private _config!: PDCConfigInternal;
 
+  private _configFinished!: boolean;
+
   static get styles(): CSSResult {
     return styles;
   }
@@ -68,6 +70,21 @@ export class PowerDistributionCard extends LitElement {
     this._config = _config;
   }
 
+  public updated(): void {
+    if (this._configFinished) return;
+
+    this._config.entities.forEach((item, index) => {
+      if (!item.entity) return;
+      //unit-of-measurement Configuration
+      !item.unit_of_measurement
+        ? (this._config.entities[index].unit_of_measurement =
+            this.hass.states[item.entity].attributes.unit_of_measurement || 'W')
+        : undefined;
+      !item.unit_of_display ? (this._config.entities[index].unit_of_measurement = 'W') : undefined;
+    });
+    this._configFinished = true;
+  }
+
   private _val(item: EntitySettings | BarSettings): number {
     const inv = item.invert_value ? -1 : 1;
     return item.entity ? Number(this.hass.states[item.entity].state) * inv : 0;
@@ -79,7 +96,15 @@ export class PowerDistributionCard extends LitElement {
     let consumption = 0;
     let production = 0;
     this._config.entities.forEach((item, index) => {
-      const value = this._val(item);
+      let value = this._val(item);
+
+      switch (item.unit_of_measurement) {
+        case 'W':
+          break;
+        case 'kW':
+          value *= 1000;
+          break;
+      }
       valueList[index] = value;
       if (!item.calc_excluded) {
         if (item.producer && valueList[index] > 0) {
@@ -102,7 +127,7 @@ export class PowerDistributionCard extends LitElement {
     let autarky;
     if (!this._config.autarky?.entity) {
       //Autarky in Percent = Home Production(Solar, Battery)*100 / Home Consumption
-      autarky = consumption != 0 ? Math.min((production * 100) / Math.round(Math.abs(consumption)), 100) : 0;
+      autarky = consumption != 0 ? Math.min(Math.round((production * 100) / Math.abs(consumption)), 100) : 0;
     } else {
       autarky = this._val(this._config.autarky);
     }
@@ -166,7 +191,7 @@ export class PowerDistributionCard extends LitElement {
           <p class="subtitle">${item.name}</p>
         </badge>
         <value>
-          <p>${value} ${item.unit_of_measurement || 'W'}</p>
+          <p>${value} ${item.unit_of_display}</p>
           ${this._render_arrow(
             //This takes the side the item is on (index even = left) into account for the arrows
             state == 0 ? 'none' : index % 2 == 0 ? (state > 0 ? 'right' : 'left') : state > 0 ? 'left' : 'right',
