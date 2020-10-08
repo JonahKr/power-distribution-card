@@ -3,13 +3,13 @@
 [![Actions Status](https://github.com/JonahKr/power-distribution-card/workflows/Tests/badge.svg)](https://github.com/Jonah/power-distribution-card/actions)
 [![GitHub license](https://img.shields.io/github/license/JonahKr/power-distribution-card)](https://img.shields.io/github/license/JonahKr/power-distribution-card/blob/master/LICENSE) 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
-<br/><br/>
+<br/>
 
 <div>
 <i>Inspired by</i>
-<img height="40px" alt="e3dc-logo" href="https://www.e3dc.com/en/#Intro" src="https://user-images.githubusercontent.com/38377070/95508157-d9edc880-09b2-11eb-9c40-53d2c0c96cd8.png"/>
+<img height="40px" alt="e3dc-logo" href="https://www.e3dc.com/en/#Intro" src="https://user-images.githubusercontent.com/38377070/95522835-7de46d80-09cd-11eb-9aae-55657aa3caae.png"/>
 </div>
-
+<br/>
 <h1 align="center">A Lovelace Card for visualizing power distributions.</h1>
 <p align="center">
 <img src="https://user-images.githubusercontent.com/38377070/95488122-730de680-0995-11eb-857a-01ac83c18dff.PNG"/>
@@ -18,16 +18,16 @@
 <br/>
 
 <div id="toc">
-  <h1> Table of Contents </h1>
+  <h2> Table of Contents </h2>
   <ul>
     <li>
-      <h2><a href="#installation">Installation</a></h2>
+      <h3><a href="#installation">Installation</a></h3>
     </li>
     <li>
-      <h2><a href="#configuration">Configuration</a></h2>
+      <h3><a href="#configuration">Configuration</a></h3>
     </li>
     <li>
-      <h2><a href="#faq">FAQs</a></h2>
+      <h3><a href="#faq">FAQs</a></h2>
     </li>
   </ul>
 <br/>
@@ -200,6 +200,7 @@ entities:
       entity: sensor.e3dc_solar
       invert_value: true
 ```
+<br/>
 
 There are alot of settings you can customize your sensors with:      
 
@@ -214,6 +215,7 @@ There are alot of settings you can customize your sensors with:
 | `name`                | string        | dishwasher       | Feel free to change the displayed name of the element. |
 | `unit_of_display`     | string        | *W* , *kW*       | The Unit the value is displayed in (standard: W) |
 | `unit_of_measurement` | string        | *W* , *kW*       | The Unit the value is coming from the Sensor. **This should be detected automatically** |
+<p>
 
 Example for advanced sensor configuration:
 ```yaml
@@ -235,7 +237,7 @@ entities:
       unit_of_display: kW
 ```
 
-<br/>
+<br/><br/>
 
 To modify the **autarky** or **ratio** bars, you have these settings:
 | Setting          | type          | example           | description  |
@@ -244,6 +246,8 @@ To modify the **autarky** or **ratio** bars, you have these settings:
 | `entity`         | string        | sensor.ln_autarky | You can specify the entity_id here aswell. |
 | `invert_value`   | bool          | false             | This will invert the value recieved from HASS. This affects calculations aswell! |
 | `name`           | string        | Eigenstrom        | Feel free to change the displayed name of the element. |
+
+<p>
 
 Example for bar configuration:
 ```yaml
