@@ -17,6 +17,28 @@
 
 <br/>
 
+<div id="toc">
+  <h1> Table of Contents </h1>
+  <ul>
+    <li>
+      <h2><a href="#installation">Installation</a></h2>
+    </li>
+    <li>
+      <h2><a href="#configuration">Configuration</a></h2>
+    </li>
+    <li>
+      <h2><a href="#faq">FAQs</a></h2>
+    </li>
+  </ul>
+<br/>
+</div>
+
+<hr>
+
+<br/>
+
+
+<div id="installation">
 <h1> Installation</h1>
 
 <h2> Installation via <a href="https://hacs.xyz/">HACS</a> <img src="https://img.shields.io/badge/-Recommended-%2303a9f4"/> </h2>
@@ -39,11 +61,13 @@
   `Configuration -> Lovelace Dashboards -> Resources (TAB)` 
 
 <br/>
+</div>
 
 ***
 
 <br/>
 
+<div id="configuration">
 <h1> Configuration</h1>
 
 <h3>Presets</h3>
@@ -233,6 +257,24 @@ entities:
       entity: sensor.e3dc_ratio
 ```
 <br/>
+</div> 
+
+<hr>
+
+<div id="faq">
+<h1> FAQs</h1>
+
+### What the heck are these autarky and ratio calculating?
+So basically these bar-graphs are nice indicators to show you:
+1. the autarky of your home (Home Production like Solar / Home Consumption) 
+2. the ratio / share of produced electricity used by the home (The Germans call it `Eigenverbrauchsanteil` 😉)
+
+### Is the battery able to show its SOC?
+Currently not. Its planned.
+
+<br/>
+</div>
+
  
 <hr>
 
