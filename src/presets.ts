@@ -29,7 +29,7 @@ export const PresetObject: { [key: string]: EntitySettings } = {
   },
   consumer: {
     consumer: true,
-    icon: 'mdi:lightning-bolt-outline',
+    icon: 'mdi:lightbulb',
     name: 'consumer',
   },
   grid: {
