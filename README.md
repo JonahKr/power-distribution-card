@@ -17,6 +17,23 @@
 
 <br/>
 
+<div id="breaking_changes">
+  <h2>Breaking Changes!</h2>
+  If your Upgrading from 1.4 to 1.5: 
+  - All entities have been moved to a `entities` List
+
+```yaml
+Old:
+solar:entityxyz
+
+New:
+entities:
+  - solar: entityxyz
+```
+<br/>
+<hr>
+</div>
+
 <div id="toc">
   <h2> Table of Contents </h2>
   <ul>
