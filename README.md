@@ -20,11 +20,11 @@
 <div id="breaking_changes">
   <h2>Breaking Changes!</h2>
   If your Upgrading from 1.4 to 1.5: 
-  - All entities have been moved to a `entities` List
+  - All entities have been moved to a `entities` list
 
 ```yaml
 Old:
-solar:entityxyz
+solar: entityxyz
 
 New:
 entities:
@@ -190,9 +190,11 @@ If you have Sensors for **autarky** or **ratio** aswell, you can just add them t
   - ratio: sensor.e3dc_ratio
 ```
 
+You can disable the arrow animations in your card aswell with the **disable_animation** keyoword which can either be *true* or *false*.  
 Furthermore you can add a **title** to the card by just:
 ```yaml
-titel: My Power Card
+title: My Power Card
+disable_animation: true
 entities:
   - ...
 ```

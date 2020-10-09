@@ -80,7 +80,7 @@ export class PowerDistributionCard extends LitElement {
         ? (this._config.entities[index].unit_of_measurement =
             this.hass.states[item.entity].attributes.unit_of_measurement || 'W')
         : undefined;
-      !item.unit_of_display ? (this._config.entities[index].unit_of_measurement = 'W') : undefined;
+      !item.unit_of_display ? (this._config.entities[index].unit_of_display = 'W') : undefined;
     });
     this._configFinished = true;
   }
@@ -191,7 +191,7 @@ export class PowerDistributionCard extends LitElement {
           <p class="subtitle">${item.name}</p>
         </badge>
         <value>
-          <p>${value} ${item.unit_of_display}</p>
+          <p>${item.unit_of_display === 'kW' ? value / 1000 : value} ${item.unit_of_display}</p>
           ${this._render_arrow(
             //This takes the side the item is on (index even = left) into account for the arrows
             state == 0 ? 'none' : index % 2 == 0 ? (state > 0 ? 'right' : 'left') : state > 0 ? 'left' : 'right',
