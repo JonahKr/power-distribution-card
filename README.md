@@ -25,10 +25,17 @@
 ```yaml
 Old:
 solar: entityxyz
+grid:
+  entity: entityxyz
+  invert_value: true
+
 
 New:
 entities:
   - solar: entityxyz
+  - grid:
+      entity: entityxyz
+      invert_value: true
 ```
 <br/>
 <hr>
