@@ -10,12 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      # Validating HACS default compatability
-      - name: HACS validation
-        uses: "hacs/integration/action@main"
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CATEGORY: "plugin"
       #Building the Js-File
       - name: Build the file
         run: |

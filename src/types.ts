@@ -15,7 +15,6 @@ export type PDCConfigInternal = {
   ratio?: BarSettings;
 };
 
-//TODO: enable top level entity settings
 export interface EntitySettings {
   calc_excluded?: boolean;
   consumer?: boolean;

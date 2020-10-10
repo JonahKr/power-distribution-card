@@ -1,11 +1,11 @@
 import { LitElement, html, customElement, property, CSSResult, TemplateResult } from 'lit-element';
 
-import { HomeAssistant, fireEvent } from 'custom-card-helpers';
+import { HomeAssistant, fireEvent, LovelaceCard } from 'custom-card-helpers';
 
 import { version } from '../package.json';
 
 import { PDCConfig, PDCConfigInternal, EntitySettings, ArrowStates, BarList, BarSettings } from './types';
-import { PresetList, PresetObject, PresetType } from './presets';
+import { DefaultItem, PresetList, PresetObject, PresetType } from './presets';
 import styles from './styles';
 
 console.info(
@@ -14,7 +14,7 @@ console.info(
   `font-weight: 500; color: #03a9f4; background: white;`,
 );
 
-@customElement('power-distribution-card')
+@customElement('power-distribution')
 export class PowerDistributionCard extends LitElement {
   //TODO Write Card Editor
   /*
@@ -22,49 +22,49 @@ export class PowerDistributionCard extends LitElement {
     return document.createElement('boilerplate-card-editor') as LovelaceCardEditor;
   }
   */
-  //TODO Write a stub config to enable the card type picker in Lovelace (return type Object -> needs interface)
-  private static getStubConfig(): Record<string, unknown> {
-    return {};
+  public static getStubConfig(): Record<string, unknown> {
+    return { entities: [{ solar: 'sensor.solar' }, { grid: 'sensor.grid' }, { home: 'sensor.home' }] };
   }
 
   @property() public hass!: HomeAssistant;
 
+  @property() private _configFinished!: boolean;
+
   private _config!: PDCConfigInternal;
 
-  private _configFinished!: boolean;
-
-  static get styles(): CSSResult {
-    return styles;
-  }
-
   public setConfig(config: PDCConfig): void {
-    //TODO warn if the same sensor has been configured twice
     const _config: PDCConfigInternal = { entities: [] };
 
+    //General Card Settings
     _config.title = config.title || undefined;
     _config.disable_animation = config.disable_animation || false;
 
+    //Warnings
+    if (!config.entities) throw new Error('You need to set a entities attribute!');
+
     config.entities.forEach((item) => {
-      // eslint-disable-next-line prefer-const
-      for (let [preset, settings] of Object.entries(item)) {
-        //TODO Warnings would be apropriate here
-        if (!PresetList.includes(<PresetType>preset)) {
-          if (BarList.includes(preset)) {
-            typeof settings === 'string'
-              ? (_config[preset] = { entity: settings })
-              : (_config[preset] = <BarSettings>settings);
-          }
-          continue;
+      for (const [preset, settings] of Object.entries(item)) {
+        //This is for filtering the SimpleSetup items and converting it
+        let setting: EntitySettings | BarSettings;
+        if (typeof settings === 'string') {
+          setting = { entity: settings };
+        } else {
+          setting = settings;
         }
-        if (typeof settings === 'string') settings = { entity: settings } as EntitySettings;
-        if (!settings.entity) continue;
+        //Advanced Setup
+        if (BarList.includes(preset)) {
+          _config[preset] = <BarSettings>setting;
+        } else if (!PresetList.includes(<PresetType>preset)) {
+          if (!setting.entity) throw new Error('You need to pass a entity_id to an item for it to work!');
 
-        const _item: EntitySettings = Object.assign({}, PresetObject[preset], settings);
+          const _item: EntitySettings = Object.assign({}, DefaultItem, PresetObject[preset], <EntitySettings>setting);
 
-        _item.preset = <PresetType>preset;
-        _item.display_abs == false ? undefined : (_item.display_abs = true);
+          _item.preset = <PresetType>preset;
 
-        _config.entities.push(_item);
+          _config.entities.push(_item);
+        } else {
+          throw new Error('The preset `' + preset + '` is not a valid entry. Please choose a Preset from the List.');
+        }
       }
     });
     this._config = _config;
@@ -76,13 +76,18 @@ export class PowerDistributionCard extends LitElement {
     this._config.entities.forEach((item, index) => {
       if (!item.entity) return;
       //unit-of-measurement Configuration
-      !item.unit_of_measurement
-        ? (this._config.entities[index].unit_of_measurement =
-            this.hass.states[item.entity].attributes.unit_of_measurement || 'W')
-        : undefined;
-      !item.unit_of_display ? (this._config.entities[index].unit_of_display = 'W') : undefined;
+      const hass_uom = this.hass.states[item.entity].attributes.unit_of_measurement;
+      !item.unit_of_measurement ? (this._config.entities[index].unit_of_measurement = hass_uom || 'W') : undefined;
     });
     this._configFinished = true;
+  }
+
+  private showWarning(warning: string): TemplateResult {
+    return html` <hui-warning>${warning}</hui-warning> `;
+  }
+
+  public static get styles(): CSSResult {
+    return styles;
   }
 
   private _val(item: EntitySettings | BarSettings): number {
