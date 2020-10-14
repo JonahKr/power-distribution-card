@@ -16,13 +16,6 @@ export const styles = css`
     margin: 4px 0 4px 0;
   }
 
-  .grid-header {
-    visibility: hidden;
-    grid-column-start: 1;
-    grid-column-end: 4;
-    height: 0;
-  }
-
   #ratio,
   #autarky {
     margin: 0;
@@ -31,7 +24,7 @@ export const styles = css`
 
   .bar-container {
     grid-column: 2;
-    grid-row-start: 2;
+    grid-row-start: 1;
     grid-row-end: 4;
 
     display: flex;
@@ -64,6 +57,14 @@ export const styles = css`
     right: 0;
   }
 
+  .item_0 {
+    grid-column: 1;
+  }
+
+  .item_1 {
+    grid-column: 3;
+  }
+
   badge {
     width: 50%;
     border: 1px solid;
@@ -81,6 +82,14 @@ export const styles = css`
   }
 
   value {
+    float: right;
+  }
+
+  .item_1 > value {
+    float: left;
+  }
+
+  .item_1 > badge {
     float: right;
   }
 
@@ -106,14 +115,6 @@ export const styles = css`
     .arrow {
       width: max-content;
       margin: 0 auto;
-    }
-  }
-  @media not screen and (max-width: 450px) {
-    item:nth-child(2n) > badge {
-      float: right;
-    }
-    item:nth-child(2n) > value {
-      float: left;
     }
   }
 

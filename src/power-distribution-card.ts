@@ -54,7 +54,7 @@ export class PowerDistributionCard extends LitElement {
         //Advanced Setup
         if (BarList.includes(preset)) {
           _config[preset] = <BarSettings>setting;
-        } else if (!PresetList.includes(<PresetType>preset)) {
+        } else if (PresetList.includes(<PresetType>preset)) {
           if (!setting.entity) throw new Error('You need to pass a entity_id to an item for it to work!');
 
           const _item: EntitySettings = Object.assign({}, DefaultItem, PresetObject[preset], <EntitySettings>setting);
@@ -141,7 +141,6 @@ export class PowerDistributionCard extends LitElement {
       <ha-card .header=${this._config.title}>
         <div class="card-content">
           <div class="grid-container">
-            <div class="grid-header">custom header 123</div>
             ${this._render_bars(ratio, autarky)}
             ${this._config.entities?.map((item, index) => html`${this._render_item(valueList[index], item, index)}`)}
           </div>
@@ -188,7 +187,7 @@ export class PowerDistributionCard extends LitElement {
     const state = item.invert_arrow ? value * -1 : value;
     value = item.display_abs ? Math.abs(value) : value;
     return html`
-      <item id="${item.name}" class="pointer" .entity=${item.entity} @click="${this._moreInfo}">
+      <item id="${item.name}" class="pointer item_${index % 2}" .entity=${item.entity} @click="${this._moreInfo}">
         <badge>
           <icon>
             <ha-icon data-state="${value == 0 ? 'unavaiable' : 'on'}" icon="${item.icon}"></ha-icon>
