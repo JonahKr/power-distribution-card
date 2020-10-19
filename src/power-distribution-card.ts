@@ -1,6 +1,6 @@
 import { LitElement, html, customElement, property, CSSResult, TemplateResult } from 'lit-element';
 
-import { HomeAssistant, fireEvent, LovelaceCard } from 'custom-card-helpers';
+import { HomeAssistant, fireEvent } from 'custom-card-helpers';
 
 import { version } from '../package.json';
 
@@ -122,14 +122,14 @@ export class PowerDistributionCard extends LitElement {
     });
 
     //Just to clarify. The formulas for this can differ widely, so i have decided to take the most suitable ones in my opinion
-    let ratio;
+    let ratio: number;
     if (!this._config.ratio?.entity) {
       //Ratio in Percent = Home Consumption / Home Production(Solar, Battery)*100
       ratio = production != 0 ? Math.min(Math.round((Math.abs(consumption) * 100) / production), 100) : 0;
     } else {
       ratio = this._val(this._config.ratio);
     }
-    let autarky;
+    let autarky: number;
     if (!this._config.autarky?.entity) {
       //Autarky in Percent = Home Production(Solar, Battery)*100 / Home Consumption
       autarky = consumption != 0 ? Math.min(Math.round((production * 100) / Math.abs(consumption)), 100) : 0;
@@ -152,6 +152,36 @@ export class PowerDistributionCard extends LitElement {
   /**
    * Render Support Functions
    */
+
+  private _render_card(): TemplateResult {
+    //render left
+    const left_panel: TemplateResult[] = [];
+    //render barchart / card
+    const center_panel: TemplateResult[] = [];
+    //render right
+    const right_panel: TemplateResult[] = [];
+
+    this._config.entities.forEach((item, index) => {
+      const value = this._val(item);
+      const _item = this._render_item(value, item, index);
+      switch (index) {
+        case 0: //Even
+          left_panel.push(_item);
+          break;
+        case 1:
+          right_panel.push(_item);
+          break;
+      }
+    });
+
+    return html`<ha-card .header=${this._config.title}>
+      <div class="card-content">
+        <div id="left-panel">${left_panel}</div>
+        <div id="mid-panel">${center_panel}</div>
+        <div id="right-panel">${right_panel}</div>
+      </div>
+    </ha-card>`;
+  }
 
   _render_bars(ratio: number, autarky: number): TemplateResult {
     return html`

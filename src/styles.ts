@@ -24,15 +24,14 @@ export const styles = css`
 
   .bar-container {
     grid-column: 2;
-    grid-row-start: 1;
-    grid-row-end: 4;
-
+    grid-row: 1/20;
     display: flex;
     flex-wrap: wrap;
     height: 100%;
   }
 
   .bar-container > div {
+    height: minmax();
     flex-basis: 50%;
     display: flex;
     flex-flow: column;
