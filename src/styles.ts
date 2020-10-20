@@ -5,78 +5,98 @@ export const styles = css`
     box-sizing: border-box;
   }
 
-  .grid-container {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr 1.5fr;
-    gap: 10px;
-  }
-
   p {
-    text-align: center;
     margin: 4px 0 4px 0;
-  }
 
-  #ratio,
-  #autarky {
-    margin: 0;
     text-align: center;
   }
 
-  .bar-container {
-    grid-column: 2;
-    grid-row: 1/20;
+  .card-content {
+    display: grid;
+    overflow: auto;
+
+    grid-template-columns: 1.5fr 1fr 1.5fr;
+    column-gap: 10px;
+  }
+
+  #mid-panel {
     display: flex;
-    flex-wrap: wrap;
+
     height: 100%;
+
+    align-items: center;
+    justify-content: center;
+    grid-column: 2;
+    flex-wrap: wrap;
   }
 
-  .bar-container > div {
-    height: minmax();
-    flex-basis: 50%;
+  #mid-panel > div {
     display: flex;
+    overflow: hidden;
+
+    width: 100%;
+    height: 80%;
+    max-height: 200px;
+
+    flex-basis: 50%;
     flex-flow: column;
-    vertical-align: middle;
   }
 
-  .bar-container > div > p {
+  #mid-panel > div > p {
     flex: 0 1 auto;
   }
 
   .bar-wrapper {
-    flex: 1 1 auto;
     position: relative;
+
     width: 50%;
+    height: 80%;
     margin: auto;
+
+    flex: 1 1 auto;
   }
 
   bar {
     position: absolute;
+    right: 0;
     bottom: 0;
     left: 0;
-    right: 0;
   }
 
-  .item_0 {
-    grid-column: 1;
+  item {
+    display: block;
+    overflow: hidden;
+
+    margin-bottom: 10px;
+
+    cursor: pointer;
   }
 
-  .item_1 {
-    grid-column: 3;
+  #right-panel > item > value {
+    float: left;
+  }
+
+  #right-panel > item > badge {
+    float: right;
   }
 
   badge {
+    float: left;
+
     width: 50%;
+    padding: 4px;
+
     border: 1px solid;
     border-color: var(--disabled-text-color);
     border-radius: 1em;
-    float: left;
-    padding: 4px;
   }
 
   icon > ha-icon {
     display: block;
+
     width: 24px;
     margin: 0 auto;
+
     color: var(--paper-item-icon-color);
   }
 
@@ -84,29 +104,18 @@ export const styles = css`
     float: right;
   }
 
-  .item_1 > value {
-    float: left;
-  }
-
-  .item_1 > badge {
-    float: right;
-  }
-
-  .pointer {
-    cursor: pointer;
-  }
-
   /**********
   Mobile View
   **********/
   @media only screen and (max-width: 450px) {
-    .grid-container {
+    .card-content {
       grid-template-columns: 1fr 1fr 1fr;
     }
     item > badge,
     item > value {
       display: block;
-      float: none;
+      float: none !important;
+
       width: 72px;
       margin: 0 auto;
     }
@@ -125,24 +134,27 @@ export const styles = css`
   }
 
   .blank {
-    height: 4px;
     width: 54px;
+    height: 4px;
+    margin: 8px auto 8px auto;
+
     opacity: 0.3;
     background-color: var(--secondary-text-color);
-    margin: 8px auto 8px auto;
   }
 
   .triangle-right {
     width: 0;
     height: 0;
+
     border-top: 8px solid transparent;
-    border-left: 17px solid;
     border-bottom: 8px solid transparent;
+    border-left: 17px solid;
   }
 
   .triangle-left {
     width: 0;
     height: 0;
+
     border-top: 8px solid transparent;
     border-right: 17px solid;
     border-bottom: 8px solid transparent;
@@ -152,13 +164,13 @@ export const styles = css`
     0%,
     66% {
       opacity: 0.3;
-      border-left-color: var(--secondary-text-color);
       border-right-color: var(--secondary-text-color);
+      border-left-color: var(--secondary-text-color);
     }
     33% {
       opacity: 0.8;
-      border-left-color: var(--secondary-text-color);
       border-right-color: var(--secondary-text-color);
+      border-left-color: var(--secondary-text-color);
     }
   }
 
@@ -166,8 +178,8 @@ export const styles = css`
   #arrow_2,
   #arrow_3 {
     opacity: 0.3;
-    border-left-color: var(--secondary-text-color);
     border-right-color: var(--secondary-text-color);
+    border-left-color: var(--secondary-text-color);
   }
 
   #arrow_1.animated {

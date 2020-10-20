@@ -30,7 +30,7 @@ export class PowerDistributionCard extends LitElement {
 
   @property() private _configFinished!: boolean;
 
-  private _config!: PDCConfigInternal;
+  @property() private _config!: PDCConfigInternal;
 
   public setConfig(config: PDCConfig): void {
     const _config: PDCConfigInternal = { entities: [] };
@@ -90,122 +90,68 @@ export class PowerDistributionCard extends LitElement {
     return styles;
   }
 
+  /**
+   * Retrieving the sensor value of hass for a Item
+   * @param item a Settings object
+   * @returns The current value from Homeassistant in Watts
+   */
   private _val(item: EntitySettings | BarSettings): number {
-    const inv = item.invert_value ? -1 : 1;
-    return item.entity ? Number(this.hass.states[item.entity].state) * inv : 0;
-  }
-
-  protected render(): TemplateResult {
-    const valueList: number[] = [];
-
-    let consumption = 0;
-    let production = 0;
-    this._config.entities.forEach((item, index) => {
-      let value = this._val(item);
-
-      switch (item.unit_of_measurement) {
-        case 'W':
-          break;
-        case 'kW':
-          value *= 1000;
-          break;
-      }
-      valueList[index] = value;
-      if (!item.calc_excluded) {
-        if (item.producer && valueList[index] > 0) {
-          production += value;
-        }
-        if (item.consumer && valueList[index] < 0) {
-          consumption -= value;
-        }
-      }
-    });
-
-    //Just to clarify. The formulas for this can differ widely, so i have decided to take the most suitable ones in my opinion
-    let ratio: number;
-    if (!this._config.ratio?.entity) {
-      //Ratio in Percent = Home Consumption / Home Production(Solar, Battery)*100
-      ratio = production != 0 ? Math.min(Math.round((Math.abs(consumption) * 100) / production), 100) : 0;
-    } else {
-      ratio = this._val(this._config.ratio);
-    }
-    let autarky: number;
-    if (!this._config.autarky?.entity) {
-      //Autarky in Percent = Home Production(Solar, Battery)*100 / Home Consumption
-      autarky = consumption != 0 ? Math.min(Math.round((production * 100) / Math.abs(consumption)), 100) : 0;
-    } else {
-      autarky = this._val(this._config.autarky);
-    }
-
-    return html`
-      <ha-card .header=${this._config.title}>
-        <div class="card-content">
-          <div class="grid-container">
-            ${this._render_bars(ratio, autarky)}
-            ${this._config.entities?.map((item, index) => html`${this._render_item(valueList[index], item, index)}`)}
-          </div>
-        </div>
-      </ha-card>
-    `;
+    let modifier = item.invert_value ? -1 : 1;
+    if ((item as EntitySettings).unit_of_measurement == 'kW') modifier *= 1000;
+    return item.entity ? Number(this.hass.states[item.entity].state) * modifier : 0;
   }
 
   /**
-   * Render Support Functions
+   * This is the main rendering function for this card
+   * @returns html for the power-distribution-card
    */
-
-  private _render_card(): TemplateResult {
-    //render left
+  protected render(): TemplateResult {
     const left_panel: TemplateResult[] = [];
-    //render barchart / card
-    const center_panel: TemplateResult[] = [];
-    //render right
+    const mid_panel: TemplateResult[] = [];
     const right_panel: TemplateResult[] = [];
+
+    let consumption = 0;
+    let production = 0;
 
     this._config.entities.forEach((item, index) => {
       const value = this._val(item);
+
+      if (!item.calc_excluded) {
+        if (item.producer && value > 0) {
+          production += value;
+        }
+        if (item.consumer && value < 0) {
+          consumption -= value;
+        }
+      }
+
       const _item = this._render_item(value, item, index);
-      switch (index) {
+      switch (index % 2) {
         case 0: //Even
           left_panel.push(_item);
           break;
-        case 1:
+        case 1: //Odd
           right_panel.push(_item);
           break;
       }
     });
 
+    //Populating the Center Panel
+    mid_panel.push(this._render_bars(consumption, production));
+
     return html`<ha-card .header=${this._config.title}>
       <div class="card-content">
         <div id="left-panel">${left_panel}</div>
-        <div id="mid-panel">${center_panel}</div>
+        <div id="mid-panel">${mid_panel}</div>
         <div id="right-panel">${right_panel}</div>
       </div>
     </ha-card>`;
   }
-
-  _render_bars(ratio: number, autarky: number): TemplateResult {
-    return html`
-      <div class="bar-container">
-        <div class="ratio-bar">
-          <p id="ratio-percentage">${ratio}%</p>
-          <div class="bar-wrapper">
-            <bar style="height:${ratio}%; background-color:${this._config.ratio?.bar_color || 'var(--dark-color)'};" />
-          </div>
-          <p id="ratio">${this._config.ratio?.name || 'ratio'}</p>
-        </div>
-        <div class="autarky-bar">
-          <p id="autarky-percentage">${autarky}%</p>
-          <div class="bar-wrapper">
-            <bar
-              style="height:${autarky}%; background-color:${this._config.autarky?.bar_color || 'var(--dark-color)'};"
-            />
-          </div>
-          <p id="autarky">${this._config.autarky?.name || 'autarky'}</p>
-        </div>
-      </div>
-    `;
-  }
-
+  /**
+   * Fires the Hass More Info Event
+   * @param ev Event Object
+   * @event hass-more-info
+   */
   private _moreInfo(ev: CustomEvent): void {
     fireEvent(this, 'hass-more-info', {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -213,11 +159,12 @@ export class PowerDistributionCard extends LitElement {
     });
   }
 
-  _render_item(value: number, item: EntitySettings, index: number): TemplateResult {
+  private _render_item(value: number, item: EntitySettings, index: number): TemplateResult {
     const state = item.invert_arrow ? value * -1 : value;
     value = item.display_abs ? Math.abs(value) : value;
+
     return html`
-      <item id="${item.name}" class="pointer item_${index % 2}" .entity=${item.entity} @click="${this._moreInfo}">
+      <item .entity=${item.entity} @click="${this._moreInfo}">
         <badge>
           <icon>
             <ha-icon data-state="${value == 0 ? 'unavaiable' : 'on'}" icon="${item.icon}"></ha-icon>
@@ -235,8 +182,11 @@ export class PowerDistributionCard extends LitElement {
     `;
   }
 
-  //This generates Animated Arrows depending on the state
-  _render_arrow(direction: ArrowStates): TemplateResult {
+  /**
+   * Render function for Generating Arrows (CSS Only)
+   * @param direction One of three Options: none, right, left
+   */
+  private _render_arrow(direction: ArrowStates): TemplateResult {
     const a = this._config.disable_animation;
     switch (direction) {
       case 'none': //Equals no Arrows at all
@@ -258,5 +208,46 @@ export class PowerDistributionCard extends LitElement {
           </div>
         `;
     }
+  }
+  /**
+   * Render Support Function Calculating and Generating the Autarky and Ratio Bars
+   * @param consumption the total home consumption
+   * @param production the total home production
+   * @returns html containing the bars
+   */
+  private _render_bars(consumption: number, production: number): TemplateResult {
+    //Just to clarify. The formulas for this can differ widely, so i have decided to take the most suitable ones in my opinion
+    let ratio: number;
+    if (!this._config.ratio?.entity) {
+      //Ratio in Percent = Home Consumption / Home Production(Solar, Battery)*100
+      ratio = production != 0 ? Math.min(Math.round((Math.abs(consumption) * 100) / production), 100) : 0;
+    } else {
+      ratio = this._val(this._config.ratio);
+    }
+    let autarky: number;
+    if (!this._config.autarky?.entity) {
+      //Autarky in Percent = Home Production(Solar, Battery)*100 / Home Consumption
+      autarky = consumption != 0 ? Math.min(Math.round((production * 100) / Math.abs(consumption)), 100) : 0;
+    } else {
+      autarky = this._val(this._config.autarky);
+    }
+    return html`
+      <div class="ratio-bar">
+        <p id="ratio-percentage">${ratio}%</p>
+        <div class="bar-wrapper">
+          <bar style="height:${ratio}%; background-color:${this._config.ratio?.bar_color || 'var(--dark-color)'};" />
+        </div>
+        <p id="ratio">${this._config.ratio?.name || 'ratio'}</p>
+      </div>
+      <div class="autarky-bar">
+        <p id="autarky-percentage">${autarky}%</p>
+        <div class="bar-wrapper">
+          <bar
+            style="height:${autarky}%; background-color:${this._config.autarky?.bar_color || 'var(--dark-color)'};"
+          />
+        </div>
+        <p id="autarky">${this._config.autarky?.name || 'autarky'}</p>
+      </div>
+    `;
   }
 }
