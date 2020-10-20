@@ -35,7 +35,7 @@ export const styles = css`
     overflow: hidden;
 
     width: 100%;
-    height: 80%;
+    height: 100%;
     max-height: 200px;
 
     flex-basis: 50%;
@@ -141,57 +141,48 @@ export const styles = css`
     opacity: 0.3;
     background-color: var(--secondary-text-color);
   }
-
-  .triangle-right {
-    width: 0;
-    height: 0;
-
-    border-top: 8px solid transparent;
-    border-bottom: 8px solid transparent;
-    border-left: 17px solid;
+  .arrows {
+    opacity: 0.8;
+    fill: var(--secondary-text-color);
   }
-
-  .triangle-left {
-    width: 0;
-    height: 0;
-
-    border-top: 8px solid transparent;
-    border-right: 17px solid;
-    border-bottom: 8px solid transparent;
+  #flash {
+    animation: flash 3s infinite steps(3);
   }
-
-  @keyframes flash_triangles {
+  @keyframes flash {
     0%,
     66% {
-      opacity: 0.3;
-      border-right-color: var(--secondary-text-color);
-      border-left-color: var(--secondary-text-color);
+      fill: var(--secondary-text-color);
     }
     33% {
-      opacity: 0.8;
-      border-right-color: var(--secondary-text-color);
-      border-left-color: var(--secondary-text-color);
+      fill: red;
     }
   }
 
-  #arrow_1,
-  #arrow_2,
-  #arrow_3 {
-    opacity: 0.3;
-    border-right-color: var(--secondary-text-color);
-    border-left-color: var(--secondary-text-color);
+  #slide-right {
+    animation: slide-right 3s linear infinite both;
   }
-
-  #arrow_1.animated {
-    animation: flash_triangles 3s infinite steps(1);
+  @keyframes slide-right {
+    0% {
+      -webkit-transform: translateX(0);
+      transform: translateX(0);
+    }
+    100% {
+      -webkit-transform: translateX(48px);
+      transform: translateX(48px);
+    }
   }
-
-  #arrow_2.animated {
-    animation: flash_triangles 3s infinite 1s steps(1);
+  #slide-left {
+    animation: slide-left 3s linear infinite both;
   }
-
-  #arrow_3.animated {
-    animation: flash_triangles 3s infinite 2s steps(1);
+  @keyframes slide-left {
+    0% {
+      -webkit-transform: translateX(48px);
+      transform: translateX(48px);
+    }
+    100% {
+      -webkit-transform: translateX(0px);
+      transform: translateX(0px);
+    }
   }
 `;
 

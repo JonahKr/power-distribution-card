@@ -37,7 +37,14 @@ export class PowerDistributionCard extends LitElement {
 
     //General Card Settings
     _config.title = config.title || undefined;
-    _config.disable_animation = config.disable_animation || false;
+    if (config.disable_animation) {
+      console.warn(
+        "DEPRACATION: The disable_animation setting is considered deprecated! Please use 'animation: none' instead",
+      );
+      _config.animation = 'none';
+    }
+
+    _config.animation = config.animation || 'none';
 
     //Warnings
     if (!config.entities) throw new Error('You need to set a entities attribute!');
@@ -187,26 +194,45 @@ export class PowerDistributionCard extends LitElement {
    * @param direction One of three Options: none, right, left
    */
   private _render_arrow(direction: ArrowStates): TemplateResult {
-    const a = this._config.disable_animation;
+    const a = this._config.animation;
     switch (direction) {
       case 'none': //Equals no Arrows at all
         return html` <div class="blank"></div> `;
-      case 'right': //Right Moving Arrows
+      default:
         return html`
           <div class="arrow">
-            <div class="triangle-right ${a ? null : 'animated'}" id="arrow_1"></div>
-            <div class="triangle-right ${a ? null : 'animated'}" id="arrow_2"></div>
-            <div class="triangle-right ${a ? null : 'animated'}" id="arrow_3"></div>
+            <svg width="57" height="18">
+              <defs>
+                <g id="arrow-right">
+                  <polygon class="arrows" points="0 0, 0 16, 16 8" />
+                </g>
+                <g id="arrow-left">
+                  <polygon class="arrows" points="16 0, 16 16, 0 8" />
+                </g>
+                <g id="slide">
+                  <use href="#arrow-${direction}" transform="translate(-36)" />
+                  <use href="#arrow-${direction}" transform="translate(-12)" />
+                  <use href="#arrow-${direction}" transform="translate(12)" />
+                  <use href="#arrow-${direction}" transform="translate(36)" />
+                </g>
+                <g id="flash">
+                  <use href="#arrow-${direction}" transform="translate(0)" style="animation-delay: 0s;" id="flash" />
+                  <use href="#arrow-${direction}" transform="translate(20)" style="animation-delay: 1s;" id="flash" />
+                  <use href="#arrow-${direction}" transform="translate(40)" style="animation-delay: 2s;" id="flash" />
+                </g>
+                <g id="none">
+                  <use href="#arrow-${direction}" transform="translate(0)" />
+                  <use href="#arrow-${direction}" transform="translate(20)" />
+                  <use href="#arrow-${direction}" transform="translate(40)" />
+                </g>
+              </defs>
+              <g>
+                <use href="#${a}" id="${a}-${direction}" />
+              </g>
+            </svg>
           </div>
         `;
-      case 'left': //Left moving Arrows
-        return html`
-          <div class="arrow">
-            <div class="triangle-left ${a ? null : 'animated'}" id="arrow_3"></div>
-            <div class="triangle-left ${a ? null : 'animated'}" id="arrow_2"></div>
-            <div class="triangle-left ${a ? null : 'animated'}" id="arrow_1"></div>
-          </div>
-        `;
+        break;
     }
   }
   /**

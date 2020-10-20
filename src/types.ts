@@ -3,12 +3,13 @@ import { PresetType } from './presets';
 export type PDCConfig = {
   title?: string;
   disable_animation?: boolean;
+  animation?: 'none' | 'flash' | 'slide';
   entities: { [key: string]: EntitySettings | BarSettings | string }[];
 };
 
 export type PDCConfigInternal = {
   title?: string;
-  disable_animation?: boolean;
+  animation?: 'none' | 'flash' | 'slide';
   entities: EntitySettings[];
 
   autarky?: BarSettings;
