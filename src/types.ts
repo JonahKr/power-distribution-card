@@ -19,6 +19,7 @@ export type PDCConfigInternal = {
 export interface EntitySettings {
   calc_excluded?: boolean;
   consumer?: boolean;
+  decimals?: number;
   display_abs?: boolean;
   entity?: string;
   icon?: string;

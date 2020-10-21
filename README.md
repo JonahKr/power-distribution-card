@@ -12,14 +12,14 @@
 <br/>
 <h1 align="center">A Lovelace Card for visualizing power distributions.</h1>
 <p align="center">
-<img src="https://user-images.githubusercontent.com/38377070/95488122-730de680-0995-11eb-857a-01ac83c18dff.PNG"/>
+<img src="https://user-images.githubusercontent.com/38377070/96733911-435dd600-13ba-11eb-8491-75e88490e417.gif"/>
 </p>
 
 <br/>
 
 <div id="breaking_changes">
   <h2>Breaking Changes!</h2>
-  If your Upgrading from 1.4 to 1.5: 
+  If your Upgrading from 1.4 to 1.5 / 1.6: 
   - All entities have been moved to a `entities` list
 
 ```yaml
@@ -37,6 +37,12 @@ entities:
       entity: entityxyz
       invert_value: true
 ```
+
+  **Deprecated**: 
+  
+  `disable_animation` has been deprecated for `animation: none`.  
+  Support will be dropped with 2.0
+  
 <br/>
 <hr>
 </div>
@@ -196,12 +202,20 @@ If you have Sensors for **autarky** or **ratio** aswell, you can just add them t
   - autarky: sensor.sunbessy_autarky
   - ratio: sensor.e3dc_ratio
 ```
+<br/>
 
-You can disable the arrow animations in your card aswell with the **disable_animation** keyoword which can either be *true* or *false*.  
+<p align="center">
+<img src="https://user-images.githubusercontent.com/38377070/96745908-e9afd880-13c6-11eb-9772-4bce4a3ad29c.gif"/>
+</p>
+
+
+
+
+You can change the animations in your card aswell with the **animation** keyoword which can either be *none* , *flash* or *slide*.  
 Furthermore you can add a **title** to the card by just:
 ```yaml
 title: My Power Card
-disable_animation: true
+animation: slide
 entities:
   - ...
 ```
@@ -233,13 +247,14 @@ There are alot of settings you can customize your sensors with:
 | Setting               | type          | example          | description  |
 | --------------------- |:-------------:|:----------------:| :------------|
 | `calc_excluded`       | boolean       | true             | If the Item should be excluded from ratio/autarky calculations |
+| `decimals`            | number        | 0, 2             | The Number of Decimals shown. (default: 2) |
 | `display_abs`         | boolean       | false            | The displayed values are Absolute normally. You can change that here. |
 | `entity`              | string        | sensor.e3dc_grid | You can specify the entity_id here aswell. |
 | `icon`                | string        | mdi:dishwasher   | Why not change the displayed Icon to any [MDI](https://cdn.materialdesignicons.com/5.4.55/) one? |
 | `invert_arrow`        | bool          | true             | This will change the *arrows* direction to the oposite one. |
 | `invert_value`        | bool          | false            | This will invert the value recieved from HASS. This affects calculations aswell! |
 | `name`                | string        | dishwasher       | Feel free to change the displayed name of the element. |
-| `unit_of_display`     | string        | *W* , *kW*       | The Unit the value is displayed in (standard: W) |
+| `unit_of_display`     | string        | *W* , *kW* , *adaptive*      | The Unit the value is displayed in (default: W). Adaptive will show kW for values >= 1kW |
 | `unit_of_measurement` | string        | *W* , *kW*       | The Unit the value is coming from the Sensor. **This should be detected automatically** |
 <p>
 

@@ -14,7 +14,7 @@ console.info(
   `font-weight: 500; color: #03a9f4; background: white;`,
 );
 
-@customElement('power-distribution')
+@customElement('power-distribution-card')
 export class PowerDistributionCard extends LitElement {
   //TODO Write Card Editor
   /*
@@ -32,19 +32,23 @@ export class PowerDistributionCard extends LitElement {
 
   @property() private _config!: PDCConfigInternal;
 
+  /**
+   * Configuring all the passed Settings and Changing it to a more usefull Internal one.
+   * @param config The Config Object configured via YAML
+   */
   public setConfig(config: PDCConfig): void {
     const _config: PDCConfigInternal = { entities: [] };
 
     //General Card Settings
     _config.title = config.title || undefined;
+
+    _config.animation = config.animation || 'flash';
     if (config.disable_animation) {
       console.warn(
         "DEPRACATION: The disable_animation setting is considered deprecated! Please use 'animation: none' instead",
       );
       _config.animation = 'none';
     }
-
-    _config.animation = config.animation || 'none';
 
     //Warnings
     if (!config.entities) throw new Error('You need to set a entities attribute!');
@@ -67,6 +71,8 @@ export class PowerDistributionCard extends LitElement {
           const _item: EntitySettings = Object.assign({}, DefaultItem, PresetObject[preset], <EntitySettings>setting);
 
           _item.preset = <PresetType>preset;
+
+          !_item.decimals && _item.decimals != 0 ? (_item.decimals = 2) : undefined;
 
           _config.entities.push(_item);
         } else {
@@ -166,9 +172,39 @@ export class PowerDistributionCard extends LitElement {
     });
   }
 
+  /**
+   * Creating a Item Element
+   * @param value The Value of the Sensor
+   * @param item The EntitySettings Object of the Item
+   * @param index The index of the Item. This is needed for the Arrow Directions.
+   * @returns Html for a single Item
+   */
   private _render_item(value: number, item: EntitySettings, index: number): TemplateResult {
     const state = item.invert_arrow ? value * -1 : value;
+
+    //Toggle Absolute Values
     value = item.display_abs ? Math.abs(value) : value;
+
+    //Unit-Of-Display
+    let unit_of_display = 'W';
+    switch (item.unit_of_display) {
+      case 'kW':
+        value /= 1000;
+        unit_of_display = 'kW';
+        break;
+      case 'adaptive':
+        if (value > 999) {
+          value = value / 1000;
+          unit_of_display = 'kW';
+        } else {
+          unit_of_display = 'W';
+        }
+        break;
+    }
+
+    //Decimal Precision
+    const decFakTen = 10 ** (item.decimals || item.decimals == 0 ? item.decimals : 2);
+    value = Math.round(value * decFakTen) / decFakTen;
 
     return html`
       <item .entity=${item.entity} @click="${this._moreInfo}">
@@ -179,7 +215,7 @@ export class PowerDistributionCard extends LitElement {
           <p class="subtitle">${item.name}</p>
         </badge>
         <value>
-          <p>${item.unit_of_display === 'kW' ? value / 1000 : value} ${item.unit_of_display}</p>
+          <p>${value} ${unit_of_display}</p>
           ${this._render_arrow(
             //This takes the side the item is on (index even = left) into account for the arrows
             state == 0 ? 'none' : index % 2 == 0 ? (state > 0 ? 'right' : 'left') : state > 0 ? 'left' : 'right',
@@ -193,6 +229,7 @@ export class PowerDistributionCard extends LitElement {
   /**
    * Render function for Generating Arrows (CSS Only)
    * @param direction One of three Options: none, right, left
+   * @param index To detect which side the item is on and adapt the direction accordingly
    */
   private _render_arrow(direction: ArrowStates, index: number): TemplateResult {
     const a = this._config.animation;
