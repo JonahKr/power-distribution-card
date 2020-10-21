@@ -67,3 +67,9 @@ export const PresetObject: { [key: string]: EntitySettings } = {
     producer: true,
   },
 };
+
+export const DefaultItem: EntitySettings = {
+  display_abs: true,
+  name: '',
+  unit_of_display: 'W',
+};

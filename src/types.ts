@@ -3,22 +3,23 @@ import { PresetType } from './presets';
 export type PDCConfig = {
   title?: string;
   disable_animation?: boolean;
+  animation?: 'none' | 'flash' | 'slide';
   entities: { [key: string]: EntitySettings | BarSettings | string }[];
 };
 
 export type PDCConfigInternal = {
   title?: string;
-  disable_animation?: boolean;
+  animation?: 'none' | 'flash' | 'slide';
   entities: EntitySettings[];
 
   autarky?: BarSettings;
   ratio?: BarSettings;
 };
 
-//TODO: enable top level entity settings
 export interface EntitySettings {
   calc_excluded?: boolean;
   consumer?: boolean;
+  decimals?: number;
   display_abs?: boolean;
   entity?: string;
   icon?: string;
