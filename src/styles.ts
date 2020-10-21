@@ -121,44 +121,46 @@ export const styles = css`
     }
 
     .arrow {
-      width: max-content;
-      margin: 0 auto;
+      margin: 0px 8px;
     }
   }
 
   /**************
   ARROW ANIMATION
   **************/
-  .arrow > div {
-    display: inline-block;
-  }
 
   .blank {
     width: 54px;
     height: 4px;
     margin: 8px auto 8px auto;
-
     opacity: 0.3;
     background-color: var(--secondary-text-color);
   }
-  .arrows {
-    opacity: 0.8;
+
+  .arrow-color {
     fill: var(--secondary-text-color);
+    fill-opacity: 0.8;
   }
-  #flash {
-    animation: flash 3s infinite steps(3);
+
+  #a-flash {
+    animation: flash 3s infinite steps(1);
+    fill: var(--secondary-text-color);
+    fill-opacity: 0.3;
   }
+
   @keyframes flash {
     0%,
     66% {
+      fill-opacity: 0.3;
       fill: var(--secondary-text-color);
     }
     33% {
-      fill: red;
+      fill-opacity: 0.8;
+      fill: var(--secondary-text-color);
     }
   }
 
-  #slide-right {
+  #a-slide-right {
     animation: slide-right 3s linear infinite both;
   }
   @keyframes slide-right {
@@ -171,7 +173,7 @@ export const styles = css`
       transform: translateX(48px);
     }
   }
-  #slide-left {
+  #a-slide-left {
     animation: slide-left 3s linear infinite both;
   }
   @keyframes slide-left {

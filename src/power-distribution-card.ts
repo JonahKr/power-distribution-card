@@ -183,6 +183,7 @@ export class PowerDistributionCard extends LitElement {
           ${this._render_arrow(
             //This takes the side the item is on (index even = left) into account for the arrows
             state == 0 ? 'none' : index % 2 == 0 ? (state > 0 ? 'right' : 'left') : state > 0 ? 'left' : 'right',
+            index,
           )}
         <value
       </item>
@@ -193,46 +194,46 @@ export class PowerDistributionCard extends LitElement {
    * Render function for Generating Arrows (CSS Only)
    * @param direction One of three Options: none, right, left
    */
-  private _render_arrow(direction: ArrowStates): TemplateResult {
+  private _render_arrow(direction: ArrowStates, index: number): TemplateResult {
     const a = this._config.animation;
-    switch (direction) {
-      case 'none': //Equals no Arrows at all
-        return html` <div class="blank"></div> `;
-      default:
-        return html`
-          <div class="arrow">
-            <svg width="57" height="18">
-              <defs>
-                <g id="arrow-right">
-                  <polygon class="arrows" points="0 0, 0 16, 16 8" />
-                </g>
-                <g id="arrow-left">
-                  <polygon class="arrows" points="16 0, 16 16, 0 8" />
-                </g>
-                <g id="slide">
-                  <use href="#arrow-${direction}" transform="translate(-36)" />
-                  <use href="#arrow-${direction}" transform="translate(-12)" />
-                  <use href="#arrow-${direction}" transform="translate(12)" />
-                  <use href="#arrow-${direction}" transform="translate(36)" />
-                </g>
-                <g id="flash">
-                  <use href="#arrow-${direction}" transform="translate(0)" style="animation-delay: 0s;" id="flash" />
-                  <use href="#arrow-${direction}" transform="translate(20)" style="animation-delay: 1s;" id="flash" />
-                  <use href="#arrow-${direction}" transform="translate(40)" style="animation-delay: 2s;" id="flash" />
-                </g>
-                <g id="none">
-                  <use href="#arrow-${direction}" transform="translate(0)" />
-                  <use href="#arrow-${direction}" transform="translate(20)" />
-                  <use href="#arrow-${direction}" transform="translate(40)" />
-                </g>
-              </defs>
-              <g>
-                <use href="#${a}" id="${a}-${direction}" />
-              </g>
-            </svg>
-          </div>
-        `;
-        break;
+    if (direction == 'none') {
+      return html` <div class="blank"></div> `;
+    } else {
+      return html`
+        <svg width="57" height="18" class="arrow">
+          <defs>
+            <polygon id="arrow-right" points="0 0, 0 16, 16 8" />
+            <polygon id="arrow-left" points="16 0, 16 16, 0 8" />
+            <g id="slide-${index}" class="arrow-color">
+              <use href="#arrow-${direction}" x="-36" />
+              <use href="#arrow-${direction}" x="-12" />
+              <use href="#arrow-${direction}" x="12" />
+              <use href="#arrow-${direction}" x="36" />
+            </g>
+            <g id="flash-${index}">
+              <use
+                href="#arrow-${direction}"
+                x="0"
+                style="animation-delay: ${direction == 'right' ? 0 : 2}s;"
+                id="a-flash"
+              />
+              <use href="#arrow-${direction}" x="20" style="animation-delay: 1s;" id="a-flash" />
+              <use
+                href="#arrow-${direction}"
+                x="40"
+                style="animation-delay: ${direction == 'right' ? 2 : 0}s;"
+                id="a-flash"
+              />
+            </g>
+            <g id="none-${index}" class="arrow-color">
+              <use href="#arrow-${direction}" x="0" />
+              <use href="#arrow-${direction}" x="20" />
+              <use href="#arrow-${direction}" x="40" />
+            </g>
+          </defs>
+          <use href="#${a}-${index}" id="a-${a}-${direction}" />
+        </svg>
+      `;
     }
   }
   /**
