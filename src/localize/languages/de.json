@@ -5,8 +5,13 @@
     "invalid_configuration": "Ungültige Konfiguration",
     "show_warning": "Warnung"
   },
-  "action": {
-    "edit": "Bearbeiten",
-    "save": "Speichern"
+  "editor": {
+    "actions": {
+      "edit": "Bearbeiten",
+      "remove": "Entfernen",
+      "save": "Speichern"
+    },
+    "title": "Titel",
+    "optional": "Optional"
   }
 }

@@ -14,9 +14,6 @@ const languages = {
  * @param replace String to replace with
  */
 export function localize(string: string, search = '', replace = ''): string {
-  const section = string.split('.')[0];
-  const key = string.split('.')[1];
-
   const lang = (localStorage.getItem('selectedLanguage') || navigator.language.split('-')[0] || 'en')
     .replace(/['"]+/g, '')
     .replace('-', '_');
@@ -24,12 +21,13 @@ export function localize(string: string, search = '', replace = ''): string {
   let translated: string;
 
   try {
-    translated = languages[lang][section][key];
+    translated = string.split('.').reduce((o, i) => o[i], languages[lang]);
   } catch (e) {
-    translated = languages['en'][section][key];
+    translated = (string.split('.').reduce((o, i) => o[i], languages['en']) as unknown) as string;
   }
 
-  if (translated === undefined) translated = languages['en'][section][key];
+  if (translated === undefined)
+    translated = (string.split('.').reduce((o, i) => o[i], languages['en']) as unknown) as string;
 
   if (search !== '' && replace !== '') {
     translated = translated.replace(search, replace);
