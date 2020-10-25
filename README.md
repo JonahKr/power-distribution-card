@@ -246,6 +246,7 @@ There are alot of settings you can customize your sensors with:
 
 | Setting               | type          | example          | description  |
 | --------------------- |:-------------:|:----------------:| :------------|
+| `attribute`           | string        | deferredWatts    | A Sensor can have multiple attributes. If one of them is your desired value to display, add it here. |
 | `calc_excluded`       | boolean       | true             | If the Item should be excluded from ratio/autarky calculations |
 | `decimals`            | number        | 0, 2             | The Number of Decimals shown. (default: 2) |
 | `display_abs`         | boolean       | false            | The displayed values are Absolute normally. You can change that here. |
@@ -316,6 +317,9 @@ So basically these bar-graphs are nice indicators to show you:
 
 ### Is the battery able to show its SOC?
 Currently not. Its planned.
+
+### kW and kWh is not the Same!
+I know... In this case usability is more important and the user has to decide if he is ok with that.
 
 <br/>
 </div>

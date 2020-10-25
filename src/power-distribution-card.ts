@@ -88,7 +88,7 @@ export class PowerDistributionCard extends LitElement {
 
     this._config.entities.forEach((item, index) => {
       if (!item.entity) return;
-      //unit-of-measurement Configuration
+      //unit-of-measurement Auto Configuration
       const hass_uom = this.hass.states[item.entity].attributes.unit_of_measurement;
       !item.unit_of_measurement ? (this._config.entities[index].unit_of_measurement = hass_uom || 'W') : undefined;
     });
@@ -110,8 +110,14 @@ export class PowerDistributionCard extends LitElement {
    */
   private _val(item: EntitySettings | BarSettings): number {
     let modifier = item.invert_value ? -1 : 1;
-    if ((item as EntitySettings).unit_of_measurement == 'kW') modifier *= 1000;
-    return item.entity ? Number(this.hass.states[item.entity].state) * modifier : 0;
+    if ((item as EntitySettings).unit_of_measurement == ('kW' || 'kWh')) modifier *= 1000;
+    const attr = (item as EntitySettings).attribute || null;
+    const num = item.entity
+      ? attr
+        ? Number(this.hass.states[item.entity].attributes[attr])
+        : Number(this.hass.states[item.entity].state)
+      : 0;
+    return item.entity ? num * modifier : 0;
   }
 
   /**
@@ -189,8 +195,9 @@ export class PowerDistributionCard extends LitElement {
     let unit_of_display = 'W';
     switch (item.unit_of_display) {
       case 'kW':
+      case 'kWh':
         value /= 1000;
-        unit_of_display = 'kW';
+        unit_of_display = item.unit_of_display;
         break;
       case 'adaptive':
         if (value > 999) {
