@@ -1,0 +1,12 @@
+{
+  "common": {
+    "version": "Version",
+    "description": "A Lovelace Card for visualizing power distributions.",
+    "invalid_configuration": "Invalid configuration",
+    "show_warning": "Show Warning"
+  },
+  "action": {
+    "edit": "Edit",
+    "save": "Save"
+  }
+}
