@@ -1,20 +1,13 @@
+import { LovelaceCardConfig } from 'custom-card-helpers';
 import { PresetType } from './presets';
 
-export type PDCConfig = {
+export interface PDCConfig extends LovelaceCardConfig {
   title?: string;
   disable_animation?: boolean;
   animation?: 'none' | 'flash' | 'slide';
-  entities: { [key: string]: EntitySettings | BarSettings | string }[];
-};
-
-export type PDCConfigInternal = {
-  title?: string;
-  animation?: 'none' | 'flash' | 'slide';
-  entities: EntitySettings[];
-
-  autarky?: BarSettings;
-  ratio?: BarSettings;
-};
+  entities: { [key: string]: EntitySettings | string }[];
+  center?: 'none' | LovelaceCardConfig | { [key: string]: BarSettings }[];
+}
 
 export interface EntitySettings {
   attribute?: string;
@@ -26,7 +19,7 @@ export interface EntitySettings {
   icon?: string;
   invert_value?: boolean;
   invert_arrow?: boolean;
-  name: string | undefined;
+  name?: string | undefined;
   preset?: PresetType;
   producer?: boolean;
   unit_of_display?: string;

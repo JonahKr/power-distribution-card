@@ -19,7 +19,7 @@ export const styles = css`
     column-gap: 10px;
   }
 
-  #mid-panel {
+  #center-panel {
     display: flex;
 
     height: 100%;
@@ -30,7 +30,7 @@ export const styles = css`
     flex-wrap: wrap;
   }
 
-  #mid-panel > div {
+  #center-panel > div {
     display: flex;
     overflow: hidden;
 
@@ -42,7 +42,7 @@ export const styles = css`
     flex-flow: column;
   }
 
-  #mid-panel > div > p {
+  #center-panel > div > p {
     flex: 0 1 auto;
   }
 

@@ -1,4 +1,4 @@
-import { EntitySettings } from './types';
+import { EntitySettings, PDCConfig } from './types';
 
 export type PresetType = typeof PresetList[number];
 
@@ -69,7 +69,15 @@ export const PresetObject: { [key: string]: EntitySettings } = {
 };
 
 export const DefaultItem: EntitySettings = {
+  decimals: 2,
   display_abs: true,
   name: '',
   unit_of_display: 'W',
+};
+
+export const DefaultConfig: PDCConfig = {
+  type: '',
+  title: undefined,
+  animation: 'flash',
+  entities: [],
 };
