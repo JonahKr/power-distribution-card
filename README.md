@@ -191,7 +191,9 @@ The presets *consumer* and *producer* enable to add any custom device into your 
 </div>
 <br/>
 <div id="simple">
-## Simple Configuration
+
+## Simple Configuration 🛠️
+
 The easiest way to get your Card up and running, is by defining the entities for the presets directly.
 Example:
 ```yaml
@@ -240,7 +242,7 @@ entities:
 
 For customizing the Center Panel you basically have 3 Options:
 
-### None
+### None 🕳️
 
 the *void* 
 ```yaml
@@ -249,7 +251,7 @@ center: none
 
 <br/>
 
-### Bars
+### Bars 📊
 
 To modify the **autarky** or **ratio** bars, you have these settings:
 | Setting          | type          | example           | description  |
@@ -264,17 +266,16 @@ To modify the **autarky** or **ratio** bars, you have these settings:
 Example for bar configuration:
 ```yaml
 type: 'custom:power-distribution'
-entities:
-  - solar: sensor.rooftop_pv
+center:
   - autarky:
+      entity: sensor.e3dc_autarky
       bar_color: blue
       name: Autarki
-  - ratio:
-      entity: sensor.e3dc_ratio
+  - ratio: sensor.e3dc_ratio
 ```
 <br/>
 
-### Cards
+### Cards 🃏
 
 You can fill the center panel with any card you want. Be aware though that the **width is limited** which limits the amount of fitting cards.
 
@@ -294,7 +295,7 @@ center:
 
 <div id="advanced">
 
-## Advanced Configuration
+## Advanced Configuration ⚙️
 
 You really want to make this card your own? Here you go! 
 
@@ -351,7 +352,7 @@ entities:
 <hr>
 
 <div id="faq">
-<h1> FAQs</h1>
+<h1> FAQs ❓</h1>
 
 ### What the heck are these autarky and ratio calculating?
 So basically these bar-graphs are nice indicators to show you:
