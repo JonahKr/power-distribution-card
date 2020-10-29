@@ -20,7 +20,8 @@
 <div id="breaking_changes">
   <h2>Breaking Changes!</h2>
 
-  From 1.7 on : All Bar Settings are now sorted under the center item.
+  From 1.7 on :
+  - All Bar Settings are now sorted under the center item.
 ```yaml
 Old:
 entities:
@@ -35,27 +36,6 @@ center:
   - ratio:
       bar_color: red
 ```
-
-  If your Upgrading from 1.4 to 1.5 / 1.6 / 1.7: 
-  - All entities have been moved to a `entities` list
-
-```yaml
-Old:
-solar: entityxyz
-grid:
-  entity: entityxyz
-  invert_value: true
-
-
-New:
-entities:
-  - solar: entityxyz
-  - grid:
-      entity: entityxyz
-      invert_value: true
-```
-
-
 
 
   **Deprecated**: 
@@ -75,10 +55,10 @@ entities:
     </li>
     <li>
       <h3><a href="#configuration">Configuration</a></h3>
-      <h4><a href="presets">Presets</a></h4>
-      <h4><a href="simple">Simple Configuration</a></h4>
-      <h4><a href="center">Center Panel</a></h4>
-      <h4><a href="advanced">Advanced Configuration</a></h4>
+      <h4><a href="#presets">Presets</a></h4>
+      <h4><a href="#simple">Simple Configuration</a></h4>
+      <h4><a href="#center">Center Panel</a></h4>
+      <h4><a href="#advanced">Advanced Configuration</a></h4>
     </li>
     <li>
       <h3><a href="#faq">FAQs</a></h2>
