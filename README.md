@@ -19,24 +19,24 @@
 
 <div id="breaking_changes">
   <h2>Breaking Changes!</h2>
-  If your Upgrading from 1.4 to 1.5 / 1.6: 
-  - All entities have been moved to a `entities` list
 
+  From 1.7 on :
+  - All Bar Settings are now sorted under the center item.
 ```yaml
 Old:
-solar: entityxyz
-grid:
-  entity: entityxyz
-  invert_value: true
+entities:
+  - autarky: sensor.xyz
+  - ratio:
+      bar_color: red
 
 
 New:
-entities:
-  - solar: entityxyz
-  - grid:
-      entity: entityxyz
-      invert_value: true
+center:
+  - autarky: sensor.xyz
+  - ratio:
+      bar_color: red
 ```
+
 
   **Deprecated**: 
   
@@ -55,6 +55,10 @@ entities:
     </li>
     <li>
       <h3><a href="#configuration">Configuration</a></h3>
+      <h4><a href="#presets">Presets</a></h4>
+      <h4><a href="#simple">Simple Configuration</a></h4>
+      <h4><a href="#center">Center Panel</a></h4>
+      <h4><a href="#advanced">Advanced Configuration</a></h4>
     </li>
     <li>
       <h3><a href="#faq">FAQs</a></h2>
@@ -100,6 +104,7 @@ entities:
 <div id="configuration">
 <h1> Configuration</h1>
 
+<div id="presets">
 <h3>Presets</h3>
 
 Every Sensor you want to add has to use one of the Presets. You can add as many of these as you want.
@@ -183,10 +188,12 @@ Every Sensor you want to add has to use one of the Presets. You can add as many 
 </table>
 
 The presets *consumer* and *producer* enable to add any custom device into your Card with just a bit of tweaking.
-
+</div>
 <br/>
+<div id="simple">
 
-## Simple Configuration
+## Simple Configuration 🛠️
+
 The easiest way to get your Card up and running, is by defining the entities for the presets directly.
 Example:
 ```yaml
@@ -226,10 +233,69 @@ entities:
 ! Please Check for every Sensor: positive sensor values = production, negative values = consumption
 ! If this is the other way around in your Case, add the `invert_value` setting (Advanced Configuration)!
 ```
+</div>
+<br/><br/>
+
+<div id="center">
+
+## Center Panel
+
+For customizing the Center Panel you basically have 3 Options:
+
+### None 🕳️
+
+the *void* 
+```yaml
+center: none
+```
 
 <br/>
 
-## Advanced Configuration
+### Bars 📊
+
+To modify the **autarky** or **ratio** bars, you have these settings:
+| Setting          | type          | example           | description  |
+| ---------------- |:-------------:|:-----------------:| :------------|
+| `bar_color`      | string        | red, #C1C1C1      |You can pass any string that CSS will accept as a color. |
+| `entity`         | string        | sensor.ln_autarky | You can specify the entity_id here aswell. |
+| `invert_value`   | bool          | false             | This will invert the value recieved from HASS. This affects calculations aswell! |
+| `name`           | string        | Eigenstrom        | Feel free to change the displayed name of the element. |
+
+<p>
+
+Example for bar configuration:
+```yaml
+type: 'custom:power-distribution'
+center:
+  - autarky:
+      entity: sensor.e3dc_autarky
+      bar_color: blue
+      name: Autarki
+  - ratio: sensor.e3dc_ratio
+```
+<br/>
+
+### Cards 🃏
+
+You can fill the center panel with any card you want. Be aware though that the **width is limited** which limits the amount of fitting cards.
+
+<p align="center">
+<img width="600px" src="https://user-images.githubusercontent.com/38377070/97620471-e8fbef80-1a21-11eb-90d3-1bcbab57da2c.PNG"/>
+</p>
+
+For example you could insert a glance card:
+```yaml
+center:
+  type: glance
+  entities:
+    - sun.sun
+```
+</div>
+<br/><br/>
+
+<div id="advanced">
+
+## Advanced Configuration ⚙️
 
 You really want to make this card your own? Here you go! 
 
@@ -278,37 +344,15 @@ entities:
       name: Tesla
       unit_of_display: kW
 ```
-
-<br/><br/>
-
-To modify the **autarky** or **ratio** bars, you have these settings:
-| Setting          | type          | example           | description  |
-| ---------------- |:-------------:|:-----------------:| :------------|
-| `bar_color`      | string        | red, #C1C1C1      |You can pass any string that CSS will accept as a color. |
-| `entity`         | string        | sensor.ln_autarky | You can specify the entity_id here aswell. |
-| `invert_value`   | bool          | false             | This will invert the value recieved from HASS. This affects calculations aswell! |
-| `name`           | string        | Eigenstrom        | Feel free to change the displayed name of the element. |
-
-<p>
-
-Example for bar configuration:
-```yaml
-type: 'custom:power-distribution'
-entities:
-  - solar: sensor.rooftop_pv
-  - autarky:
-      bar_color: blue
-      name: Autarki
-  - ratio:
-      entity: sensor.e3dc_ratio
-```
+</div>
+<br/>
 <br/>
 </div> 
 
 <hr>
 
 <div id="faq">
-<h1> FAQs</h1>
+<h1> FAQs ❓</h1>
 
 ### What the heck are these autarky and ratio calculating?
 So basically these bar-graphs are nice indicators to show you:

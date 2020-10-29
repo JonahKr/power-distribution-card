@@ -1,0 +1,17 @@
+{
+  "common": {
+    "version": "Version",
+    "description": "Eine Karte zur Visualizierung von Stromverteilungen",
+    "invalid_configuration": "Ungültige Konfiguration",
+    "show_warning": "Warnung"
+  },
+  "editor": {
+    "actions": {
+      "edit": "Bearbeiten",
+      "remove": "Entfernen",
+      "save": "Speichern"
+    },
+    "title": "Titel",
+    "optional": "Optional"
+  }
+}
