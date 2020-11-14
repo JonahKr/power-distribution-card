@@ -11,7 +11,10 @@
       "remove": "Entfernen",
       "save": "Speichern"
     },
+    "optional": "Optional",
+    "required": "Erforderlich",
     "title": "Titel",
-    "optional": "Optional"
+    "animation": "Animation",
+    "entities": "Entities"
   }
 }

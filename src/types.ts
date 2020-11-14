@@ -3,7 +3,6 @@ import { PresetType } from './presets';
 
 export interface PDCConfig extends LovelaceCardConfig {
   title?: string;
-  disable_animation?: boolean;
   animation?: 'none' | 'flash' | 'slide';
   entities: { [key: string]: EntitySettings | string }[];
   center?: 'none' | LovelaceCardConfig | { [key: string]: BarSettings }[];

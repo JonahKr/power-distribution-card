@@ -6,13 +6,16 @@
     "show_warning": "Show Warning"
   },
   "editor": {
-    "action": {
+    "actions": {
       "edit": "Edit",
       "remove": "Remove",
       "save": "Save"
     },
+    "optional": "Optional",
+    "required": "Required",
     "title": "Titel",
-    "optional": "Optional"
+    "animation": "Animation",
+    "entities": "Entities"
   }
   
 }

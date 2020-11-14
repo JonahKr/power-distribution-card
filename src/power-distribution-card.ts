@@ -1,4 +1,4 @@
-import { LitElement, html, customElement, property, CSSResult, TemplateResult } from 'lit-element';
+import { LitElement, html, customElement, property, CSSResult, TemplateResult, internalProperty } from 'lit-element';
 
 import {
   HomeAssistant,
@@ -11,17 +11,19 @@ import {
 
 import { version } from '../package.json';
 
+import './editor';
+
 import { PDCConfig, EntitySettings, ArrowStates, BarSettings } from './types';
 import { DefaultItem, DefaultConfig, PresetList, PresetObject, PresetType } from './presets';
 import styles from './styles';
 
 console.info(
-  `%c POWER-DISTRIBUTION-CARD %c ${version}`,
+  `%c POWER-DISTRIBUTION-CARD %c ${version}_b1`,
   `font-weight: 500; color: white; background: #03a9f4;`,
   `font-weight: 500; color: #03a9f4; background: white;`,
 );
 
-@customElement('power-distribution-card')
+@customElement('power-distribution')
 export class PowerDistributionCard extends LitElement {
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
     return document.createElement('power-distribution-card-editor') as LovelaceCardEditor;
@@ -33,11 +35,11 @@ export class PowerDistributionCard extends LitElement {
 
   @property() public hass!: HomeAssistant;
 
-  @property() private _configFinished!: boolean;
+  @internalProperty() private _configFinished!: boolean;
 
   @property() private _config!: PDCConfig;
 
-  private _entities: EntitySettings[] = [];
+  @internalProperty() private _entities: EntitySettings[] = [];
   @property() private _card!: LovelaceCard;
 
   /**
