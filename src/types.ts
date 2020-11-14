@@ -4,7 +4,7 @@ import { PresetType } from './presets';
 export interface PDCConfig extends LovelaceCardConfig {
   title?: string;
   animation?: 'none' | 'flash' | 'slide';
-  entities: { [key: string]: EntitySettings | string }[];
+  entities: EntitySettings[];
   center?: 'none' | LovelaceCardConfig | { [key: string]: BarSettings }[];
 }
 

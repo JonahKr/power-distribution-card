@@ -49,37 +49,25 @@ export class PowerDistributionCard extends LitElement {
   public async setConfig(config: PDCConfig): Promise<void> {
     //General Card Settings
     if (config.disable_animation) {
-      console.warn(
-        "DEPRACATION: The disable_animation setting is considered deprecated! Please use 'animation: none' instead",
+      throw new Error(
+        'DEPRACATION: The disable_animation setting is considered deprecated! Please use "animation: none" instead',
       );
-      config.animation = 'none';
     }
+    //The Addition of the last object is needed to override the entities array for the preset settings
+    const _config = Object.assign({}, DefaultConfig, config, { entities: [] });
 
-    this._config = Object.assign({}, DefaultConfig, config);
-
-    //Warnings
+    //Entities Preset Object Stacking
     if (!config.entities) throw new Error('You need to set a entities attribute!');
-    this._entities = [];
     config.entities.forEach((item) => {
-      for (const [preset, settings] of Object.entries(item)) {
-        //This is for filtering the SimpleSetup items and converting it
-        let setting: EntitySettings;
-        if (typeof settings === 'string') {
-          setting = { entity: settings };
-        } else {
-          setting = settings;
-        }
-        //Advanced Setup
-        if (PresetList.includes(<PresetType>preset)) {
-          if (!setting.entity) throw new Error('You need to pass a entity_id to an item for it to work!');
-          const _item: EntitySettings = Object.assign({}, DefaultItem, PresetObject[preset], <EntitySettings>setting);
-          _item.preset = <PresetType>preset;
-          this._entities.push(_item);
-        } else {
-          throw new Error('The preset `' + preset + '` is not a valid entry. Please choose a Preset from the List.');
-        }
+      if (item.preset && PresetList.includes(<PresetType>item.preset)) {
+        const _item: EntitySettings = Object.assign({}, DefaultItem, PresetObject[item.preset], <EntitySettings>item);
+        _config.entities.push(_item);
+      } else {
+        throw new Error('The preset `' + item.preset + '` is not a valid entry. Please choose a Preset from the List.');
       }
     });
+
+    this._config = _config;
   }
 
   public firstUpdated(): void {
@@ -87,7 +75,7 @@ export class PowerDistributionCard extends LitElement {
 
     const _config = this._config;
 
-    this._entities.forEach((item, index) => {
+    _config._entities.forEach((item, index) => {
       if (!item.entity) return;
       //unit-of-measurement Auto Configuration
       const hass_uom = this.hass.states[item.entity].attributes.unit_of_measurement;
@@ -113,10 +101,6 @@ export class PowerDistributionCard extends LitElement {
       this._config.center = barlist;
     }
     this._configFinished = true;
-  }
-
-  private showWarning(warning: string): TemplateResult {
-    return html` <hui-warning>${warning}</hui-warning> `;
   }
 
   public static get styles(): CSSResult {
@@ -152,7 +136,7 @@ export class PowerDistributionCard extends LitElement {
     let consumption = 0;
     let production = 0;
 
-    this._entities.forEach((item, index) => {
+    this._config.entities.forEach((item, index) => {
       const value = this._val(item);
 
       if (!item.calc_excluded) {
