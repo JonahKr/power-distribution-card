@@ -35,11 +35,10 @@ export class PowerDistributionCard extends LitElement {
 
   @property() public hass!: HomeAssistant;
 
-  @internalProperty() private _configFinished!: boolean;
+  private _configFinished!: boolean;
 
   @property() private _config!: PDCConfig;
 
-  @internalProperty() private _entities: EntitySettings[] = [];
   @property() private _card!: LovelaceCard;
 
   /**
@@ -69,17 +68,16 @@ export class PowerDistributionCard extends LitElement {
 
     this._config = _config;
   }
-
   public firstUpdated(): void {
     if (this._configFinished) return;
 
     const _config = this._config;
 
-    _config._entities.forEach((item, index) => {
+    _config.entities.forEach((item, index) => {
       if (!item.entity) return;
       //unit-of-measurement Auto Configuration
       const hass_uom = this.hass.states[item.entity].attributes.unit_of_measurement;
-      !item.unit_of_measurement ? (this._entities[index].unit_of_measurement = hass_uom || 'W') : undefined;
+      !item.unit_of_measurement ? (this._config.entities[index].unit_of_measurement = hass_uom || 'W') : undefined;
     });
 
     //Setting up card if needed

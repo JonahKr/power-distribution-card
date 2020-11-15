@@ -7,6 +7,7 @@
   },
   "editor": {
     "actions": {
+      "add": "Hinzufügen",
       "edit": "Bearbeiten",
       "remove": "Entfernen",
       "save": "Speichern"
@@ -15,6 +16,7 @@
     "required": "Erforderlich",
     "title": "Titel",
     "animation": "Animation",
-    "entities": "Entities"
+    "entities": "Entities",
+    "preset": "Vorlagen"
   }
 }

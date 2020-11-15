@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   LitElement,
   customElement,
@@ -17,6 +18,7 @@ import { fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helper
 import { EntitySettings, PDCConfig } from './types';
 import { localize } from './localize/localize';
 
+import { DefaultItem, PresetList, PresetObject } from './presets';
 /**
  * Editor Settings
  */
@@ -25,7 +27,7 @@ const animation = ['none', 'flash', 'slide'];
 @customElement('power-distribution-card-editor')
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
   @property({ attribute: false }) public hass?: HomeAssistant;
-  @property() private _config?: PDCConfig;
+  @property() private _config!: PDCConfig;
 
   public setConfig(config: PDCConfig): void {
     this._config = config;
@@ -57,23 +59,22 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     `;
   }
 
-  private _valueChanged(ev: Event): void {
+  private _valueChanged(ev: any): void {
     if (!this._config || !this.hass) {
       return;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const target = ev.target as any;
-    if (this[`_${target.configValue}`] === target.value) {
-      return;
-    }
-    if (target.configValue) {
-      if (target.value === '') {
-        delete this._config[target.configValue];
-      } else {
-        this._config = {
-          ...this._config,
-          [target.configValue]: target.checked !== undefined ? target.checked : target.value,
-        };
+    if (ev.target) {
+      const target = ev.target as any;
+      if (target.configValue) {
+        if (target.index) target.configValue = 'entities[' + target.index + ']' + target.configValue;
+        if (target.value === '') {
+          delete this._config[target.configValue];
+        } else {
+          this._config = {
+            ...this._config,
+            [target.configValue]: target.checked !== undefined ? target.checked : target.value,
+          };
+        }
       }
     }
     fireEvent(this, 'config-changed', { config: this._config });
@@ -82,7 +83,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   /**
    * Entity Selector Functions
    */
-
   @property({ attribute: false }) protected entities?: EntitySettings[];
 
   @internalProperty() private _renderEmptySortable = false;
@@ -91,24 +91,28 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   @internalProperty() private _attached = false;
 
   private _renderEntitiesEditor() {
+    console.log('Rerender');
     return html`
       <h3>
         ${localize('editor.entities')} (${localize('editor.required')})
       </h3>
       <div class="entities">
-          ${guard([this._config?.entities, this._renderEmptySortable], () =>
+          ${guard([this._config.entities, this._renderEmptySortable], () =>
             this._renderEmptySortable
               ? ''
-              : this._config?.entities?.map((entityConf, index) => {
+              : this._config.entities.map((settings, index) => {
+                  console.log(settings);
                   return html`
                     <div class="entity">
                       <ha-icon class="handle" icon="mdi:drag"></ha-icon>
 
                       <ha-entity-picker
+                        label="Entity - ${settings.preset}"
                         allow-custom-entity
                         hideClearIcon
+                        .configValue="entity"
                         .hass=${this.hass}
-                        .value=${entityConf.entity}
+                        .value=${settings.entity}
                         .index=${index}
                         @value-changed=${this._valueChanged}
                       ></ha-entity-picker>
@@ -136,7 +140,27 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           )}
         </div>
       </div>
-      <ha-entity-picker .hass=${this.hass} @value-changed=${this._addEntity}></ha-entity-picker>
+      <div class="add-item">
+        <paper-dropdown-menu
+          label="${localize('editor.preset')}"
+          name="preset"
+          class="add-preset"
+          >
+          <paper-listbox slot="dropdown-content" .selected=1>
+            ${PresetList.map((val) => html`<paper-item>${val}</paper-item>`)}
+          </paper-listbox>
+        </paper-dropdown-menu>
+
+        <ha-entity-picker .hass=${this.hass} name="entity" class="add-entity"></ha-entity-picker>
+
+        <mwc-icon-button
+          aria-label=${localize('editor.actions.add')}
+          class="add-icon"
+          @click="${this._addEntity}"
+          >
+          <ha-icon icon="mdi:plus-circle-outline"></ha-icon>
+        </mwc-icon-button>
+      </div>
     `;
   }
 
@@ -183,6 +207,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   }
 
   private async _handleEntitiesChanged() {
+    console.log('Handeling Entities Changed');
     this._renderEmptySortable = true;
     await this.updateComplete;
     const container = this.shadowRoot!.querySelector('.entities')!;
@@ -203,43 +228,40 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     });
   }
 
-  private async _addEntity(ev: CustomEvent): Promise<void> {
-    const value = ev.detail.value;
-    if (value === '') {
-      return;
-    }
-    const newConfigEntities = this._config?.entities.concat({
-      entity: value as string,
-    });
-    (ev.target as any).value = '';
-    this._valueChanged({ entities: newConfigEntities });
+  private async _addEntity(): Promise<void> {
+    const preset = (this.shadowRoot?.querySelector('.add-preset') as any)?.value;
+    const entity_id = (this.shadowRoot?.querySelector('.add-entity') as any)?.value;
+    if (!preset || !entity_id) return;
+
+    const item = Object.assign({}, DefaultItem, PresetObject[preset], { entity: entity_id, preset: preset });
+    const newEntities = this._config.entities.concat(item);
+
+    this._valueChanged({ target: { configValue: 'entities', value: newEntities } });
   }
 
   private _rowMoved(ev: SortableEvent): void {
-    if (ev.oldIndex === ev.newIndex) {
-      return;
-    }
+    if (ev.oldIndex === ev.newIndex) return;
 
-    const newEntities = this._config?.entities?.concat() || [];
+    const newEntities = [...this._config.entities];
+    newEntities.splice(ev.newIndex, 0, newEntities.splice(ev.oldIndex, 1)[0]);
+    console.log(newEntities);
 
-    newEntities.splice(ev.newIndex!, 0, newEntities!.splice(ev.oldIndex!, 1)[0]);
-
-    this._valueChanged({ entities: newEntities });
+    this._valueChanged({ target: { configValue: 'entities', value: newEntities } });
   }
 
   private _removeRow(ev: CustomEvent): void {
     const index = (ev.currentTarget as any).index;
-    const newConfigEntities = this._config!.entities.concat();
+    const newEntities = [...this._config.entities];
+    newEntities.splice(index, 1);
 
-    newConfigEntities.splice(index, 1);
-
-    this._valueChanged({ entities: newConfigEntities });
+    this._valueChanged({ target: { configValue: 'entities', value: newEntities } });
   }
 
   static get styles(): CSSResult[] {
     return [
       css`
-        .entity {
+        .entity,
+        .add-item {
           display: flex;
           align-items: center;
         }
@@ -247,23 +269,17 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           padding-right: 8px;
           cursor: move;
         }
-        .entity ha-entity-picker {
+        .entity ha-entity-picker,
+        .add-item ha-entity-picker {
           flex-grow: 1;
         }
-        .special-row {
-          height: 60px;
-          font-size: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          flex-grow: 1;
-        }
-        .special-row div {
-          display: flex;
-          flex-direction: column;
+        .add-preset {
+          padding-right: 8px;
+          max-width: 130px;
         }
         .remove-icon,
-        .edit-icon {
+        .edit-icon,
+        .add-icon {
           --mdc-icon-button-size: 36px;
           color: var(--secondary-text-color);
         }
