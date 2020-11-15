@@ -18,7 +18,7 @@ import { DefaultItem, DefaultConfig, PresetList, PresetObject, PresetType } from
 import styles from './styles';
 
 console.info(
-  `%c POWER-DISTRIBUTION-CARD %c ${version}_b1`,
+  `%c POWER-DISTRIBUTION-CARD %c ${version}_b2`,
   `font-weight: 500; color: white; background: #03a9f4;`,
   `font-weight: 500; color: #03a9f4; background: white;`,
 );

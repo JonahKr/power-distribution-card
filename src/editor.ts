@@ -14,7 +14,7 @@ import { guard } from 'lit-html/directives/guard';
 import Sortable, { AutoScroll, OnSpill, SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
 import { fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
-import { PDCConfig, HTMLElementValue, CustomValueEvent } from './types';
+import { PDCConfig, HTMLElementValue, CustomValueEvent, SubElementConfig } from './types';
 import { localize } from './localize/localize';
 
 import { DefaultItem, PresetList, PresetObject } from './presets';
@@ -26,16 +26,16 @@ const animation = ['none', 'flash', 'slide'];
 @customElement('power-distribution-card-editor')
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
   @property({ attribute: false }) public hass?: HomeAssistant;
-  @property() private _config!: PDCConfig;
+  @internalProperty() private _config!: PDCConfig;
 
   public setConfig(config: PDCConfig): void {
     this._config = config;
   }
 
   protected render(): TemplateResult | void {
-    if (!this.hass) {
-      return html``;
-    }
+    if (!this.hass) return html``;
+    if (this._subElementEditor) return this._renderSubElementEditor();
+
     return html`
       <div class="card-config">
         <paper-input
@@ -77,6 +77,31 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       }
     }
     fireEvent(this, 'config-changed', { config: this._config });
+  }
+
+  /**
+   * SubElementEditor
+   * -------------------
+   * dawda
+   */
+
+  @internalProperty() private _subElementEditor: SubElementConfig | undefined = undefined;
+
+  private _renderSubElementEditor(): TemplateResult {
+    return html`
+      <div class="header">
+        <div class="back-title">
+          <mwc-icon-button @click=${this._goBack}>
+            <ha-icon icon="mdi:arrow-left"></ha-icon>
+          </mwc-icon-button>
+          <slot name="title"></slot>
+        </div>
+      </div>
+    `;
+  }
+
+  private _goBack(): void {
+    this._subElementEditor = undefined;
   }
 
   /**
@@ -134,7 +159,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
                         aria-label=${localize('editor.actions.edit')}
                         class="edit-icon"
                         .index=${index}
-                        @click="this._editRow"
+                        @click="${this._editRow}"
                       >
                         <ha-icon icon="mdi:pencil"></ha-icon>
                       </mwc-icon-button>
@@ -277,6 +302,20 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
 
     this._valueChanged({ target: { configValue: 'entities', value: newEntities } });
   }
+  /**
+   * When the Row is edited:
+   * @param ev Event containing a Target to remove
+   */
+  private _editRow(ev: CustomValueEvent): void {
+    const index = ev.currentTarget?.index || 0;
+
+    this._subElementEditor = {
+      type: 'entity',
+      element: this._config.entities[index],
+      index: index,
+    };
+  }
+
   /**
    * The Second Part comes from here: https://github.com/home-assistant/frontend/blob/dev/src/resources/ha-sortable-style.ts
    * @returns Editor CSS

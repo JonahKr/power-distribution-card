@@ -50,3 +50,10 @@ export interface CustomValueEvent {
     index?: number;
   };
 }
+
+//SubElement Config still needs center options
+export interface SubElementConfig {
+  type: 'entity' | 'center-bar' | 'center-card';
+  index?: number;
+  element: EntitySettings;
+}
