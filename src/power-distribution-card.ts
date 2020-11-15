@@ -1,4 +1,4 @@
-import { LitElement, html, customElement, property, CSSResult, TemplateResult, internalProperty } from 'lit-element';
+import { LitElement, html, customElement, property, CSSResult, TemplateResult } from 'lit-element';
 
 import {
   HomeAssistant,

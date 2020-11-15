@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   LitElement,
   customElement,
@@ -15,7 +14,7 @@ import { guard } from 'lit-html/directives/guard';
 import Sortable, { AutoScroll, OnSpill, SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
 import { fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
-import { EntitySettings, PDCConfig } from './types';
+import { PDCConfig, HTMLElementValue, CustomValueEvent } from './types';
 import { localize } from './localize/localize';
 
 import { DefaultItem, PresetList, PresetObject } from './presets';
@@ -59,12 +58,12 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     `;
   }
 
-  private _valueChanged(ev: any): void {
+  private _valueChanged(ev: CustomValueEvent): void {
     if (!this._config || !this.hass) {
       return;
     }
     if (ev.target) {
-      const target = ev.target as any;
+      const target = ev.target;
       if (target.configValue) {
         if (target.index) target.configValue = 'entities[' + target.index + ']' + target.configValue;
         if (target.value === '') {
@@ -81,17 +80,23 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   }
 
   /**
-   * Entity Selector Functions
+   * Entities Row Editor
+   * -------------------
+   * This Row Editor is based on the hui-entities-card-row-editor in homeassistant. (Thanks Zack for your help)
+   * If you are interested in using the Editor for your own card, i tried explaining everything with incode documentation
    */
-  @property({ attribute: false }) protected entities?: EntitySettings[];
 
   @internalProperty() private _renderEmptySortable = false;
   private _sortable?: Sortable;
 
   @internalProperty() private _attached = false;
 
-  private _renderEntitiesEditor() {
-    console.log('Rerender');
+  /**
+   * Generator for all entities in the config.entities list
+   * The Guard Function prevents unnecessary rendering
+   * @returns HTML for the Entities Editor
+   */
+  private _renderEntitiesEditor(): TemplateResult {
     return html`
       <h3>
         ${localize('editor.entities')} (${localize('editor.required')})
@@ -101,7 +106,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
             this._renderEmptySortable
               ? ''
               : this._config.entities.map((settings, index) => {
-                  console.log(settings);
                   return html`
                     <div class="entity">
                       <ha-icon class="handle" icon="mdi:drag"></ha-icon>
@@ -179,11 +183,14 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     Sortable.mount(new AutoScroll());
   }
 
+  /**
+   * This is for Checking if something relevant has changed and updating variables accordingly
+   * @param changedProps The Changed Property Values
+   */
   protected updated(changedProps: PropertyValues): void {
     super.updated(changedProps);
-
     const attachedChanged = changedProps.has('_attached');
-    const entitiesChanged = changedProps.has('entities');
+    const entitiesChanged = changedProps.has('_config');
 
     if (!entitiesChanged && !attachedChanged) {
       return;
@@ -205,19 +212,23 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       this._handleEntitiesChanged();
     }
   }
-
-  private async _handleEntitiesChanged() {
-    console.log('Handeling Entities Changed');
+  /**
+   * Since we have the guard function enabled to prevent unecessary renders, we need to handle switched rows seperately.
+   */
+  private async _handleEntitiesChanged(): Promise<void> {
     this._renderEmptySortable = true;
     await this.updateComplete;
-    const container = this.shadowRoot!.querySelector('.entities')!;
+    const container = this.shadowRoot?.querySelector('.entities') as HTMLElement;
     while (container.lastElementChild) {
       container.removeChild(container.lastElementChild);
     }
     this._renderEmptySortable = false;
   }
 
-  private _createSortable() {
+  /**
+   * Creating the Sortable Element (https://github.com/SortableJS/sortablejs) used as a foundation
+   */
+  private _createSortable(): void {
     const element = this.shadowRoot?.querySelector('.entities') as HTMLElement;
     if (!element) return;
     this._sortable = new Sortable(element, {
@@ -228,35 +239,48 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     });
   }
 
+  /**
+   * If you add an entity it needs to be appended to the Configuration!
+   * In this particular Case the Entity Generation is a bit more complicated and involves Presets
+   */
   private async _addEntity(): Promise<void> {
-    const preset = (this.shadowRoot?.querySelector('.add-preset') as any)?.value;
-    const entity_id = (this.shadowRoot?.querySelector('.add-entity') as any)?.value;
+    const preset = (this.shadowRoot?.querySelector('.add-preset') as HTMLElementValue).value || null;
+    const entity_id = (this.shadowRoot?.querySelector('.add-entity') as HTMLElementValue).value;
     if (!preset || !entity_id) return;
 
     const item = Object.assign({}, DefaultItem, PresetObject[preset], { entity: entity_id, preset: preset });
     const newEntities = this._config.entities.concat(item);
-
+    //This basically fakes a event object
     this._valueChanged({ target: { configValue: 'entities', value: newEntities } });
   }
 
+  /**
+   * Handeling if the User drags elements to a different position in the list.
+   * @param ev Event containing old index, new index
+   */
   private _rowMoved(ev: SortableEvent): void {
     if (ev.oldIndex === ev.newIndex) return;
 
     const newEntities = [...this._config.entities];
     newEntities.splice(ev.newIndex, 0, newEntities.splice(ev.oldIndex, 1)[0]);
     console.log(newEntities);
-
     this._valueChanged({ target: { configValue: 'entities', value: newEntities } });
   }
-
-  private _removeRow(ev: CustomEvent): void {
-    const index = (ev.currentTarget as any).index;
+  /**
+   * When the Row is removed:
+   * @param ev Event containing a Target to remove
+   */
+  private _removeRow(ev: CustomValueEvent): void {
+    const index = ev.currentTarget?.index || 0;
     const newEntities = [...this._config.entities];
     newEntities.splice(index, 1);
 
     this._valueChanged({ target: { configValue: 'entities', value: newEntities } });
   }
-
+  /**
+   * The Second Part comes from here: https://github.com/home-assistant/frontend/blob/dev/src/resources/ha-sortable-style.ts
+   * @returns Editor CSS
+   */
   static get styles(): CSSResult[] {
     return [
       css`

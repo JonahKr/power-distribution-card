@@ -34,3 +34,19 @@ export interface BarSettings {
 }
 
 export type ArrowStates = 'right' | 'left' | 'none';
+
+export interface HTMLElementValue extends HTMLElement {
+  value: string;
+}
+
+export interface CustomValueEvent {
+  target?: {
+    checked?: boolean;
+    configValue?: string;
+    index?: number;
+    value?: string | EntitySettings[];
+  };
+  currentTarget?: {
+    index?: number;
+  };
+}
