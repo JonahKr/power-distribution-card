@@ -65,7 +65,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     if (ev.target) {
       const target = ev.target;
       if (target.configValue) {
-        if (target.index) target.configValue = 'entities[' + target.index + ']' + target.configValue;
         if (target.value === '') {
           delete this._config[target.configValue];
         } else {
@@ -139,11 +138,11 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
                         label="Entity - ${settings.preset}"
                         allow-custom-entity
                         hideClearIcon
-                        .configValue="entity"
                         .hass=${this.hass}
+                        .configValue=${'entities'}
                         .value=${settings.entity}
                         .index=${index}
-                        @value-changed=${this._valueChanged}
+                        @value-changed=${this._itemEntityChanged}
                       ></ha-entity-picker>
 
                       <mwc-icon-button
@@ -262,6 +261,21 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       handle: '.handle',
       onEnd: async (evt: SortableEvent) => this._rowMoved(evt),
     });
+  }
+
+  /**
+   * This enables support for changing the entity_ids using the ha-entity pickers in each row directly
+   * @param ev Value Event containing the index and value of the cahnged element
+   */
+  private _itemEntityChanged(ev: CustomValueEvent): void {
+    if (!ev.target) return;
+    const target = ev.target;
+    const configValue = [...this._config.entities];
+    configValue[target.index || 0] = { ...configValue[target.index || 0], entity: target.value as string };
+
+    this._config = { ...this._config, entities: configValue };
+    console.dir(this._config);
+    fireEvent(this, 'config-changed', { config: this._config });
   }
 
   /**
