@@ -14,10 +14,15 @@
     },
     "optional": "Optional",
     "required": "Required",
-    "title": "Titel",
-    "animation": "Animation",
-    "entities": "Entities",
-    "preset": "Preset"
+    "settings": {
+      "title": "Titel",
+      "animation": "Animation",
+      "entities": "Entities",
+      "icon": "Icon",
+      "preset": "Preset",
+      "name": "Name",
+      "invert-value": "Invert Value",
+      "display-abs": "Display Absolute Value"
+    }
   }
-  
 }

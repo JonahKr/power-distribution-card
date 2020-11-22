@@ -39,13 +39,13 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     return html`
       <div class="card-config">
         <paper-input
-          .label="${localize('editor.title')} (${localize('editor.optional')})"
+          .label="${localize('editor.settings.title')} (${localize('editor.optional')})"
           .value=${this._config?.title || ''}
           .configValue=${'title'}
           @value-changed=${this._valueChanged}
         ></paper-input>
         <paper-dropdown-menu
-          label="${localize('editor.animation')}"
+          label="${localize('editor.settings.animation')}"
           .configValue=${'animation'}
           @value-changed=${this._valueChanged}
         >
@@ -80,23 +80,95 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
 
   /**
    * SubElementEditor
-   * -------------------
+   *
    * dawda
    */
 
   @internalProperty() private _subElementEditor: SubElementConfig | undefined = undefined;
 
   private _renderSubElementEditor(): TemplateResult {
+    switch (this._subElementEditor?.type) {
+      case 'entity':
+        return this._entityEditor();
+      case 'center-bar':
+        return this._barEditor();
+      case 'center-card':
+        return this._cardEditor();
+      default:
+        return html``;
+    }
+  }
+
+  /**
+   * This enables support for changing the entity_ids using the ha-entity pickers in each row directly as well as the entity Editor itsself
+   * @param ev Value Event containing the index and value of the cahnged element
+   */
+  private _itemEntityChanged(ev: CustomValueEvent): void {
+    if (!ev.target) return;
+    const target = ev.target;
+    if (!target.configValue) return;
+    const configEntities = [...this._config.entities];
+    const index = target.index || this._subElementEditor?.index || 0;
+    configEntities[index] = {
+      ...configEntities[index],
+      [target.configValue]: target.checked != undefined ? target.checked : (target.value as string),
+    };
+
+    this._config = { ...this._config, entities: configEntities };
+    fireEvent(this, 'config-changed', { config: this._config });
+  }
+
+  private _entityEditor(): TemplateResult {
+    const item = this._subElementEditor?.element || DefaultItem;
     return html`
       <div class="header">
         <div class="back-title">
           <mwc-icon-button @click=${this._goBack}>
             <ha-icon icon="mdi:arrow-left"></ha-icon>
           </mwc-icon-button>
-          <slot name="title"></slot>
         </div>
       </div>
+      <div class="side-by-side">
+        <paper-input
+          .label="${localize('editor.settings.name')} (${localize('editor.optional')})"
+          .value=${item.name || ''}
+          .configValue=${'name'}
+          @value-changed=${this._itemEntityChanged}
+        ></paper-input>
+        <ha-icon-input
+          .label=${localize('editor.settings.icon')}
+          .value=${item.icon}
+          .configValue=${'icon'}
+          @value-changed=${this._itemEntityChanged}
+        ></ha-icon-input>
+      </div>
+      <div class="side-by-side">
+        <input
+          type="checkbox"
+          id="invert-value"
+          .checked="${item.invert_value || false}"
+          .configValue=${'invert_value'}
+          @change=${this._itemEntityChanged}
+        />
+        <label for="invert-value"> ${localize('editor.settings.invert-value')}</label>
+        <input
+          type="checkbox"
+          id="display-abs"
+          .checked="${item.display_abs || true}"
+          .configValue=${'display_abs'}
+          @change=${this._itemEntityChanged}
+        />
+        <label for="display-abs"> ${localize('editor.settings.display-abs')} </label>
+      </div>
     `;
+  }
+
+  private _barEditor(): TemplateResult {
+    return html``;
+  }
+
+  private _cardEditor(): TemplateResult {
+    return html``;
   }
 
   private _goBack(): void {
@@ -123,7 +195,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   private _renderEntitiesEditor(): TemplateResult {
     return html`
       <h3>
-        ${localize('editor.entities')} (${localize('editor.required')})
+        ${localize('editor.settings.entities')} (${localize('editor.required')})
       </h3>
       <div class="entities">
           ${guard([this._config.entities, this._renderEmptySortable], () =>
@@ -135,11 +207,11 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
                       <ha-icon class="handle" icon="mdi:drag"></ha-icon>
 
                       <ha-entity-picker
-                        label="Entity - ${settings.preset}"
+                        label="Entity - ${localize('editor.settings.preset')}"
                         allow-custom-entity
                         hideClearIcon
                         .hass=${this.hass}
-                        .configValue=${'entities'}
+                        .configValue=${'entity'}
                         .value=${settings.entity}
                         .index=${index}
                         @value-changed=${this._itemEntityChanged}
@@ -232,7 +304,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       return;
     }
 
-    if (entitiesChanged) {
+    if (entitiesChanged && this._subElementEditor == undefined) {
       this._handleEntitiesChanged();
     }
   }
@@ -261,21 +333,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       handle: '.handle',
       onEnd: async (evt: SortableEvent) => this._rowMoved(evt),
     });
-  }
-
-  /**
-   * This enables support for changing the entity_ids using the ha-entity pickers in each row directly
-   * @param ev Value Event containing the index and value of the cahnged element
-   */
-  private _itemEntityChanged(ev: CustomValueEvent): void {
-    if (!ev.target) return;
-    const target = ev.target;
-    const configValue = [...this._config.entities];
-    configValue[target.index || 0] = { ...configValue[target.index || 0], entity: target.value as string };
-
-    this._config = { ...this._config, entities: configValue };
-    console.dir(this._config);
-    fireEvent(this, 'config-changed', { config: this._config });
   }
 
   /**
@@ -337,6 +394,13 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   static get styles(): CSSResult[] {
     return [
       css`
+        .side-by-side {
+          display: flex;
+        }
+        .side-by-side > * {
+          flex: 1 1 0%;
+          padding-right: 4px;
+        }
         .entity,
         .add-item {
           display: flex;

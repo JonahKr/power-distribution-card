@@ -14,9 +14,15 @@
     },
     "optional": "Optional",
     "required": "Erforderlich",
-    "title": "Titel",
-    "animation": "Animation",
-    "entities": "Entities",
-    "preset": "Vorlagen"
+    "settings": {
+      "title": "Titel",
+      "animation": "Animation",
+      "entities": "Entities",
+      "icon": "Icon",
+      "preset": "Vorlagen",
+      "name": "Name",
+      "invert-value": "Invertierter Wert",
+      "display-abs": "Absolute Wertanzeige"
+    }
   }
 }
