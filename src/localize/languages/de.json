@@ -18,11 +18,15 @@
       "title": "Titel",
       "animation": "Animation",
       "entities": "Entities",
-      "icon": "Icon",
+      "icon": "Symbol",
       "preset": "Vorlagen",
       "name": "Name",
       "invert-value": "Invertierter Wert",
-      "display-abs": "Absolute Wertanzeige"
+      "display-abs": "Absolute Wertanzeige",
+      "decimals": "Dezimalstellen",
+      "unit_of_display": "Angezeigte Einheit",
+      "entity": "Element",
+      "attribute": "Attribut"
     }
   }
 }

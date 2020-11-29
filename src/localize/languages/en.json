@@ -22,7 +22,11 @@
       "preset": "Preset",
       "name": "Name",
       "invert-value": "Invert Value",
-      "display-abs": "Display Absolute Value"
+      "display-abs": "Display Absolute Value",
+      "decimals": "Decimals",
+      "unit_of_display": "Unit of Display",
+      "entity": "Entity",
+      "attribute": "Attribute"
     }
   }
 }

@@ -120,6 +120,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
 
   private _entityEditor(): TemplateResult {
     const item = this._subElementEditor?.element || DefaultItem;
+    const attributes = Object.keys({ ...this.hass?.states[item.entity || 0].attributes }) || [];
     return html`
       <div class="header">
         <div class="back-title">
@@ -136,29 +137,70 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           @value-changed=${this._itemEntityChanged}
         ></paper-input>
         <ha-icon-input
-          .label=${localize('editor.settings.icon')}
+          .label="${localize('editor.settings.icon')}  (${localize('editor.optional')})"
           .value=${item.icon}
           .configValue=${'icon'}
           @value-changed=${this._itemEntityChanged}
         ></ha-icon-input>
       </div>
       <div class="side-by-side">
-        <input
-          type="checkbox"
-          id="invert-value"
-          .checked="${item.invert_value || false}"
-          .configValue=${'invert_value'}
-          @change=${this._itemEntityChanged}
-        />
-        <label for="invert-value"> ${localize('editor.settings.invert-value')}</label>
-        <input
-          type="checkbox"
-          id="display-abs"
-          .checked="${item.display_abs || true}"
-          .configValue=${'display_abs'}
-          @change=${this._itemEntityChanged}
-        />
-        <label for="display-abs"> ${localize('editor.settings.display-abs')} </label>
+        <ha-entity-picker
+          label="${localize('editor.settings.entity')} (${localize('editor.required')})"
+          allow-custom-entity
+          hideClearIcon
+          .hass=${this.hass}
+          .configValue=${'entity'}
+          .value=${item.entity}
+          @value-changed=${this._itemEntityChanged}
+        ></ha-entity-picker>
+        <paper-dropdown-menu
+          label="${localize('editor.settings.attribute')} (${localize('editor.optional')})"
+          .configValue=${'attribute'}
+          @value-changed=${this._itemEntityChanged}
+        >
+          <paper-listbox slot="dropdown-content" .selected=${attributes.indexOf(item.attribute || '')}>
+            ${attributes.map((val) => html`<paper-item>${val}</paper-item>`)}
+          </paper-listbox>
+        </paper-dropdown-menu>
+      </div>
+      <h3>Value Settings</h3>
+      <div class="side-by-side">
+        <div class="checkbox">
+          <input
+            type="checkbox"
+            id="invert-value"
+            .checked="${item.invert_value || false}"
+            .configValue=${'invert_value'}
+            @change=${this._itemEntityChanged}
+          />
+          <label for="invert-value"> ${localize('editor.settings.invert-value')}</label>
+        </div>
+        <div class="checkbox">
+          <input
+            type="checkbox"
+            id="display-abs"
+            .checked="${item.display_abs || true}"
+            .configValue=${'display_abs'}
+            @change=${this._itemEntityChanged}
+          />
+          <label for="display-abs"> ${localize('editor.settings.display-abs')} </label>
+        </div>
+      </div>
+      <div class="side-by-side">
+        <paper-input
+          .label="${localize('editor.settings.unit_of_display')}"
+          .value=${item.unit_of_display || ''}
+          .configValue=${'unit_of_display'}
+          @value-changed=${this._itemEntityChanged}
+        ></paper-input>
+        <paper-input
+          auto-validate
+          pattern="[0-9]"
+          .label="${localize('editor.settings.decimals')}"
+          .value=${item.decimals || 2}
+          .configValue=${'decimals'}
+          @value-changed=${this._itemEntityChanged}
+        ></paper-input>
       </div>
     `;
   }
@@ -207,7 +249,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
                       <ha-icon class="handle" icon="mdi:drag"></ha-icon>
 
                       <ha-entity-picker
-                        label="Entity - ${localize('editor.settings.preset')}"
+                        label="Entity - ${settings.preset}"
                         allow-custom-entity
                         hideClearIcon
                         .hass=${this.hass}
@@ -359,7 +401,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
 
     const newEntities = [...this._config.entities];
     newEntities.splice(ev.newIndex, 0, newEntities.splice(ev.oldIndex, 1)[0]);
-    console.log(newEntities);
+
     this._valueChanged({ target: { configValue: 'entities', value: newEntities } });
   }
   /**
@@ -393,6 +435,19 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    */
   static get styles(): CSSResult[] {
     return [
+      css`
+        .checkbox {
+          display: flex;
+          align-items: center;
+          padding: 8px 0;
+        }
+        .checkbox input {
+          height: 20px;
+          width: 20px;
+          margin-left: 0;
+          margin-right: 8px;
+        }
+      `,
       css`
         .side-by-side {
           display: flex;
