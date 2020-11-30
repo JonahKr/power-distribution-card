@@ -26,7 +26,8 @@
       "decimals": "Decimals",
       "unit_of_display": "Unit of Display",
       "entity": "Entity",
-      "attribute": "Attribute"
+      "attribute": "Attribute",
+      "calc_excluded": "Excluded from Calculations"
     }
   }
 }

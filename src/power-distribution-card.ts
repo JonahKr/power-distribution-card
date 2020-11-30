@@ -16,12 +16,21 @@ import './editor';
 import { PDCConfig, EntitySettings, ArrowStates, BarSettings } from './types';
 import { DefaultItem, DefaultConfig, PresetList, PresetObject, PresetType } from './presets';
 import styles from './styles';
+import { localize } from './localize/localize';
 
 console.info(
   `%c POWER-DISTRIBUTION-CARD %c ${version}_b2`,
   `font-weight: 500; color: white; background: #03a9f4;`,
   `font-weight: 500; color: #03a9f4; background: white;`,
 );
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(window as any).customCards = (window as any).customCards || [];
+(window as any).customCards.push({
+  type: 'power-distribution-card',
+  name: 'Power Distribution Card',
+  description: localize('common.description'),
+});
 
 @customElement('power-distribution')
 export class PowerDistributionCard extends LitElement {

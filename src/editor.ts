@@ -80,8 +80,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
 
   /**
    * SubElementEditor
-   *
-   * dawda
    */
 
   @internalProperty() private _subElementEditor: SubElementConfig | undefined = undefined;
@@ -163,6 +161,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           </paper-listbox>
         </paper-dropdown-menu>
       </div>
+      <br />
       <h3>Value Settings</h3>
       <div class="side-by-side">
         <div class="checkbox">
@@ -188,19 +187,41 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       </div>
       <div class="side-by-side">
         <paper-input
+          auto-validate
+          pattern="[0-9]"
+          .label="${localize('editor.settings.decimals')}"
+          .value=${item.decimals || ''}
+          .configValue=${'decimals'}
+          @value-changed=${this._itemEntityChanged}
+        ></paper-input>
+        <paper-input
           .label="${localize('editor.settings.unit_of_display')}"
           .value=${item.unit_of_display || ''}
           .configValue=${'unit_of_display'}
           @value-changed=${this._itemEntityChanged}
         ></paper-input>
-        <paper-input
-          auto-validate
-          pattern="[0-9]"
-          .label="${localize('editor.settings.decimals')}"
-          .value=${item.decimals || 2}
-          .configValue=${'decimals'}
+      </div>
+      <h3>Preset Settings</h3>
+      <div class="side-by-side">
+        <paper-dropdown-menu
+          label="${localize('editor.preset')}"
+          .configValue=${'preset'}
           @value-changed=${this._itemEntityChanged}
-        ></paper-input>
+        >
+          <paper-listbox slot="dropdown-content" .selected=${PresetList.indexOf(item.preset!)}>
+            ${PresetList.map((val) => html`<paper-item>${val}</paper-item>`)}
+          </paper-listbox>
+        </paper-dropdown-menu>
+        <div class="checkbox">
+          <input
+            type="checkbox"
+            id="calc_excluded"
+            .checked="${item.calc_excluded}"
+            .configValue=${'calc_excluded'}
+            @change=${this._itemEntityChanged}
+          />
+          <label for="calc_excluded"> ${localize('editor.settings.calc_excluded')} </label>
+        </div>
       </div>
     `;
   }
@@ -210,7 +231,14 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   }
 
   private _cardEditor(): TemplateResult {
-    return html``;
+    return html`
+      <hui-card-element-editor
+        .hass=${this.hass}
+        .value=${this._card}
+        .lovelace=${this.lovelace}
+        @config-changed=${this._handleConfigChanged}
+      ></hui-card-element-editor>
+    `;
   }
 
   private _goBack(): void {

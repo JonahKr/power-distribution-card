@@ -26,7 +26,8 @@
       "decimals": "Dezimalstellen",
       "unit_of_display": "Angezeigte Einheit",
       "entity": "Element",
-      "attribute": "Attribut"
+      "attribute": "Attribut",
+      "calc_excluded": "Von Rechnungen ausgeschlossen"
     }
   }
 }
