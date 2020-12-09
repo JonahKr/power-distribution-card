@@ -1,4 +1,4 @@
-import { LitElement, html, customElement, property, CSSResult, TemplateResult } from 'lit-element';
+import { LitElement, html, customElement, property, CSSResult, TemplateResult, internalProperty } from 'lit-element';
 
 import {
   HomeAssistant,
@@ -19,15 +19,14 @@ import styles from './styles';
 import { localize } from './localize/localize';
 
 console.info(
-  `%c POWER-DISTRIBUTION-CARD %c ${version}_b2`,
+  `%c POWER-DISTRIBUTION-CARD %c ${version}_b3`,
   `font-weight: 500; color: white; background: #03a9f4;`,
   `font-weight: 500; color: #03a9f4; background: white;`,
 );
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-(window as any).customCards = (window as any).customCards || [];
 (window as any).customCards.push({
-  type: 'power-distribution-card',
+  type: 'power-distribution', //TODO ADD CARD
   name: 'Power Distribution Card',
   description: localize('common.description'),
 });
@@ -39,14 +38,12 @@ export class PowerDistributionCard extends LitElement {
   }
 
   public static getStubConfig(): Record<string, unknown> {
-    return { entities: [{ solar: 'sensor.solar' }, { grid: 'sensor.grid' }, { home: 'sensor.home' }] };
+    return { title: 'Title', center: { type: 'bars' } };
   }
 
   @property() public hass!: HomeAssistant;
 
-  private _configFinished!: boolean;
-
-  @property() private _config!: PDCConfig;
+  @internalProperty() private _config!: PDCConfig;
 
   @property() private _card!: LovelaceCard;
 
@@ -55,17 +52,11 @@ export class PowerDistributionCard extends LitElement {
    * @param config The Config Object configured via YAML
    */
   public async setConfig(config: PDCConfig): Promise<void> {
-    //General Card Settings
-    if (config.disable_animation) {
-      throw new Error(
-        'DEPRACATION: The disable_animation setting is considered deprecated! Please use "animation: none" instead',
-      );
-    }
     //The Addition of the last object is needed to override the entities array for the preset settings
     const _config = Object.assign({}, DefaultConfig, config, { entities: [] });
 
     //Entities Preset Object Stacking
-    if (!config.entities) throw new Error('You need to set a entities attribute!');
+    if (!config.entities) throw new Error('You need to define Entities!');
     config.entities.forEach((item) => {
       if (item.preset && PresetList.includes(<PresetType>item.preset)) {
         const _item: EntitySettings = Object.assign({}, DefaultItem, PresetObject[item.preset], <EntitySettings>item);
@@ -74,12 +65,10 @@ export class PowerDistributionCard extends LitElement {
         throw new Error('The preset `' + item.preset + '` is not a valid entry. Please choose a Preset from the List.');
       }
     });
-
     this._config = _config;
   }
-  public firstUpdated(): void {
-    if (this._configFinished) return;
 
+  public firstUpdated(): void {
     const _config = this._config;
 
     _config.entities.forEach((item, index) => {
@@ -91,23 +80,9 @@ export class PowerDistributionCard extends LitElement {
 
     //Setting up card if needed
     const center = this._config.center;
-    if (center !== 'none' && typeof center === 'object' && center['type']) {
+    if (center.type == 'card') {
       this._card = this._createCardElement(center as LovelaceCardConfig);
-    } else if (center !== 'none') {
-      //Simple Setup Support... Seriously considering dropping it considering the added complexity
-      const barlist: { [key: string]: BarSettings }[] = [];
-      center?.forEach((element: { [key: string]: BarSettings | string }) => {
-        const key = Object.keys(element)[0];
-        if (key !== 'autarky' && key !== 'ratio') throw new Error('You cannot add Bar: ' + key);
-        if (typeof element[key] === 'string' && _config.center) {
-          barlist.push({ [key]: { entity: element[key] as string } });
-        } else {
-          barlist.push(element as { [key: string]: BarSettings });
-        }
-      });
-      this._config.center = barlist;
     }
-    this._configFinished = true;
   }
 
   public static get styles(): CSSResult {
@@ -156,6 +131,7 @@ export class PowerDistributionCard extends LitElement {
       }
 
       const _item = this._render_item(value, item, index);
+      //Sorting the Items to either side
       switch (index % 2) {
         case 0: //Even
           left_panel.push(_item);
@@ -168,11 +144,15 @@ export class PowerDistributionCard extends LitElement {
 
     //Populating the Center Panel
     const center = this._config.center;
-    if (center === 'none') undefined;
-    else if (typeof center === 'object' && center['type']) {
-      center_panel.push(this._createCardElement(center as LovelaceCardConfig));
-    } else {
-      center_panel.push(this._render_bars(consumption, production));
+    switch (center.type) {
+      case 'none':
+        break;
+      case 'card':
+        center_panel.push(this._createCardElement(center.content as LovelaceCardConfig));
+        break;
+      case 'bars':
+        center_panel.push(this._render_bars(consumption, production));
+        break;
     }
 
     return html`<ha-card .header=${this._config.title}>
@@ -297,6 +277,7 @@ export class PowerDistributionCard extends LitElement {
       `;
     }
   }
+
   /**
    * Render Support Function Calculating and Generating the Autarky and Ratio Bars
    * @param consumption the total home consumption
@@ -304,11 +285,9 @@ export class PowerDistributionCard extends LitElement {
    * @returns html containing the bars
    */
   private _render_bars(consumption: number, production: number): TemplateResult {
-    if (this._config.center == 'none') return html``;
-
     let autarky_settings: BarSettings = {};
     let ratio_settings: BarSettings = {};
-    this._config.center?.forEach((element: { [key: string]: BarSettings }) => {
+    this._config.center.content?.forEach((element: { [key: string]: BarSettings }) => {
       if (element.autarky) autarky_settings = element.autarky;
       if (element.ratio) ratio_settings = element.ratio;
     });

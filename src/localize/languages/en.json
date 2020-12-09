@@ -27,7 +27,8 @@
       "unit_of_display": "Unit of Display",
       "entity": "Entity",
       "attribute": "Attribute",
-      "calc_excluded": "Excluded from Calculations"
+      "calc_excluded": "Excluded from Calculations",
+      "center": "Center"
     }
   }
 }

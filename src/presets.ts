@@ -80,4 +80,7 @@ export const DefaultConfig: PDCConfig = {
   title: undefined,
   animation: 'flash',
   entities: [],
+  center: {
+    type: 'none',
+  },
 };

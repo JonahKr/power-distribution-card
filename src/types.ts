@@ -5,7 +5,7 @@ export interface PDCConfig extends LovelaceCardConfig {
   title?: string;
   animation?: 'none' | 'flash' | 'slide';
   entities: EntitySettings[];
-  center?: 'none' | LovelaceCardConfig | { [key: string]: BarSettings }[];
+  center: center;
 }
 
 export interface EntitySettings {
@@ -25,6 +25,10 @@ export interface EntitySettings {
   unit_of_measurement?: string;
 }
 
+export interface center {
+  type: 'none' | 'card' | 'bars';
+  content?: LovelaceCardConfig | [BarSettings];
+}
 export const BarList = ['autarky', 'ratio'];
 export interface BarSettings {
   bar_color?: string;
@@ -48,12 +52,13 @@ export interface CustomValueEvent {
   };
   currentTarget?: {
     index?: number;
+    value?: string;
   };
 }
 
 //SubElement Config still needs center options
 export interface SubElementConfig {
-  type: 'entity' | 'center-bar' | 'center-card';
+  type: 'entity' | 'bars' | 'card';
   index?: number;
-  element: EntitySettings;
+  element: EntitySettings | LovelaceCardConfig | [BarSettings];
 }

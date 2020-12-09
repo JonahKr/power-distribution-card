@@ -27,7 +27,8 @@
       "unit_of_display": "Angezeigte Einheit",
       "entity": "Element",
       "attribute": "Attribut",
-      "calc_excluded": "Von Rechnungen ausgeschlossen"
+      "calc_excluded": "Von Rechnungen ausgeschlossen",
+      "center": "Mittelbereich"
     }
   }
 }

@@ -13,8 +13,8 @@ import { guard } from 'lit-html/directives/guard';
 
 import Sortable, { AutoScroll, OnSpill, SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
-import { fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
-import { PDCConfig, HTMLElementValue, CustomValueEvent, SubElementConfig } from './types';
+import { fireEvent, getLovelace, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
+import { PDCConfig, HTMLElementValue, CustomValueEvent, SubElementConfig, EntitySettings } from './types';
 import { localize } from './localize/localize';
 
 import { DefaultItem, PresetList, PresetObject } from './presets';
@@ -22,20 +22,42 @@ import { DefaultItem, PresetList, PresetObject } from './presets';
  * Editor Settings
  */
 const animation = ['none', 'flash', 'slide'];
+const center = ['none', 'card', 'bars'];
 
 @customElement('power-distribution-card-editor')
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
   @property({ attribute: false }) public hass?: HomeAssistant;
   @internalProperty() private _config!: PDCConfig;
+  private _helpers: any;
 
   public setConfig(config: PDCConfig): void {
     this._config = config;
   }
 
+  /**
+   * This Preloads all standard hass components which are not natively avaiable
+   * https://discord.com/channels/330944238910963714/351047592588869643/783477690036125747 for more info
+   */
+  protected async firstUpdated(): Promise<void> {
+    //Loading Card with ha-entities-picker, ha-icon-input,
+    try {
+      await this.loadCardHelpers();
+      await this._helpers.createCardElement({ type: 'calendar' });
+    } catch {
+      undefined;
+    }
+    //Sortable Stuff for the Entities Row Editor
+    Sortable.mount(OnSpill);
+    Sortable.mount(new AutoScroll());
+  }
+
+  private async loadCardHelpers(): Promise<void> {
+    this._helpers = await (window as any).loadCardHelpers();
+  }
+
   protected render(): TemplateResult | void {
     if (!this.hass) return html``;
     if (this._subElementEditor) return this._renderSubElementEditor();
-
     return html`
       <div class="card-config">
         <paper-input
@@ -53,9 +75,62 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
             ${animation.map((val) => html`<paper-item>${val}</paper-item>`)}
           </paper-listbox>
         </paper-dropdown-menu>
+        <br />
+        <div class="entity">
+          <paper-dropdown-menu
+            label="${localize('editor.settings.center')}"
+            .configValue=${'type'}
+            @value-changed=${this._centerChanged}
+          >
+            <paper-listbox slot="dropdown-content" .selected="${center.indexOf(this._config?.center?.type || 'none')}">
+              ${center.map((val) => html`<paper-item>${val}</paper-item>`)}
+            </paper-listbox>
+          </paper-dropdown-menu>
+          ${this._config?.center?.type == 'bars' || this._config?.center?.type == 'card'
+            ? html`<mwc-icon-button
+                aria-label=${localize('editor.actions.edit')}
+                class="edit-icon"
+                .value=${this._config?.center?.type}
+                @click="${this._editCenter}"
+              >
+                <ha-icon icon="mdi:pencil"></ha-icon>
+              </mwc-icon-button>`
+            : ''}
+        </div>
         ${this._renderEntitiesEditor()}
       </div>
     `;
+  }
+  /**
+   * Custom handeling for Center panel
+   */
+  private _centerChanged(ev: CustomValueEvent): void {
+    if (!this._config || !this.hass) {
+      return;
+    }
+    if (ev.target) {
+      const target = ev.target;
+      if (target.configValue) {
+        this._config = {
+          ...this._config,
+          center: {
+            ...this._config.center,
+            [target.configValue]: target.checked !== undefined ? target.checked : target.value,
+          },
+        };
+      }
+    }
+    fireEvent(this, 'config-changed', { config: this._config });
+  }
+
+  private _editCenter(ev: CustomValueEvent): void {
+    if (ev.currentTarget) {
+      const target = ev.currentTarget;
+      this._subElementEditor = {
+        type: <'card' | 'bars'>target.value,
+        element: this._config.center.content || target.value == 'card' ? {} : [{}],
+      };
+    }
   }
 
   private _valueChanged(ev: CustomValueEvent): void {
@@ -85,16 +160,27 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   @internalProperty() private _subElementEditor: SubElementConfig | undefined = undefined;
 
   private _renderSubElementEditor(): TemplateResult {
+    const subel = [
+      html`<div class="header">
+        <div class="back-title">
+          <mwc-icon-button @click=${this._goBack}>
+            <ha-icon icon="mdi:arrow-left"></ha-icon>
+          </mwc-icon-button>
+        </div>
+      </div>`,
+    ];
     switch (this._subElementEditor?.type) {
       case 'entity':
-        return this._entityEditor();
-      case 'center-bar':
-        return this._barEditor();
-      case 'center-card':
-        return this._cardEditor();
-      default:
-        return html``;
+        subel.push(this._entityEditor());
+        break;
+      case 'bars':
+        subel.push(this._barEditor());
+        break;
+      case 'card':
+        subel.push(this._cardEditor());
+        break;
     }
+    return html`${subel}`;
   }
 
   /**
@@ -117,16 +203,9 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   }
 
   private _entityEditor(): TemplateResult {
-    const item = this._subElementEditor?.element || DefaultItem;
+    const item = <EntitySettings>this._subElementEditor?.element || DefaultItem;
     const attributes = Object.keys({ ...this.hass?.states[item.entity || 0].attributes }) || [];
     return html`
-      <div class="header">
-        <div class="back-title">
-          <mwc-icon-button @click=${this._goBack}>
-            <ha-icon icon="mdi:arrow-left"></ha-icon>
-          </mwc-icon-button>
-        </div>
-      </div>
       <div class="side-by-side">
         <paper-input
           .label="${localize('editor.settings.name')} (${localize('editor.optional')})"
@@ -229,15 +308,43 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   private _barEditor(): TemplateResult {
     return html``;
   }
-
   private _cardEditor(): TemplateResult {
+    const card = this._subElementEditor?.element;
     return html`
       <hui-card-element-editor
         .hass=${this.hass}
-        .value=${this._card}
-        .lovelace=${this.lovelace}
-        @config-changed=${this._handleConfigChanged}
+        .value=${card}
+        .lovelace=${getLovelace()}
+        @config-changed=${this._centerChanged}
       ></hui-card-element-editor>
+      <div id="editor">
+        ${card
+          ? html`
+              <div id="card-options">
+                <mwc-button @click=${this._toggleMode} .disabled=${!this._guiModeAvailable} class="gui-mode-button">
+                  ${this.hass!.localize(
+                    !this._cardEditorEl || this._GUImode
+                      ? 'ui.panel.lovelace.editor.edit_card.show_code_editor'
+                      : 'ui.panel.lovelace.editor.edit_card.show_visual_editor',
+                  )}
+                </mwc-button>
+              </div>
+              <hui-card-element-editor
+                .hass=${this.hass}
+                .value=${this._config.cards[selected]}
+                .lovelace=${this.lovelace}
+                @config-changed=${this._handleConfigChanged}
+                @GUImode-changed=${this._handleGUIModeChanged}
+              ></hui-card-element-editor>
+            `
+          : html`
+              <hui-card-picker
+                .hass=${this.hass}
+                .lovelace=${this.lovelace}
+                @config-changed="${this._handleCardPicked}"
+              ></hui-card-picker>
+            `}
+      </div>
     `;
   }
 
@@ -342,11 +449,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   public disconnectedCallback(): void {
     super.disconnectedCallback();
     this._attached = false;
-  }
-
-  protected firstUpdated(): void {
-    Sortable.mount(OnSpill);
-    Sortable.mount(new AutoScroll());
   }
 
   /**
