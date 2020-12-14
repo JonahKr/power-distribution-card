@@ -8,6 +8,7 @@ import {
   PropertyValues,
   CSSResult,
   css,
+  query,
 } from 'lit-element';
 import { guard } from 'lit-html/directives/guard';
 
@@ -43,9 +44,12 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     try {
       await this.loadCardHelpers();
       await this._helpers.createCardElement({ type: 'calendar' });
+      await this._helpers.createCardElement({ type: 'horizontal-stack' });
     } catch {
       undefined;
     }
+    await customElements.get('hui-calendar-card').getConfigElement();
+    await customElements.get('hui-horizontal-stack-card').getConfigElement();
     //Sortable Stuff for the Entities Row Editor
     Sortable.mount(OnSpill);
     Sortable.mount(new AutoScroll());
@@ -287,7 +291,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           .configValue=${'preset'}
           @value-changed=${this._itemEntityChanged}
         >
-          <paper-listbox slot="dropdown-content" .selected=${PresetList.indexOf(item.preset!)}>
+          <paper-listbox slot="dropdown-content" .selected=${PresetList.indexOf(item.preset )}>
             ${PresetList.map((val) => html`<paper-item>${val}</paper-item>`)}
           </paper-listbox>
         </paper-dropdown-menu>
@@ -308,6 +312,20 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   private _barEditor(): TemplateResult {
     return html``;
   }
+
+  private _goBack(): void {
+    this._subElementEditor = undefined;
+  }
+
+  /**
+   * Card Editor
+   * -----------
+   * The Following is needed to implement the Card editor inside of the editor
+   */
+
+  @query('hui-card-element-editor')
+  private _cardEditorEl?;
+
   private _cardEditor(): TemplateResult {
     const card = this._subElementEditor?.element;
     return html`
@@ -317,39 +335,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         .lovelace=${getLovelace()}
         @config-changed=${this._centerChanged}
       ></hui-card-element-editor>
-      <div id="editor">
-        ${card
-          ? html`
-              <div id="card-options">
-                <mwc-button @click=${this._toggleMode} .disabled=${!this._guiModeAvailable} class="gui-mode-button">
-                  ${this.hass!.localize(
-                    !this._cardEditorEl || this._GUImode
-                      ? 'ui.panel.lovelace.editor.edit_card.show_code_editor'
-                      : 'ui.panel.lovelace.editor.edit_card.show_visual_editor',
-                  )}
-                </mwc-button>
-              </div>
-              <hui-card-element-editor
-                .hass=${this.hass}
-                .value=${this._config.cards[selected]}
-                .lovelace=${this.lovelace}
-                @config-changed=${this._handleConfigChanged}
-                @GUImode-changed=${this._handleGUIModeChanged}
-              ></hui-card-element-editor>
-            `
-          : html`
-              <hui-card-picker
-                .hass=${this.hass}
-                .lovelace=${this.lovelace}
-                @config-changed="${this._handleCardPicked}"
-              ></hui-card-picker>
-            `}
-      </div>
     `;
-  }
-
-  private _goBack(): void {
-    this._subElementEditor = undefined;
   }
 
   /**
