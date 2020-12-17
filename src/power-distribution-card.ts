@@ -17,6 +17,7 @@ import { PDCConfig, EntitySettings, ArrowStates, BarSettings } from './types';
 import { DefaultItem, DefaultConfig, PresetList, PresetObject, PresetType } from './presets';
 import styles from './styles';
 import { localize } from './localize/localize';
+import { formatNumber } from './format-number';
 
 console.info(
   `%c POWER-DISTRIBUTION-CARD %c ${version}_b4`,
@@ -193,10 +194,8 @@ export class PowerDistributionCard extends LitElement {
    */
   private _render_item(value: number, item: EntitySettings, index: number): TemplateResult {
     const state = item.invert_arrow ? value * -1 : value;
-
     //Toggle Absolute Values
     value = item.display_abs ? Math.abs(value) : value;
-
     //Unit-Of-Display
     let unit_of_display = 'W';
     switch (item.unit_of_display) {
@@ -214,21 +213,22 @@ export class PowerDistributionCard extends LitElement {
         }
         break;
     }
-
     //Decimal Precision
     const decFakTen = 10 ** (item.decimals || item.decimals == 0 ? item.decimals : 2);
     value = Math.round(value * decFakTen) / decFakTen;
+    //Format Number
+    const formatValue = formatNumber(value, this.hass.language);
 
     return html`
       <item .entity=${item.entity} @click="${this._moreInfo}">
         <badge>
           <icon>
-            <ha-icon data-state="${value == 0 ? 'unavaiable' : 'on'}" icon="${item.icon}"></ha-icon>
+            <ha-icon icon="${item.icon}"></ha-icon>
           </icon>
           <p class="subtitle">${item.name}</p>
         </badge>
         <value>
-          <p>${value} ${unit_of_display}</p>
+          <p>${formatValue} ${unit_of_display}</p>
           ${this._render_arrow(
             //This takes the side the item is on (index even = left) into account for the arrows
             state == 0 ? 'none' : index % 2 == 0 ? (state > 0 ? 'right' : 'left') : state > 0 ? 'left' : 'right',
