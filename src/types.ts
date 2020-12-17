@@ -27,14 +27,14 @@ export interface EntitySettings {
 
 export interface center {
   type: 'none' | 'card' | 'bars';
-  content?: LovelaceCardConfig | [BarSettings];
+  content?: LovelaceCardConfig | BarSettings[];
 }
-export const BarList = ['autarky', 'ratio'];
 export interface BarSettings {
   bar_color?: string;
   entity?: string;
   invert_value?: boolean;
   name?: string | undefined;
+  preset?: 'autarky' | 'ratio' | 'custom';
 }
 
 export type ArrowStates = 'right' | 'left' | 'none';

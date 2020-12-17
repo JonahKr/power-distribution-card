@@ -19,7 +19,7 @@ import styles from './styles';
 import { localize } from './localize/localize';
 
 console.info(
-  `%c POWER-DISTRIBUTION-CARD %c ${version}_b3`,
+  `%c POWER-DISTRIBUTION-CARD %c ${version}_b4`,
   `font-weight: 500; color: white; background: #03a9f4;`,
   `font-weight: 500; color: #03a9f4; background: white;`,
 );
@@ -38,7 +38,16 @@ export class PowerDistributionCard extends LitElement {
   }
 
   public static getStubConfig(): Record<string, unknown> {
-    return { title: 'Title', center: { type: 'bars' } };
+    return {
+      title: 'Title',
+      center: {
+        type: 'bars',
+        content: [
+          { preset: 'autarky', name: 'autarky' },
+          { preset: 'ratio', name: 'ratio' },
+        ],
+      },
+    };
   }
 
   @property() public hass!: HomeAssistant;
@@ -151,7 +160,7 @@ export class PowerDistributionCard extends LitElement {
         center_panel.push(this._createCardElement(center.content as LovelaceCardConfig));
         break;
       case 'bars':
-        center_panel.push(this._render_bars(consumption, production));
+        center_panel.concat(this._render_bars(consumption, production));
         break;
     }
 
@@ -282,46 +291,34 @@ export class PowerDistributionCard extends LitElement {
    * Render Support Function Calculating and Generating the Autarky and Ratio Bars
    * @param consumption the total home consumption
    * @param production the total home production
-   * @returns html containing the bars
+   * @returns html containing the bars in a Array of Template Results
    */
-  private _render_bars(consumption: number, production: number): TemplateResult {
-    let autarky_settings: BarSettings = {};
-    let ratio_settings: BarSettings = {};
-    this._config.center.content?.forEach((element: { [key: string]: BarSettings }) => {
-      if (element.autarky) autarky_settings = element.autarky;
-      if (element.ratio) ratio_settings = element.ratio;
+  private _render_bars(consumption: number, production: number): TemplateResult[] {
+    const bars: TemplateResult[] = [];
+    (this._config.center.content as BarSettings[]).forEach((element) => {
+      let value = -1;
+      switch (element.preset) {
+        case 'autarky': //Autarky in Percent = Home Production(Solar, Battery)*100 / Home Consumption
+          if (!element.entity)
+            value = consumption != 0 ? Math.min(Math.round((production * 100) / Math.abs(consumption)), 100) : 0;
+          break;
+        case 'ratio': //Ratio in Percent = Home Consumption / Home Production(Solar, Battery)*100
+          if (!element.entity)
+            value = production != 0 ? Math.min(Math.round((Math.abs(consumption) * 100) / production), 100) : 0;
+          break;
+      }
+      if (value < 0) value = this._val(element);
+      bars.push(html`
+        <div class="bar-element">
+          <p class="bar-percentage">${value}%</p>
+          <div class="bar-wrapper">
+            <bar style="height:${value}%; background-color:${element.bar_color || 'var(--dark-color)'};" />
+          </div>
+          <p>${element.name || ''}</p>
+        </div>
+      `);
     });
-    //Just to clarify. The formulas for this can differ widely, so i have decided to take the most suitable ones in my opinion
-    let ratio: number;
-    if (!ratio_settings.entity) {
-      //Ratio in Percent = Home Consumption / Home Production(Solar, Battery)*100
-      ratio = production != 0 ? Math.min(Math.round((Math.abs(consumption) * 100) / production), 100) : 0;
-    } else {
-      ratio = this._val(ratio_settings);
-    }
-    let autarky: number;
-    if (!autarky_settings.entity) {
-      //Autarky in Percent = Home Production(Solar, Battery)*100 / Home Consumption
-      autarky = consumption != 0 ? Math.min(Math.round((production * 100) / Math.abs(consumption)), 100) : 0;
-    } else {
-      autarky = this._val(autarky_settings);
-    }
-    return html`
-      <div class="ratio-bar">
-        <p id="ratio-percentage">${ratio}%</p>
-        <div class="bar-wrapper">
-          <bar style="height:${ratio}%; background-color:${ratio_settings.bar_color || 'var(--dark-color)'};" />
-        </div>
-        <p id="ratio">${ratio_settings.name || 'ratio'}</p>
-      </div>
-      <div class="autarky-bar">
-        <p id="autarky-percentage">${autarky}%</p>
-        <div class="bar-wrapper">
-          <bar style="height:${autarky}%; background-color:${autarky_settings.bar_color || 'var(--dark-color)'};" />
-        </div>
-        <p id="autarky">${autarky_settings.name || 'autarky'}</p>
-      </div>
-    `;
+    return bars;
   }
 
   private _createCardElement(cardConfig: LovelaceCardConfig) {
