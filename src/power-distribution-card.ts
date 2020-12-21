@@ -314,7 +314,7 @@ export class PowerDistributionCard extends LitElement {
         <div class="bar-element">
           <p class="bar-percentage">${value}%</p>
           <div class="bar-wrapper">
-            <bar style="height:${value}%; background-color:${element.bar_color || 'var(--dark-color)'};" />
+            <bar style="height:${value}%; background-color:${element.bar_color};" />
           </div>
           <p>${element.name || ''}</p>
         </div>

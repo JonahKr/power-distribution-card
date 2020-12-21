@@ -54,6 +54,8 @@ export const styles = css`
     margin: auto;
 
     flex: 1 1 auto;
+
+    background-color: rgba(114, 114, 114, 0.2);
   }
 
   bar {
@@ -61,6 +63,7 @@ export const styles = css`
     right: 0;
     bottom: 0;
     left: 0;
+    background-color: var(--secondary-text-color);
   }
 
   item {
@@ -133,7 +136,7 @@ export const styles = css`
     width: 54px;
     height: 4px;
     margin: 8px auto 8px auto;
-    opacity: 0.3;
+    opacity: 0.2;
     background-color: var(--secondary-text-color);
   }
 
@@ -145,13 +148,13 @@ export const styles = css`
   #a-flash {
     animation: flash 3s infinite steps(1);
     fill: var(--secondary-text-color);
-    fill-opacity: 0.3;
+    fill-opacity: 0.2;
   }
 
   @keyframes flash {
     0%,
     66% {
-      fill-opacity: 0.3;
+      fill-opacity: 0.2;
       fill: var(--secondary-text-color);
     }
     33% {
