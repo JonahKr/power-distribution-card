@@ -15,7 +15,7 @@ import { guard } from 'lit-html/directives/guard';
 import Sortable, { AutoScroll, OnSpill, SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
 import { fireEvent, getLovelace, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
-import { PDCConfig, HTMLElementValue, CustomValueEvent, SubElementConfig, EntitySettings } from './types';
+import { PDCConfig, HTMLElementValue, CustomValueEvent, SubElementConfig, EntitySettings, BarSettings } from './types';
 import { localize } from './localize/localize';
 
 import { DefaultItem, PresetList, PresetObject } from './presets';
@@ -132,8 +132,9 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       const target = ev.currentTarget;
       this._subElementEditor = {
         type: <'card' | 'bars'>target.value,
-        element: this._config.center.content || target.value == 'card' ? {} : [{}],
+        element: this._config.center.content!,
       };
+      console.log(this._subElementEditor);
     }
   }
 
@@ -291,7 +292,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           .configValue=${'preset'}
           @value-changed=${this._itemEntityChanged}
         >
-          <paper-listbox slot="dropdown-content" .selected=${PresetList.indexOf(item.preset )}>
+          <paper-listbox slot="dropdown-content" .selected=${PresetList.indexOf(item.preset!)}>
             ${PresetList.map((val) => html`<paper-item>${val}</paper-item>`)}
           </paper-listbox>
         </paper-dropdown-menu>
@@ -306,11 +307,127 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           <label for="calc_excluded"> ${localize('editor.settings.calc_excluded')} </label>
         </div>
       </div>
+      <h3>Color Settings</h3>
+      <table>
+        <tr>
+          <th>Element</th>
+          <th>&gt; 0</th>
+          <th>= 0</th>
+          <th>&lt; 0</th>
+        </tr>
+        <tr>
+          <th>icon</th>
+          <th>1</th>
+          <th>2</th>
+          <th>3</th>
+        </tr>
+      </table>
     `;
   }
 
+  /**
+   * This enables support for changing the bars
+   * @param ev Value Event containing the index and value of the changed element
+   */
+  private _barChanged(ev: CustomValueEvent): void {
+    if (!ev.target) return;
+    const target = ev.target;
+    if (!target.configValue) return;
+    let content: BarSettings[];
+    if (target.configValue == 'content') {
+      content = target.value as BarSettings[];
+    } else {
+      content = [...(this._config.center.content as BarSettings[])];
+      const index = target.index || this._subElementEditor?.index || 0;
+      content[index] = {
+        ...content[index],
+        [target.configValue]: target.checked != undefined ? target.checked : (target.value as string),
+      };
+    }
+
+    this._config = { ...this._config, center: { type: 'bars', content: content } };
+    fireEvent(this, 'config-changed', { config: this._config });
+  }
+
+  private _removeBar(ev: CustomValueEvent): void {
+    const index = ev.currentTarget?.index || 0;
+    const newBars = [...(this._config.center.content as BarSettings[])];
+    newBars.splice(index, 1);
+
+    this._barChanged({ target: { configValue: 'content', value: newBars } });
+  }
+
+  private async _addBar(): Promise<void> {
+    const item = Object.assign({}, { name: 'Name' });
+    const newEntities = this._config.entities.concat(item);
+    //This basically fakes a event object
+    this._valueChanged({ target: { configValue: 'entities', value: newEntities } });
+  }
+
   private _barEditor(): TemplateResult {
-    return html``;
+    const editor: TemplateResult[] = [];
+    (this._subElementEditor?.element as BarSettings[]).forEach((e, index) =>
+      editor.push(html`
+        <div class="bar-editor">
+          <h3 style="margin-bottom:6px;">Bar ${index + 1}
+          <mwc-icon-button
+            aria-label=${localize('editor.actions.remove')}
+            class="remove-icon"
+            .index=${index}
+            @click=${this._removeBar}
+            >
+            <ha-icon icon="mdi:close"></ha-icon>
+          </mwc-icon-button>
+          </h4>
+          <div class="side-by-side">
+            <paper-input
+              .label="${localize('editor.settings.name')} (${localize('editor.optional')})"
+              .value=${e.name || ''}
+              .configValue=${'name'}
+              @value-changed=${this._barChanged}
+              .index=${index}
+            ></paper-input>
+            <ha-entity-picker
+              label="${localize('editor.settings.entity')} (${localize('editor.required')})"
+              allow-custom-entity
+              hideClearIcon
+              .hass=${this.hass}
+              .configValue=${'entity'}
+              .value=${e.entity}
+              @value-changed=${this._barChanged}
+              .index=${index}
+            ></ha-entity-picker>
+          </div>
+          <div class="side-by-side">
+            <div class="checkbox">
+              <input
+                type="checkbox"
+                id="invert-value"
+                .checked="${e.invert_value || false}"
+                .configValue=${'invert_value'}
+                @change=${this._barChanged}
+                .index=${index}
+              />
+              <label for="invert-value"> ${localize('editor.settings.invert-value')}</label>
+            </div>
+            <paper-input
+              .label="${localize('editor.settings.color')}"
+              .value=${e.bar_color || ''}
+              .configValue=${'bar_color'}
+              @value-changed=${this._barChanged}
+              .index=${index}
+            ></paper-input>
+          </div>
+        </div>
+      `),
+    );
+    editor.push(html`
+      <mwc-icon-button aria-label=${localize('editor.actions.add')} class="add-icon" @click="${this._addBar}">
+        >
+        <ha-icon icon="mdi:plus-circle-outline"></ha-icon>
+      </mwc-icon-button>
+    `);
+    return html`${editor.map((e) => html`${e}`)}`;
   }
 
   private _goBack(): void {

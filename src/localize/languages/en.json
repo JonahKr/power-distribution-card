@@ -28,7 +28,8 @@
       "entity": "Entity",
       "attribute": "Attribute",
       "calc_excluded": "Excluded from Calculations",
-      "center": "Center"
+      "center": "Center",
+      "color": "Color"
     }
   }
 }

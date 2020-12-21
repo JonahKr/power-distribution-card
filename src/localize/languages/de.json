@@ -28,7 +28,8 @@
       "entity": "Element",
       "attribute": "Attribut",
       "calc_excluded": "Von Rechnungen ausgeschlossen",
-      "center": "Mittelbereich"
+      "center": "Mittelbereich",
+      "color": "Farbe"
     }
   }
 }

@@ -41,6 +41,7 @@ export class PowerDistributionCard extends LitElement {
   public static getStubConfig(): Record<string, unknown> {
     return {
       title: 'Title',
+      entities: [],
       center: {
         type: 'bars',
         content: [
@@ -154,6 +155,7 @@ export class PowerDistributionCard extends LitElement {
 
     //Populating the Center Panel
     const center = this._config.center;
+    console.log(center);
     switch (center.type) {
       case 'none':
         break;
@@ -161,7 +163,7 @@ export class PowerDistributionCard extends LitElement {
         center_panel.push(this._createCardElement(center.content as LovelaceCardConfig));
         break;
       case 'bars':
-        center_panel.concat(this._render_bars(consumption, production));
+        center_panel.push(this._render_bars(consumption, production));
         break;
     }
 
@@ -291,9 +293,9 @@ export class PowerDistributionCard extends LitElement {
    * Render Support Function Calculating and Generating the Autarky and Ratio Bars
    * @param consumption the total home consumption
    * @param production the total home production
-   * @returns html containing the bars in a Array of Template Results
+   * @returns html containing the bars as Template Results
    */
-  private _render_bars(consumption: number, production: number): TemplateResult[] {
+  private _render_bars(consumption: number, production: number): TemplateResult {
     const bars: TemplateResult[] = [];
     (this._config.center.content as BarSettings[]).forEach((element) => {
       let value = -1;
@@ -318,7 +320,7 @@ export class PowerDistributionCard extends LitElement {
         </div>
       `);
     });
-    return bars;
+    return html`${bars.map((e) => html`${e}`)}`;
   }
 
   private _createCardElement(cardConfig: LovelaceCardConfig) {

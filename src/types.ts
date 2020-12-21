@@ -48,7 +48,7 @@ export interface CustomValueEvent {
     checked?: boolean;
     configValue?: string;
     index?: number;
-    value?: string | EntitySettings[];
+    value?: string | EntitySettings[] | BarSettings[];
   };
   currentTarget?: {
     index?: number;
@@ -59,5 +59,5 @@ export interface CustomValueEvent {
 export interface SubElementConfig {
   type: 'entity' | 'bars' | 'card';
   index?: number;
-  element: EntitySettings | LovelaceCardConfig | [BarSettings];
+  element: EntitySettings | LovelaceCardConfig | BarSettings[];
 }
