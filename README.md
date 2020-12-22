@@ -20,28 +20,8 @@
 <div id="breaking_changes">
   <h2>Breaking Changes!</h2>
 
-  From 1.7 on :
-  - All Bar Settings are now sorted under the center item.
-```yaml
-Old:
-entities:
-  - autarky: sensor.xyz
-  - ratio:
-      bar_color: red
-
-
-New:
-center:
-  - autarky: sensor.xyz
-  - ratio:
-      bar_color: red
-```
-
-
-  **Deprecated**: 
-  
-  `disable_animation` has been deprecated for `animation: none`.  
-  Support will be dropped with 2.0
+  !I highly recommend using the visual editor for configuration!
+  Only for nested-card configurations the code editor is still needed.
   
 <br/>
 <hr>
@@ -58,7 +38,7 @@ center:
       <h4><a href="#presets">Presets</a></h4>
       <h4><a href="#simple">Simple Configuration</a></h4>
       <h4><a href="#center">Center Panel</a></h4>
-      <h4><a href="#advanced">Advanced Configuration</a></h4>
+      <h4><a href="#entity">Advanced Configuration</a></h4>
     </li>
     <li>
       <h3><a href="#faq">FAQs</a></h2>
@@ -194,45 +174,26 @@ The presets *consumer* and *producer* enable to add any custom device into your 
 
 ## Simple Configuration 🛠️
 
+With Version 2.0 a Visual Editor got introduced.
+You can find the Card in your Card Selector probably at the bottom.
+From there on you can configure your way to your custom Card.
 The easiest way to get your Card up and running, is by defining the entities for the presets directly.
-Example:
-```yaml
-type: 'custom:power-distribution-card'
-entities:
-  - solar: sensor.PV_garage
-  - grid: sensor.kamstrup_grid
-  - battery: sensor.lg_neon_battery
-  - home: sensor.e3dc_home
-```
-If you have Sensors for **autarky** or **ratio** aswell, you can just add them to the list:
-```yaml
-  - autarky: sensor.sunbessy_autarky
-  - ratio: sensor.e3dc_ratio
-```
 <br/>
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/38377070/96745908-e9afd880-13c6-11eb-9772-4bce4a3ad29c.gif"/>
+<img src="https://user-images.githubusercontent.com/38377070/102943002-25464c00-44b7-11eb-8566-0a82c80ae96d.gif"/>
 </p>
-
-
-
-
-You can change the animations in your card aswell with the **animation** keyoword which can either be *none* , *flash* or *slide*.  
-Furthermore you can add a **title** to the card by just:
-```yaml
-title: My Power Card
-animation: slide
-entities:
-  - ...
-```
-
 <br/>
 
 ```diff
 ! Please Check for every Sensor: positive sensor values = production, negative values = consumption
-! If this is the other way around in your Case, add the `invert_value` setting (Advanced Configuration)!
+! If this is the other way around in your Case, check the `invert_value` setting (Advanced Configuration)!
 ```
+
+<p align="center">
+<img src="https://user-images.githubusercontent.com/38377070/102943049-44dd7480-44b7-11eb-9a42-912cac357299.gif"/>
+</p>
+
 </div>
 <br/><br/>
 
@@ -245,68 +206,47 @@ For customizing the Center Panel you basically have 3 Options:
 ### None 🕳️
 
 the *void* 
-```yaml
-center: none
-```
 
 <br/>
 
 ### Bars 📊
 
-To modify the **autarky** or **ratio** bars, you have these settings:
+Bars have the following Settings:
 | Setting          | type          | example           | description  |
 | ---------------- |:-------------:|:-----------------:| :------------|
 | `bar_color`      | string        | red, #C1C1C1      |You can pass any string that CSS will accept as a color. |
 | `entity`         | string        | sensor.ln_autarky | You can specify the entity_id here aswell. |
 | `invert_value`   | bool          | false             | This will invert the value recieved from HASS. This affects calculations aswell! |
 | `name`           | string        | Eigenstrom        | Feel free to change the displayed name of the element. |
+| `preset`         | 'ratio' 'autarky' 'custom'        | all in type        | Option to autocalc ratio/autarky. |
 
-<p>
-
-Example for bar configuration:
-```yaml
-type: 'custom:power-distribution'
-center:
-  - autarky:
-      entity: sensor.e3dc_autarky
-      bar_color: blue
-      name: Autarki
-  - ratio: sensor.e3dc_ratio
-```
 <br/>
 
 ### Cards 🃏
 
-You can fill the center panel with any card you want. Be aware though that the **width is limited** which limits the amount of fitting cards.
 
 <p align="center">
 <img width="600px" src="https://user-images.githubusercontent.com/38377070/97620471-e8fbef80-1a21-11eb-90d3-1bcbab57da2c.PNG"/>
 </p>
 
+Cards couldn't yet be included in the Visual editor in a nice way. I am working on it though. Feel free to open a Issue with suggestions.
+To add a card you can simply replace the `center` part in the Code Editor. Be aware though: While you can switch between `none` and `card` without any issues, switching to Bars will override your settings.
+
 For example you could insert a glance card:
 ```yaml
 center:
-  type: glance
-  entities:
-    - sun.sun
+  type: card
+  content:
+    type: glance
+    entities:
+      - sensor.any_Sensor
 ```
 </div>
 <br/><br/>
 
-<div id="advanced">
+<div id="entity">
 
-## Advanced Configuration ⚙️
-
-You really want to make this card your own? Here you go! 
-
-You can create Settings for each element by creating a new level. The *entity_id* **must** be changed to the `entity` setting:
-```yaml
-entities:
-  - solar:
-      entity: sensor.e3dc_solar
-      invert_value: true
-```
-<br/>
+## Entity Configuration ⚙️
 
 There are alot of settings you can customize your sensors with:      
 
@@ -325,25 +265,6 @@ There are alot of settings you can customize your sensors with:
 | `unit_of_measurement` | string        | *W* , *kW*       | The Unit the value is coming from the Sensor. **This should be detected automatically** |
 <p>
 
-Example for advanced sensor configuration:
-```yaml
-type: 'custom:power-distribution'
-entities:
-  - solar:
-      entity: sensor.e3dc_solar
-      icon: mdi:sun
-  - battery:
-      entity: lg_neon_battery
-      display_abs: true
-  - home:
-      entity: sensor.e3dc_home
-      invert_value: true
-  - car_charger:
-      entity: sensor.home_powerwall
-      calc_excluded: true
-      name: Tesla
-      unit_of_display: kW
-```
 </div>
 <br/>
 <br/>
@@ -354,13 +275,14 @@ entities:
 <div id="faq">
 <h1> FAQs ❓</h1>
 
+### My old Configuration doesn't work anymore!
+If this is the case - Congratulations you're running the new Version. 
+To easily integrate the visual editor i had to make some sacrefices and apply many breaking changes.
+This will be the last time though. *I hope °-°*
 ### What the heck are these autarky and ratio calculating?
 So basically these bar-graphs are nice indicators to show you:
 1. the autarky of your home (Home Production like Solar / Home Consumption) 
 2. the ratio / share of produced electricity used by the home (The Germans call it `Eigenverbrauchsanteil` 😉)
-
-### Is the battery able to show its SOC?
-Currently not. Its planned.
 
 ### kW and kWh is not the Same!
 I know... In this case usability is more important and the user has to decide if he is ok with that.
