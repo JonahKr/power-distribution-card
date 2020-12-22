@@ -134,7 +134,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         type: <'card' | 'bars'>target.value,
         element: this._config.center.content!,
       };
-      console.log(this._subElementEditor);
     }
   }
 
@@ -438,6 +437,12 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    * Card Editor
    * -----------
    * The Following is needed to implement the Card editor inside of the editor
+   * <hui-card-element-editor
+   *    .hass=${this.hass}
+   *    .value=${card}
+   *    .lovelace=${getLovelace()}
+   *    @config-changed=${this._centerChanged}
+   *  ></hui-card-element-editor>
    */
 
   @query('hui-card-element-editor')
@@ -446,12 +451,11 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   private _cardEditor(): TemplateResult {
     const card = this._subElementEditor?.element;
     return html`
-      <hui-card-element-editor
-        .hass=${this.hass}
-        .value=${card}
-        .lovelace=${getLovelace()}
-        @config-changed=${this._centerChanged}
-      ></hui-card-element-editor>
+      Sadly you cannot edit cards from the visual editor yet.
+      <p />
+      Check out the
+      <a target="_blank" rel="noopener noreferrer" href="https://github.com/JonahKr/power-distribution-card#cards-">Readme</a>
+      to check out the latest and best way to add it.
     `;
   }
 
