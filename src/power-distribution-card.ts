@@ -219,7 +219,7 @@ export class PowerDistributionCard extends LitElement {
     const decFakTen = 10 ** (item.decimals || item.decimals == 0 ? item.decimals : 2);
     value = Math.round(value * decFakTen) / decFakTen;
     //Format Number
-    const formatValue = formatNumber(value, this.hass.language);
+    const formatValue = value; //formatNumber(value, this.hass.language);
 
     return html`
       <item .entity=${item.entity} @click="${this._moreInfo}">
