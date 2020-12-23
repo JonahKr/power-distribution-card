@@ -17,7 +17,7 @@ import { PDCConfig, EntitySettings, ArrowStates, BarSettings } from './types';
 import { DefaultItem, DefaultConfig, PresetList, PresetObject, PresetType } from './presets';
 import styles from './styles';
 import { localize } from './localize/localize';
-import { formatNumber } from './format-number';
+//import { formatNumber } from './format-number';
 
 console.info(
   `%c POWER-DISTRIBUTION-CARD %c ${version}_b4`,
@@ -296,6 +296,7 @@ export class PowerDistributionCard extends LitElement {
    */
   private _render_bars(consumption: number, production: number): TemplateResult {
     const bars: TemplateResult[] = [];
+    if (!this._config.center.content || (this._config.center.content as BarSettings[]).length == 0) return html``;
     (this._config.center.content as BarSettings[]).forEach((element) => {
       let value = -1;
       switch (element.preset) {

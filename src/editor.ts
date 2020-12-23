@@ -14,7 +14,7 @@ import { guard } from 'lit-html/directives/guard';
 
 import Sortable, { AutoScroll, OnSpill, SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
-import { fireEvent, getLovelace, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
+import { fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
 import { PDCConfig, HTMLElementValue, CustomValueEvent, SubElementConfig, EntitySettings, BarSettings } from './types';
 import { localize } from './localize/localize';
 
@@ -54,7 +54,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   }
 
   private async loadCardHelpers(): Promise<void> {
-    this._helpers = await (window as any).loadCardHelpers();
+    this._helpers = await window.loadCardHelpers();
   }
 
   protected render(): TemplateResult | void {
@@ -130,7 +130,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       const target = ev.currentTarget;
       this._subElementEditor = {
         type: <'card' | 'bars'>target.value,
-        element: this._config.center.content!,
+        element: this._config.center.content,
       };
     }
   }
@@ -142,14 +142,10 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     if (ev.target) {
       const target = ev.target;
       if (target.configValue) {
-        if (target.value === '') {
-          delete this._config[target.configValue];
-        } else {
-          this._config = {
-            ...this._config,
-            [target.configValue]: target.checked !== undefined ? target.checked : target.value,
-          };
-        }
+        this._config = {
+          ...this._config,
+          [target.configValue]: target.checked !== undefined ? target.checked : target.value,
+        };
       }
     }
     fireEvent(this, 'config-changed', { config: this._config });
@@ -285,11 +281,11 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       <h3>Preset Settings</h3>
       <div class="side-by-side">
         <paper-dropdown-menu
-          label="${localize('editor.preset')}"
+          label="${localize('editor.settings.preset')}"
           .configValue=${'preset'}
           @value-changed=${this._itemEntityChanged}
         >
-          <paper-listbox slot="dropdown-content" .selected=${PresetList.indexOf(item.preset!)}>
+          <paper-listbox slot="dropdown-content" .selected=${PresetList.indexOf(item.preset || PresetList[0])}>
             ${PresetList.map((val) => html`<paper-item>${val}</paper-item>`)}
           </paper-listbox>
         </paper-dropdown-menu>
@@ -363,8 +359,9 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
 
   private _barEditor(): TemplateResult {
     const editor: TemplateResult[] = [];
-    (this._subElementEditor?.element as BarSettings[]).forEach((e, index) =>
-      editor.push(html`
+    if (this._subElementEditor?.element) {
+      (this._subElementEditor?.element as BarSettings[]).forEach((e, index) =>
+        editor.push(html`
         <div class="bar-editor">
           <h3 style="margin-bottom:6px;">Bar ${index + 1}
           <mwc-icon-button
@@ -417,7 +414,8 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           </div>
         </div>
       `),
-    );
+      );
+    }
     editor.push(html`
       <mwc-icon-button aria-label=${localize('editor.actions.add')} class="add-icon" @click="${this._addBar}">
         <ha-icon icon="mdi:plus-circle-outline"></ha-icon>
@@ -446,7 +444,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   private _cardEditorEl?;
 
   private _cardEditor(): TemplateResult {
-    const card = this._subElementEditor?.element;
+    //const card = this._subElementEditor?.element;
     return html`
       Sadly you cannot edit cards from the visual editor yet.
       <p />

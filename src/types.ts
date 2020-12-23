@@ -39,10 +39,6 @@ export interface BarSettings {
 
 export type ArrowStates = 'right' | 'left' | 'none';
 
-export interface HTMLElementValue extends HTMLElement {
-  value: string;
-}
-
 export interface CustomValueEvent {
   target?: {
     checked?: boolean;
@@ -59,5 +55,14 @@ export interface CustomValueEvent {
 export interface SubElementConfig {
   type: 'entity' | 'bars' | 'card';
   index?: number;
-  element: EntitySettings | LovelaceCardConfig | BarSettings[];
+  element?: EntitySettings | LovelaceCardConfig | BarSettings[];
+}
+
+export interface HTMLElementValue extends HTMLElement {
+  value: string;
+}
+declare global {
+  interface Window {
+    loadCardHelpers: () => void;
+  }
 }
