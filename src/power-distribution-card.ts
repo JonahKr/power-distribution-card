@@ -155,7 +155,6 @@ export class PowerDistributionCard extends LitElement {
 
     //Populating the Center Panel
     const center = this._config.center;
-    console.log(center);
     switch (center.type) {
       case 'none':
         break;

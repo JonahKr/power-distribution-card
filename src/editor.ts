@@ -44,12 +44,10 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     try {
       await this.loadCardHelpers();
       await this._helpers.createCardElement({ type: 'calendar' });
-      await this._helpers.createCardElement({ type: 'horizontal-stack' });
+      await customElements.get('hui-calendar-card').getConfigElement();
     } catch {
       undefined;
     }
-    await customElements.get('hui-calendar-card').getConfigElement();
-    await customElements.get('hui-horizontal-stack-card').getConfigElement();
     //Sortable Stuff for the Entities Row Editor
     Sortable.mount(OnSpill);
     Sortable.mount(new AutoScroll());
@@ -357,10 +355,10 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   }
 
   private async _addBar(): Promise<void> {
-    const item = Object.assign({}, { name: 'Name' });
-    const newEntities = this._config.entities.concat(item);
+    const item = Object.assign({}, { name: 'Name', preset: 'custom' });
+    const newBar = this._config.center.content?.concat(item);
     //This basically fakes a event object
-    this._valueChanged({ target: { configValue: 'entities', value: newEntities } });
+    this._valueChanged({ target: { configValue: 'entities', value: newBar } });
   }
 
   private _barEditor(): TemplateResult {
@@ -422,7 +420,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     );
     editor.push(html`
       <mwc-icon-button aria-label=${localize('editor.actions.add')} class="add-icon" @click="${this._addBar}">
-        >
         <ha-icon icon="mdi:plus-circle-outline"></ha-icon>
       </mwc-icon-button>
     `);
@@ -454,7 +451,9 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       Sadly you cannot edit cards from the visual editor yet.
       <p />
       Check out the
-      <a target="_blank" rel="noopener noreferrer" href="https://github.com/JonahKr/power-distribution-card#cards-">Readme</a>
+      <a target="_blank" rel="noopener noreferrer" href="https://github.com/JonahKr/power-distribution-card#cards-"
+        >Readme</a
+      >
       to check out the latest and best way to add it.
     `;
   }
@@ -526,7 +525,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       </div>
       <div class="add-item">
         <paper-dropdown-menu
-          label="${localize('editor.preset')}"
+          label="${localize('editor.settings.preset')}"
           name="preset"
           class="add-preset"
           >

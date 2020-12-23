@@ -15,21 +15,21 @@
     "optional": "Optional",
     "required": "Erforderlich",
     "settings": {
-      "title": "Titel",
       "animation": "Animation",
-      "entities": "Entities",
-      "icon": "Symbol",
-      "preset": "Vorlagen",
-      "name": "Name",
-      "invert-value": "Invertierter Wert",
-      "display-abs": "Absolute Wertanzeige",
-      "decimals": "Dezimalstellen",
-      "unit_of_display": "Angezeigte Einheit",
-      "entity": "Element",
       "attribute": "Attribut",
       "calc_excluded": "Von Rechnungen ausgeschlossen",
       "center": "Mittelbereich",
-      "color": "Farbe"
+      "color": "Farbe",
+      "decimals": "Dezimalstellen",
+      "display-abs": "Absolute Wertanzeige",
+      "entities": "Entities",
+      "entity": "Element",
+      "icon": "Symbol",
+      "invert-value": "Invertierter Wert",
+      "name": "Name",
+      "preset": "Vorlagen",
+      "title": "Titel",
+      "unit_of_display": "Angezeigte Einheit"
     }
   }
 }

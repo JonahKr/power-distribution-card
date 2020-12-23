@@ -15,21 +15,21 @@
     "optional": "Optional",
     "required": "Required",
     "settings": {
-      "title": "Title",
       "animation": "Animation",
-      "entities": "Entities",
-      "icon": "Icon",
-      "preset": "Preset",
-      "name": "Name",
-      "invert-value": "Invert Value",
-      "display-abs": "Display Absolute Value",
-      "decimals": "Decimals",
-      "unit_of_display": "Unit of Display",
-      "entity": "Entity",
       "attribute": "Attribute",
       "calc_excluded": "Excluded from Calculations",
       "center": "Center",
-      "color": "Color"
+      "color": "Color",
+      "decimals": "Decimals",
+      "display-abs": "Display Absolute Value",
+      "entities": "Entities",
+      "entity": "Entity",
+      "icon": "Icon",
+      "invert-value": "Invert Value",
+      "name": "Name",
+      "preset": "Preset",
+      "title": "Title",
+      "unit_of_display": "Unit of Display"
     }
   }
 }
