@@ -352,15 +352,15 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
 
   private async _addBar(): Promise<void> {
     const item = Object.assign({}, { name: 'Name', preset: 'custom' });
-    const newBar = this._config.center.content?.concat(item);
+    const newBars = [...(<BarSettings[]>this._config.center.content || []), <BarSettings>item];
     //This basically fakes a event object
-    this._valueChanged({ target: { configValue: 'entities', value: newBar } });
+    this._barChanged({ target: { configValue: 'content', value: newBars } });
   }
 
   private _barEditor(): TemplateResult {
     const editor: TemplateResult[] = [];
-    if (this._subElementEditor?.element) {
-      (this._subElementEditor?.element as BarSettings[]).forEach((e, index) =>
+    if (this._config.center.content) {
+      (this._config.center.content as BarSettings[]).forEach((e, index) =>
         editor.push(html`
         <div class="bar-editor">
           <h3 style="margin-bottom:6px;">Bar ${index + 1}
@@ -426,6 +426,10 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
 
   private _goBack(): void {
     this._subElementEditor = undefined;
+
+    this._sortable?.destroy();
+    this._sortable = undefined;
+    this._sortable = this._createSortable();
   }
 
   /**
@@ -440,8 +444,8 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    *  ></hui-card-element-editor>
    */
 
-  @query('hui-card-element-editor')
-  private _cardEditorEl?;
+  //@query('hui-card-element-editor')
+  //private _cardEditorEl?;
 
   private _cardEditor(): TemplateResult {
     //const card = this._subElementEditor?.element;
@@ -563,7 +567,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     super.updated(changedProps);
     const attachedChanged = changedProps.has('_attached');
     const entitiesChanged = changedProps.has('_config');
-
     if (!entitiesChanged && !attachedChanged) {
       return;
     }

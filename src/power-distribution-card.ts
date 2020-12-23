@@ -20,7 +20,7 @@ import { localize } from './localize/localize';
 //import { formatNumber } from './format-number';
 
 console.info(
-  `%c POWER-DISTRIBUTION-CARD %c ${version}_b4`,
+  `%c POWER-DISTRIBUTION-CARD %c ${version}_b5`,
   `font-weight: 500; color: white; background: #03a9f4;`,
   `font-weight: 500; color: #03a9f4; background: white;`,
 );
