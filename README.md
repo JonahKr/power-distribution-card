@@ -215,6 +215,7 @@ Bars have the following Settings:
 | Setting          | type          | example           | description  |
 | ---------------- |:-------------:|:-----------------:| :------------|
 | `bar_color`      | string        | red, #C1C1C1      |You can pass any string that CSS will accept as a color. |
+| `bar_bg_color`   | string        | red, #C1C1C1      |The Background Color of the Bar. You can pass any string that CSS will accept as a color. |
 | `entity`         | string        | sensor.ln_autarky | You can specify the entity_id here aswell. |
 | `invert_value`   | bool          | false             | This will invert the value recieved from HASS. This affects calculations aswell! |
 | `name`           | string        | Eigenstrom        | Feel free to change the displayed name of the element. |
@@ -258,12 +259,32 @@ There are alot of settings you can customize your sensors with:
 | `display_abs`         | boolean       | false            | The displayed values are Absolute normally. You can change that here. |
 | `entity`              | string        | sensor.e3dc_grid | You can specify the entity_id here aswell. |
 | `icon`                | string        | mdi:dishwasher   | Why not change the displayed Icon to any [MDI](https://cdn.materialdesignicons.com/5.4.55/) one? |
+| `icon_color`          | object        | {smaller:'red'}  | You can Change the Color of the icon dependant on the value. (Bigger, Equal and Smaller) |
 | `invert_arrow`        | bool          | true             | This will change the *arrows* direction to the oposite one. |
 | `invert_value`        | bool          | false            | This will invert the value recieved from HASS. This affects calculations aswell! |
 | `name`                | string        | dishwasher       | Feel free to change the displayed name of the element. |
 | `unit_of_display`     | string        | *W* , *kW* , *adaptive*      | The Unit the value is displayed in (default: W). Adaptive will show kW for values >= 1kW |
 | `unit_of_measurement` | string        | *W* , *kW*       | The Unit the value is coming from the Sensor. **This should be detected automatically** |
-<p>
+<p> 
+
+This could look something like:
+
+```yaml
+entities:
+  - decimals: 2
+    display_abs: true
+    name: battery
+    unit_of_display: W
+    consumer: true
+    icon: 'mdi:battery-outline'
+    producer: true
+    entity: sensor.e3dc_battery
+    preset: battery
+    icon_color:
+      bigger: 'green'
+      equal: ''
+      smaller: 'red'
+```
 
 </div>
 <br/>
