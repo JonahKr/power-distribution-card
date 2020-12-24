@@ -24,6 +24,7 @@ import { DefaultItem, PresetList, PresetObject } from './presets';
  */
 const animation = ['none', 'flash', 'slide'];
 const center = ['none', 'card', 'bars'];
+const bar_presets = ['autarky', 'ratio', 'custom'];
 
 @customElement('power-distribution-card-editor')
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
@@ -135,22 +136,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     }
   }
 
-  private _valueChanged(ev: CustomValueEvent): void {
-    if (!this._config || !this.hass) {
-      return;
-    }
-    if (ev.target) {
-      const target = ev.target;
-      if (target.configValue) {
-        this._config = {
-          ...this._config,
-          [target.configValue]: target.checked !== undefined ? target.checked : target.value,
-        };
-      }
-    }
-    fireEvent(this, 'config-changed', { config: this._config });
-  }
-
   /**
    * SubElementEditor
    */
@@ -179,6 +164,14 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         break;
     }
     return html`${subel}`;
+  }
+
+  private _goBack(): void {
+    this._subElementEditor = undefined;
+
+    this._sortable?.destroy();
+    this._sortable = undefined;
+    this._sortable = this._createSortable();
   }
 
   /**
@@ -319,9 +312,11 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   }
 
   /**
-   * This enables support for changing the bars
-   * @param ev Value Event containing the index and value of the changed element
+   * Bar Editor
+   * -------------------
+   * This Bar Editor allows the user to easily add and remove new bars.
    */
+
   private _barChanged(ev: CustomValueEvent): void {
     if (!ev.target) return;
     const target = ev.target;
@@ -382,7 +377,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
               .index=${index}
             ></paper-input>
             <ha-entity-picker
-              label="${localize('editor.settings.entity')} (${localize('editor.required')})"
+              label="${localize('editor.settings.entity')}"
               allow-custom-entity
               hideClearIcon
               .hass=${this.hass}
@@ -404,6 +399,20 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
               />
               <label for="invert-value"> ${localize('editor.settings.invert-value')}</label>
             </div>
+            <div>
+            <paper-dropdown-menu
+              label="${localize('editor.settings.preset')}"
+              .configValue=${'preset'}
+              @value-changed=${this._barChanged}
+              .index=${index}
+            >
+              <paper-listbox slot="dropdown-content" .selected=${bar_presets.indexOf(e.preset || '')}>
+                ${bar_presets.map((val) => html`<paper-item>${val}</paper-item>`)}
+              </paper-listbox>
+            </paper-dropdown-menu>
+          </div>
+          </div>
+          <div class="side-by-side">
             <paper-input
               .label="${localize('editor.settings.color')}"
               .value=${e.bar_color || ''}
@@ -411,8 +420,16 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
               @value-changed=${this._barChanged}
               .index=${index}
             ></paper-input>
+            <paper-input
+              .label="${localize('editor.settings.background_color')}"
+              .value=${e.bar_bg_color || ''}
+              .configValue=${'bar_bg_color'}
+              @value-changed=${this._barChanged}
+              .index=${index}
+            ></paper-input>
           </div>
         </div>
+        <br/>
       `),
       );
     }
@@ -422,14 +439,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       </mwc-icon-button>
     `);
     return html`${editor.map((e) => html`${e}`)}`;
-  }
-
-  private _goBack(): void {
-    this._subElementEditor = undefined;
-
-    this._sortable?.destroy();
-    this._sortable = undefined;
-    this._sortable = this._createSortable();
   }
 
   /**
@@ -612,6 +621,22 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       handle: '.handle',
       onEnd: async (evt: SortableEvent) => this._rowMoved(evt),
     });
+  }
+
+  private _valueChanged(ev: CustomValueEvent): void {
+    if (!this._config || !this.hass) {
+      return;
+    }
+    if (ev.target) {
+      const target = ev.target;
+      if (target.configValue) {
+        this._config = {
+          ...this._config,
+          [target.configValue]: target.checked !== undefined ? target.checked : target.value,
+        };
+      }
+    }
+    fireEvent(this, 'config-changed', { config: this._config });
   }
 
   /**

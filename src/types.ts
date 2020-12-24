@@ -31,6 +31,7 @@ export interface center {
 }
 export interface BarSettings {
   bar_color?: string;
+  bar_bg_color?: string;
   entity?: string;
   invert_value?: boolean;
   name?: string | undefined;

@@ -17,6 +17,7 @@
     "settings": {
       "animation": "Animation",
       "attribute": "Attribute",
+      "background_color": "Background Color",
       "calc_excluded": "Excluded from Calculations",
       "center": "Center",
       "color": "Color",
