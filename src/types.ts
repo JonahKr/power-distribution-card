@@ -16,6 +16,7 @@ export interface EntitySettings {
   display_abs?: boolean;
   entity?: string;
   icon?: string;
+  icon_color?: { bigger: string; equal: string; smaller: string };
   invert_value?: boolean;
   invert_arrow?: boolean;
   name?: string | undefined;
@@ -35,7 +36,7 @@ export interface BarSettings {
   entity?: string;
   invert_value?: boolean;
   name?: string | undefined;
-  preset?: 'autarky' | 'ratio' | 'custom';
+  preset?: 'autarky' | 'ratio' | '';
 }
 
 export type ArrowStates = 'right' | 'left' | 'none';
@@ -45,7 +46,7 @@ export interface CustomValueEvent {
     checked?: boolean;
     configValue?: string;
     index?: number;
-    value?: string | EntitySettings[] | BarSettings[];
+    value?: string | EntitySettings[] | BarSettings[] | { bigger: string; equal: string; smaller: string };
   };
   currentTarget?: {
     index?: number;
@@ -65,5 +66,6 @@ export interface HTMLElementValue extends HTMLElement {
 declare global {
   interface Window {
     loadCardHelpers: () => void;
+    customCards: { type?: string; name?: string; description?: string; preview?: boolean }[];
   }
 }

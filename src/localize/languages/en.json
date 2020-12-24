@@ -18,6 +18,7 @@
       "animation": "Animation",
       "attribute": "Attribute",
       "background_color": "Background Color",
+      "bigger": "Bigger",
       "calc_excluded": "Excluded from Calculations",
       "center": "Center",
       "color": "Color",
@@ -25,10 +26,12 @@
       "display-abs": "Display Absolute Value",
       "entities": "Entities",
       "entity": "Entity",
+      "equal": "Equal",
       "icon": "Icon",
       "invert-value": "Invert Value",
       "name": "Name",
       "preset": "Preset",
+      "smaller": "Smaller",
       "title": "Title",
       "unit_of_display": "Unit of Display"
     }

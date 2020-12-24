@@ -107,6 +107,10 @@ export const styles = css`
     float: right;
   }
 
+  table {
+    width: 100%;
+  }
+
   /**********
   Mobile View
   **********/

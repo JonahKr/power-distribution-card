@@ -8,7 +8,6 @@ import {
   PropertyValues,
   CSSResult,
   css,
-  query,
 } from 'lit-element';
 import { guard } from 'lit-html/directives/guard';
 
@@ -24,7 +23,7 @@ import { DefaultItem, PresetList, PresetObject } from './presets';
  */
 const animation = ['none', 'flash', 'slide'];
 const center = ['none', 'card', 'bars'];
-const bar_presets = ['autarky', 'ratio', 'custom'];
+const bar_presets = ['autarky', 'ratio', ''];
 
 @customElement('power-distribution-card-editor')
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
@@ -186,11 +185,25 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     const index = target.index || this._subElementEditor?.index || 0;
     configEntities[index] = {
       ...configEntities[index],
-      [target.configValue]: target.checked != undefined ? target.checked : (target.value as string),
+      [target.configValue]: target.checked != undefined ? target.checked : target.value,
     };
 
     this._config = { ...this._config, entities: configEntities };
     fireEvent(this, 'config-changed', { config: this._config });
+  }
+
+  private _icon_colorChanged(ev: CustomValueEvent): void {
+    if (!ev.target) return;
+    const target = ev.target;
+    if (!target.configValue) return;
+    const icon_color = {
+      ...this._config.entities[this._subElementEditor?.index || 0].icon_color,
+      [target.configValue]: target.value as string,
+    };
+
+    this._itemEntityChanged({
+      target: { configValue: 'icon_color', value: <{ bigger: string; equal: string; smaller: string }>icon_color },
+    });
   }
 
   private _entityEditor(): TemplateResult {
@@ -303,9 +316,30 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         </tr>
         <tr>
           <th>icon</th>
-          <th>1</th>
-          <th>2</th>
-          <th>3</th>
+          <td>
+            <paper-input
+              .label="${localize('editor.settings.bigger')}"
+              .value=${item.icon_color?.bigger || ''}
+              .configValue=${'bigger'}
+              @value-changed=${this._icon_colorChanged}
+            ></paper-input>
+          </td>
+          <td>
+            <paper-input
+              .label="${localize('editor.settings.equal')}"
+              .value=${item.icon_color?.equal || ''}
+              .configValue=${'equal'}
+              @value-changed=${this._icon_colorChanged}
+            ></paper-input>
+          </td>
+          <td>
+            <paper-input
+              .label="${localize('editor.settings.smaller')}"
+              .value=${item.icon_color?.smaller || ''}
+              .configValue=${'smaller'}
+              @value-changed=${this._icon_colorChanged}
+            ></paper-input>
+          </td>
         </tr>
       </table>
     `;

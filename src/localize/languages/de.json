@@ -18,6 +18,7 @@
       "animation": "Animation",
       "attribute": "Attribut",
       "background_color": "Hintergrundfarbe",
+      "bigger": "Größer ",
       "calc_excluded": "Von Rechnungen ausgeschlossen",
       "center": "Mittelbereich",
       "color": "Farbe",
@@ -25,10 +26,12 @@
       "display-abs": "Absolute Wertanzeige",
       "entities": "Entities",
       "entity": "Element",
+      "equal": "Gleich",
       "icon": "Symbol",
       "invert-value": "Invertierter Wert",
       "name": "Name",
       "preset": "Vorlagen",
+      "smaller": "Kleiner",
       "title": "Titel",
       "unit_of_display": "Angezeigte Einheit"
     }

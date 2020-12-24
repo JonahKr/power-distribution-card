@@ -25,8 +25,7 @@ console.info(
   `font-weight: 500; color: #03a9f4; background: white;`,
 );
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-(window as any).customCards.push({
+window.customCards.push({
   type: 'power-distribution', //TODO ADD CARD
   name: 'Power Distribution Card',
   description: localize('common.description'),
@@ -220,11 +219,19 @@ export class PowerDistributionCard extends LitElement {
     //Format Number
     const formatValue = value; //formatNumber(value, this.hass.language);
 
+    //Icon color dependant on state
+    let icon_color: string | undefined;
+    if (item.icon_color) {
+      if (state > 0) icon_color = item.icon_color.bigger;
+      if (state < 0) icon_color = item.icon_color.smaller;
+      if (state == 0) icon_color = item.icon_color.equal;
+    }
+
     return html`
       <item .entity=${item.entity} @click="${this._moreInfo}">
         <badge>
           <icon>
-            <ha-icon icon="${item.icon}"></ha-icon>
+            <ha-icon icon="${item.icon}" style="${icon_color ? `color:${icon_color};` : ''}"></ha-icon>
           </icon>
           <p class="subtitle">${item.name}</p>
         </badge>
@@ -313,7 +320,7 @@ export class PowerDistributionCard extends LitElement {
       bars.push(html`
         <div class="bar-element">
           <p class="bar-percentage">${value}%</p>
-          <div class="bar-wrapper">
+          <div class="bar-wrapper" style="${element.bar_bg_color ? `background-color:${element.bar_bg_color};` : ''}">
             <bar style="height:${value}%; background-color:${element.bar_color};" />
           </div>
           <p>${element.name || ''}</p>
