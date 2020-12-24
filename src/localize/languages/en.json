@@ -6,13 +6,34 @@
     "show_warning": "Show Warning"
   },
   "editor": {
-    "action": {
+    "actions": {
+      "add": "Add",
       "edit": "Edit",
       "remove": "Remove",
       "save": "Save"
     },
-    "title": "Titel",
-    "optional": "Optional"
+    "optional": "Optional",
+    "required": "Required",
+    "settings": {
+      "animation": "Animation",
+      "attribute": "Attribute",
+      "background_color": "Background Color",
+      "bigger": "Bigger",
+      "calc_excluded": "Excluded from Calculations",
+      "center": "Center",
+      "color": "Color",
+      "decimals": "Decimals",
+      "display-abs": "Display Absolute Value",
+      "entities": "Entities",
+      "entity": "Entity",
+      "equal": "Equal",
+      "icon": "Icon",
+      "invert-value": "Invert Value",
+      "name": "Name",
+      "preset": "Preset",
+      "smaller": "Smaller",
+      "title": "Title",
+      "unit_of_display": "Unit of Display"
+    }
   }
-  
 }

@@ -3,10 +3,9 @@ import { PresetType } from './presets';
 
 export interface PDCConfig extends LovelaceCardConfig {
   title?: string;
-  disable_animation?: boolean;
   animation?: 'none' | 'flash' | 'slide';
-  entities: { [key: string]: EntitySettings | string }[];
-  center?: 'none' | LovelaceCardConfig | { [key: string]: BarSettings }[];
+  entities: EntitySettings[];
+  center: center;
 }
 
 export interface EntitySettings {
@@ -17,6 +16,7 @@ export interface EntitySettings {
   display_abs?: boolean;
   entity?: string;
   icon?: string;
+  icon_color?: { bigger: string; equal: string; smaller: string };
   invert_value?: boolean;
   invert_arrow?: boolean;
   name?: string | undefined;
@@ -26,12 +26,46 @@ export interface EntitySettings {
   unit_of_measurement?: string;
 }
 
-export const BarList = ['autarky', 'ratio'];
+export interface center {
+  type: 'none' | 'card' | 'bars';
+  content?: LovelaceCardConfig | BarSettings[];
+}
 export interface BarSettings {
   bar_color?: string;
+  bar_bg_color?: string;
   entity?: string;
   invert_value?: boolean;
   name?: string | undefined;
+  preset?: 'autarky' | 'ratio' | '';
 }
 
 export type ArrowStates = 'right' | 'left' | 'none';
+
+export interface CustomValueEvent {
+  target?: {
+    checked?: boolean;
+    configValue?: string;
+    index?: number;
+    value?: string | EntitySettings[] | BarSettings[] | { bigger: string; equal: string; smaller: string };
+  };
+  currentTarget?: {
+    index?: number;
+    value?: string;
+  };
+}
+
+export interface SubElementConfig {
+  type: 'entity' | 'bars' | 'card';
+  index?: number;
+  element?: EntitySettings | LovelaceCardConfig | BarSettings[];
+}
+
+export interface HTMLElementValue extends HTMLElement {
+  value: string;
+}
+declare global {
+  interface Window {
+    loadCardHelpers: () => void;
+    customCards: { type?: string; name?: string; description?: string; preview?: boolean }[];
+  }
+}

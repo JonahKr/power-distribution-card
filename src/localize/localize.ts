@@ -19,7 +19,6 @@ export function localize(string: string, search = '', replace = ''): string {
     .replace('-', '_');
 
   let translated: string;
-
   try {
     translated = string.split('.').reduce((o, i) => o[i], languages[lang]);
   } catch (e) {

@@ -7,11 +7,33 @@
   },
   "editor": {
     "actions": {
+      "add": "Hinzufügen",
       "edit": "Bearbeiten",
       "remove": "Entfernen",
       "save": "Speichern"
     },
-    "title": "Titel",
-    "optional": "Optional"
+    "optional": "Optional",
+    "required": "Erforderlich",
+    "settings": {
+      "animation": "Animation",
+      "attribute": "Attribut",
+      "background_color": "Hintergrundfarbe",
+      "bigger": "Größer ",
+      "calc_excluded": "Von Rechnungen ausgeschlossen",
+      "center": "Mittelbereich",
+      "color": "Farbe",
+      "decimals": "Dezimalstellen",
+      "display-abs": "Absolute Wertanzeige",
+      "entities": "Entities",
+      "entity": "Element",
+      "equal": "Gleich",
+      "icon": "Symbol",
+      "invert-value": "Invertierter Wert",
+      "name": "Name",
+      "preset": "Vorlagen",
+      "smaller": "Kleiner",
+      "title": "Titel",
+      "unit_of_display": "Angezeigte Einheit"
+    }
   }
 }
