@@ -20,13 +20,13 @@ import { localize } from './localize/localize';
 //import { formatNumber } from './format-number';
 
 console.info(
-  `%c POWER-DISTRIBUTION-CARD %c ${version}_b5`,
+  `%c POWER-DISTRIBUTION-CARD %c ${version}`,
   `font-weight: 500; color: white; background: #03a9f4;`,
   `font-weight: 500; color: #03a9f4; background: white;`,
 );
 
 window.customCards.push({
-  type: 'power-distribution', //TODO ADD CARD
+  type: 'power-distribution-card',
   name: 'Power Distribution Card',
   description: localize('common.description'),
 });
