@@ -31,7 +31,7 @@ window.customCards.push({
   description: localize('common.description'),
 });
 
-@customElement('power-distribution')
+@customElement('power-distribution-card')
 export class PowerDistributionCard extends LitElement {
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
     return document.createElement('power-distribution-card-editor') as LovelaceCardEditor;
