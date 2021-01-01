@@ -197,7 +197,7 @@ export class PowerDistributionCard extends LitElement {
     //Toggle Absolute Values
     value = item.display_abs ? Math.abs(value) : value;
     //Unit-Of-Display
-    let unit_of_display = 'W';
+    let unit_of_display = item.unit_of_display || 'W';
     switch (item.unit_of_display) {
       case 'kW':
       case 'kWh':
@@ -213,6 +213,7 @@ export class PowerDistributionCard extends LitElement {
         }
         break;
     }
+
     //Decimal Precision
     const decFakTen = 10 ** (item.decimals || item.decimals == 0 ? item.decimals : 2);
     value = Math.round(value * decFakTen) / decFakTen;
