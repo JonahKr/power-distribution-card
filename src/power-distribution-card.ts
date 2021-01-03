@@ -106,7 +106,7 @@ export class PowerDistributionCard extends LitElement {
    */
   private _val(item: EntitySettings | BarSettings): number {
     let modifier = item.invert_value ? -1 : 1;
-    if ((item as EntitySettings).unit_of_measurement == ('kW' || 'kWh')) modifier *= 1000;
+    if ((item as EntitySettings).unit_of_measurement?.startsWith('k')) modifier *= 1000;
     const attr = (item as EntitySettings).attribute || null;
     const num = item.entity
       ? attr
@@ -198,20 +198,15 @@ export class PowerDistributionCard extends LitElement {
     value = item.display_abs ? Math.abs(value) : value;
     //Unit-Of-Display
     let unit_of_display = item.unit_of_display || 'W';
-    switch (item.unit_of_display) {
-      case 'kW':
-      case 'kWh':
-        value /= 1000;
-        unit_of_display = item.unit_of_display;
-        break;
-      case 'adaptive':
-        if (value > 999) {
-          value = value / 1000;
-          unit_of_display = 'kW';
-        } else {
-          unit_of_display = 'W';
-        }
-        break;
+    if (unit_of_display.startsWith('k')) {
+      value /= 1000;
+    } else if (item.unit_of_display == 'adaptive') {
+      if (value > 999) {
+        value = value / 1000;
+        unit_of_display = 'kW';
+      } else {
+        unit_of_display = 'W';
+      }
     }
 
     //Decimal Precision
