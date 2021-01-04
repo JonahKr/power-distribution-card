@@ -17,6 +17,7 @@ import { PDCConfig, EntitySettings, ArrowStates, BarSettings } from './types';
 import { DefaultItem, DefaultConfig, PresetList, PresetObject, PresetType } from './presets';
 import styles from './styles';
 import { localize } from './localize/localize';
+import ResizeObserver from 'resize-observer-polyfill';
 //import { formatNumber } from './format-number';
 
 console.info(
@@ -30,6 +31,12 @@ window.customCards.push({
   name: 'Power Distribution Card',
   description: localize('common.description'),
 });
+
+export const installResizeObserver = async (): Promise<void> => {
+  if (typeof ResizeObserver !== 'function') {
+    window.ResizeObserver = (await import('resize-observer-polyfill')).default;
+  }
+};
 
 @customElement('power-distribution-card')
 export class PowerDistributionCard extends LitElement {
