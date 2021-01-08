@@ -240,11 +240,15 @@ export class PowerDistributionCard extends LitElement {
         </badge>
         <value>
           <p>${formatValue} ${unit_of_display}</p>
-          ${this._render_arrow(
-            //This takes the side the item is on (index even = left) into account for the arrows
-            state == 0 ? 'none' : index % 2 == 0 ? (state > 0 ? 'right' : 'left') : state > 0 ? 'left' : 'right',
-            index,
-          )}
+          ${
+            !item.hide_arrows
+              ? this._render_arrow(
+                  //This takes the side the item is on (index even = left) into account for the arrows
+                  state == 0 ? 'none' : index % 2 == 0 ? (state > 0 ? 'right' : 'left') : state > 0 ? 'left' : 'right',
+                  index,
+                )
+              : html``
+          }
         <value
       </item>
     `;
