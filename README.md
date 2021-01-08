@@ -12,7 +12,7 @@
 <br/>
 <h1 align="center">A Lovelace Card for visualizing power distributions.</h1>
 <p align="center">
-<img src="https://user-images.githubusercontent.com/38377070/96733911-435dd600-13ba-11eb-8491-75e88490e417.gif"/>
+<img src="https://user-images.githubusercontent.com/38377070/103143008-389f2480-470e-11eb-945a-68115febef8a.gif"/>
 </p>
 
 <br/>
