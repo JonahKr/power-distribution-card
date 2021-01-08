@@ -15,7 +15,7 @@ import './editor';
 
 import { PDCConfig, EntitySettings, ArrowStates, BarSettings } from './types';
 import { DefaultItem, DefaultConfig, PresetList, PresetObject, PresetType } from './presets';
-import styles from './styles';
+import { styles, narrow_styles } from './styles';
 import { localize } from './localize/localize';
 import ResizeObserver from 'resize-observer-polyfill';
 import { debounce, installResizeObserver } from './util';
@@ -60,6 +60,7 @@ export class PowerDistributionCard extends LitElement {
   @property() private _card!: LovelaceCard;
 
   private _resizeObserver?: ResizeObserver;
+  @internalProperty() private _narrow = false;
 
   /**
    * Configuring all the passed Settings and Changing it to a more usefull Internal one.
@@ -125,14 +126,14 @@ export class PowerDistributionCard extends LitElement {
     }
     const card = this.shadowRoot?.querySelector('ha-card');
     // If we show an error or warning there is no ha-card
-    if (!card) {
-      return;
-    }
+    if (!card) return;
     this._resizeObserver.observe(card);
   }
 
   private _adjustWidth(): void {
-    console.log('HELLOTHERE');
+    const card = this.shadowRoot?.querySelector('ha-card');
+    if (!card) return;
+    this._narrow = card.offsetWidth < 400;
   }
 
   /**
@@ -201,13 +202,14 @@ export class PowerDistributionCard extends LitElement {
         break;
     }
 
-    return html`<ha-card .header=${this._config.title}>
-      <div class="card-content">
-        <div id="left-panel">${left_panel}</div>
-        <div id="center-panel">${center_panel}</div>
-        <div id="right-panel">${right_panel}</div>
-      </div>
-    </ha-card>`;
+    return html` ${this._narrow ? narrow_styles : undefined}
+      <ha-card .header=${this._config.title}>
+        <div class="card-content">
+          <div id="left-panel">${left_panel}</div>
+          <div id="center-panel">${center_panel}</div>
+          <div id="right-panel">${right_panel}</div>
+        </div>
+      </ha-card>`;
   }
   /**
    * Fires the Hass More Info Event

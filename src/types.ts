@@ -70,4 +70,8 @@ declare global {
     customCards: { type?: string; name?: string; description?: string; preview?: boolean }[];
     ResizeObserver: { new (callback: ResizeObserverCallback): ResizeObserver; prototype: ResizeObserver };
   }
+
+  interface Element {
+    offsetWidth: number;
+  }
 }
