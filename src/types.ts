@@ -22,6 +22,7 @@ export interface EntitySettings {
   name?: string | undefined;
   preset?: PresetType;
   producer?: boolean;
+  hide_arrows?: boolean;
   unit_of_display?: string;
   unit_of_measurement?: string;
 }
@@ -67,5 +68,10 @@ declare global {
   interface Window {
     loadCardHelpers: () => void;
     customCards: { type?: string; name?: string; description?: string; preview?: boolean }[];
+    ResizeObserver: { new (callback: ResizeObserverCallback): ResizeObserver; prototype: ResizeObserver };
+  }
+
+  interface Element {
+    offsetWidth: number;
   }
 }

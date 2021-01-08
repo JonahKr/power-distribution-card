@@ -12,7 +12,7 @@
 <br/>
 <h1 align="center">A Lovelace Card for visualizing power distributions.</h1>
 <p align="center">
-<img src="https://user-images.githubusercontent.com/38377070/96733911-435dd600-13ba-11eb-8491-75e88490e417.gif"/>
+<img src="https://user-images.githubusercontent.com/38377070/103143008-389f2480-470e-11eb-945a-68115febef8a.gif"/>
 </p>
 
 <br/>
@@ -258,6 +258,7 @@ There are alot of settings you can customize your sensors with:
 | `decimals`            | number        | 0, 2             | The Number of Decimals shown. (default: 2) |
 | `display_abs`         | boolean       | false            | The displayed values are Absolute normally. You can change that here. |
 | `entity`              | string        | sensor.e3dc_grid | You can specify the entity_id here aswell. |
+| `hide_arrows`        | bool          | true              | Toggeling the visibility od the *arrows*. |
 | `icon`                | string        | mdi:dishwasher   | Why not change the displayed Icon to any [MDI](https://cdn.materialdesignicons.com/5.4.55/) one? |
 | `icon_color`          | object        | {smaller:'red'}  | You can Change the Color of the icon dependant on the value. (Bigger, Equal and Smaller) |
 | `invert_arrow`        | bool          | true             | This will change the *arrows* direction to the oposite one. |

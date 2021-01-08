@@ -267,6 +267,16 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           />
           <label for="display-abs"> ${localize('editor.settings.display-abs')} </label>
         </div>
+        <div class="checkbox">
+          <input
+            type="checkbox"
+            id="hide-arrows"
+            .checked="${item.hide_arrows || false}"
+            .configValue=${'hide_arrows'}
+            @change=${this._itemEntityChanged}
+          />
+          <label for="invert-value"> ${localize('editor.settings.hide-arrows')}</label>
+        </div>
       </div>
       <div class="side-by-side">
         <paper-input

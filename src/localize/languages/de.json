@@ -27,6 +27,7 @@
       "entities": "Entities",
       "entity": "Element",
       "equal": "Gleich",
+      "hide-arrows": "Pfeile Verstecken",
       "icon": "Symbol",
       "invert-value": "Invertierter Wert",
       "name": "Name",

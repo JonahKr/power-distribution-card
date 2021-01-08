@@ -1,4 +1,4 @@
-import { css } from 'lit-element';
+import { css, html } from 'lit-element';
 
 export const styles = css`
   * {
@@ -111,27 +111,6 @@ export const styles = css`
     width: 100%;
   }
 
-  /**********
-  Mobile View
-  **********/
-  @media only screen and (max-width: 450px) {
-    .card-content {
-      grid-template-columns: 1fr 1fr 1fr;
-    }
-    item > badge,
-    item > value {
-      display: block;
-      float: none !important;
-
-      width: 72px;
-      margin: 0 auto;
-    }
-
-    .arrow {
-      margin: 0px 8px;
-    }
-  }
-
   /**************
   ARROW ANIMATION
   **************/
@@ -195,4 +174,25 @@ export const styles = css`
   }
 `;
 
-export default styles;
+export const narrow_styles = html`
+  <style>
+    /**********
+    Mobile View
+    **********/
+    .card-content {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+    item > badge,
+    item > value {
+      display: block;
+      float: none !important;
+
+      width: 72px;
+      margin: 0 auto;
+    }
+
+    .arrow {
+      margin: 0px 8px;
+    }
+  </style>
+`;

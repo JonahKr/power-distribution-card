@@ -15,8 +15,10 @@ import './editor';
 
 import { PDCConfig, EntitySettings, ArrowStates, BarSettings } from './types';
 import { DefaultItem, DefaultConfig, PresetList, PresetObject, PresetType } from './presets';
-import styles from './styles';
+import { styles, narrow_styles } from './styles';
 import { localize } from './localize/localize';
+import ResizeObserver from 'resize-observer-polyfill';
+import { debounce, installResizeObserver } from './util';
 //import { formatNumber } from './format-number';
 
 console.info(
@@ -57,6 +59,9 @@ export class PowerDistributionCard extends LitElement {
 
   @property() private _card!: LovelaceCard;
 
+  private _resizeObserver?: ResizeObserver;
+  @internalProperty() private _narrow = false;
+
   /**
    * Configuring all the passed Settings and Changing it to a more usefull Internal one.
    * @param config The Config Object configured via YAML
@@ -93,10 +98,42 @@ export class PowerDistributionCard extends LitElement {
     if (center.type == 'card') {
       this._card = this._createCardElement(center as LovelaceCardConfig);
     }
+
+    //Resize Observer
+    this._adjustWidth();
+    this._attachObserver();
   }
 
   public static get styles(): CSSResult {
     return styles;
+  }
+
+  public connectedCallback(): void {
+    super.connectedCallback();
+    this.updateComplete.then(() => this._attachObserver());
+  }
+
+  public disconnectedCallback(): void {
+    if (this._resizeObserver) {
+      this._resizeObserver.disconnect();
+    }
+  }
+
+  private async _attachObserver(): Promise<void> {
+    if (!this._resizeObserver) {
+      await installResizeObserver();
+      this._resizeObserver = new ResizeObserver(debounce(() => this._adjustWidth(), 250, false));
+    }
+    const card = this.shadowRoot?.querySelector('ha-card');
+    // If we show an error or warning there is no ha-card
+    if (!card) return;
+    this._resizeObserver.observe(card);
+  }
+
+  private _adjustWidth(): void {
+    const card = this.shadowRoot?.querySelector('ha-card');
+    if (!card) return;
+    this._narrow = card.offsetWidth < 400;
   }
 
   /**
@@ -106,7 +143,7 @@ export class PowerDistributionCard extends LitElement {
    */
   private _val(item: EntitySettings | BarSettings): number {
     let modifier = item.invert_value ? -1 : 1;
-    if ((item as EntitySettings).unit_of_measurement == ('kW' || 'kWh')) modifier *= 1000;
+    if ((item as EntitySettings).unit_of_measurement?.startsWith('k')) modifier *= 1000;
     const attr = (item as EntitySettings).attribute || null;
     const num = item.entity
       ? attr
@@ -165,13 +202,14 @@ export class PowerDistributionCard extends LitElement {
         break;
     }
 
-    return html`<ha-card .header=${this._config.title}>
-      <div class="card-content">
-        <div id="left-panel">${left_panel}</div>
-        <div id="center-panel">${center_panel}</div>
-        <div id="right-panel">${right_panel}</div>
-      </div>
-    </ha-card>`;
+    return html` ${this._narrow ? narrow_styles : undefined}
+      <ha-card .header=${this._config.title}>
+        <div class="card-content">
+          <div id="left-panel">${left_panel}</div>
+          <div id="center-panel">${center_panel}</div>
+          <div id="right-panel">${right_panel}</div>
+        </div>
+      </ha-card>`;
   }
   /**
    * Fires the Hass More Info Event
@@ -197,22 +235,18 @@ export class PowerDistributionCard extends LitElement {
     //Toggle Absolute Values
     value = item.display_abs ? Math.abs(value) : value;
     //Unit-Of-Display
-    let unit_of_display = 'W';
-    switch (item.unit_of_display) {
-      case 'kW':
-      case 'kWh':
-        value /= 1000;
-        unit_of_display = item.unit_of_display;
-        break;
-      case 'adaptive':
-        if (value > 999) {
-          value = value / 1000;
-          unit_of_display = 'kW';
-        } else {
-          unit_of_display = 'W';
-        }
-        break;
+    let unit_of_display = item.unit_of_display || 'W';
+    if (unit_of_display.startsWith('k')) {
+      value /= 1000;
+    } else if (item.unit_of_display == 'adaptive') {
+      if (value > 999) {
+        value = value / 1000;
+        unit_of_display = 'kW';
+      } else {
+        unit_of_display = 'W';
+      }
     }
+
     //Decimal Precision
     const decFakTen = 10 ** (item.decimals || item.decimals == 0 ? item.decimals : 2);
     value = Math.round(value * decFakTen) / decFakTen;
@@ -237,11 +271,15 @@ export class PowerDistributionCard extends LitElement {
         </badge>
         <value>
           <p>${formatValue} ${unit_of_display}</p>
-          ${this._render_arrow(
-            //This takes the side the item is on (index even = left) into account for the arrows
-            state == 0 ? 'none' : index % 2 == 0 ? (state > 0 ? 'right' : 'left') : state > 0 ? 'left' : 'right',
-            index,
-          )}
+          ${
+            !item.hide_arrows
+              ? this._render_arrow(
+                  //This takes the side the item is on (index even = left) into account for the arrows
+                  state == 0 ? 'none' : index % 2 == 0 ? (state > 0 ? 'right' : 'left') : state > 0 ? 'left' : 'right',
+                  index,
+                )
+              : html``
+          }
         <value
       </item>
     `;
