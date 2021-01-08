@@ -18,6 +18,7 @@ import { DefaultItem, DefaultConfig, PresetList, PresetObject, PresetType } from
 import styles from './styles';
 import { localize } from './localize/localize';
 import ResizeObserver from 'resize-observer-polyfill';
+import { debounce, installResizeObserver } from './util';
 //import { formatNumber } from './format-number';
 
 console.info(
@@ -31,12 +32,6 @@ window.customCards.push({
   name: 'Power Distribution Card',
   description: localize('common.description'),
 });
-
-export const installResizeObserver = async (): Promise<void> => {
-  if (typeof ResizeObserver !== 'function') {
-    window.ResizeObserver = (await import('resize-observer-polyfill')).default;
-  }
-};
 
 @customElement('power-distribution-card')
 export class PowerDistributionCard extends LitElement {
@@ -63,6 +58,8 @@ export class PowerDistributionCard extends LitElement {
   @internalProperty() private _config!: PDCConfig;
 
   @property() private _card!: LovelaceCard;
+
+  private _resizeObserver?: ResizeObserver;
 
   /**
    * Configuring all the passed Settings and Changing it to a more usefull Internal one.
@@ -100,10 +97,42 @@ export class PowerDistributionCard extends LitElement {
     if (center.type == 'card') {
       this._card = this._createCardElement(center as LovelaceCardConfig);
     }
+
+    //Resize Observer
+    this._adjustWidth();
+    this._attachObserver();
   }
 
   public static get styles(): CSSResult {
     return styles;
+  }
+
+  public connectedCallback(): void {
+    super.connectedCallback();
+    this.updateComplete.then(() => this._attachObserver());
+  }
+
+  public disconnectedCallback(): void {
+    if (this._resizeObserver) {
+      this._resizeObserver.disconnect();
+    }
+  }
+
+  private async _attachObserver(): Promise<void> {
+    if (!this._resizeObserver) {
+      await installResizeObserver();
+      this._resizeObserver = new ResizeObserver(debounce(() => this._adjustWidth(), 250, false));
+    }
+    const card = this.shadowRoot?.querySelector('ha-card');
+    // If we show an error or warning there is no ha-card
+    if (!card) {
+      return;
+    }
+    this._resizeObserver.observe(card);
+  }
+
+  private _adjustWidth(): void {
+    console.log('HELLOTHERE');
   }
 
   /**
