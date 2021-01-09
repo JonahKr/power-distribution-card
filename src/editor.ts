@@ -49,7 +49,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       undefined;
     }
     //Sortable Stuff for the Entities Row Editor
-    Sortable.mount(OnSpill);
     Sortable.mount(new AutoScroll());
   }
 
