@@ -44,7 +44,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     //Loading Card with ha-entities-picker, ha-icon-input,
     await this.loadCardHelpers();
     try {
-      await this._helpers.createCardElement({ type: 'calendar' });
+      await this._helpers.createCardElement({ type: 'calendar', entities: ['calendar.does_not_exist'] });
     } catch (e) {}
     await customElements.get('hui-calendar-card').getConfigElement();
   }
