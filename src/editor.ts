@@ -29,6 +29,7 @@ const bar_presets = ['autarky', 'ratio', ''];
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
   @property({ attribute: false }) public hass?: HomeAssistant;
   @internalProperty() private _config!: PDCConfig;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _helpers: any;
 
   public setConfig(config: PDCConfig): void {
@@ -41,16 +42,11 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    */
   protected async firstUpdated(): Promise<void> {
     //Loading Card with ha-entities-picker, ha-icon-input,
+    await this.loadCardHelpers();
     try {
-      await this.loadCardHelpers();
-      await this._helpers.createCardElement({ type: 'calendar' });
-      await customElements.get('hui-calendar-card').getConfigElement();
-    } catch {
-      undefined;
-    }
-    //Sortable Stuff for the Entities Row Editor
-    Sortable.mount(OnSpill);
-    Sortable.mount(new AutoScroll());
+      await this._helpers.createCardElement({ type: 'calendar', entities: ['calendar.does_not_exist'] });
+    } catch (e) {}
+    await customElements.get('hui-calendar-card').getConfigElement();
   }
 
   private async loadCardHelpers(): Promise<void> {
@@ -261,7 +257,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           <input
             type="checkbox"
             id="display-abs"
-            .checked="${item.display_abs || true}"
+            .checked="${item.display_abs == false ? false : true}"
             .configValue=${'display_abs'}
             @change=${this._itemEntityChanged}
           />
