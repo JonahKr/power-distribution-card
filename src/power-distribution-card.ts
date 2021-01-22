@@ -1,4 +1,13 @@
-import { LitElement, html, customElement, property, CSSResult, TemplateResult, internalProperty } from 'lit-element';
+import {
+  LitElement,
+  html,
+  customElement,
+  property,
+  CSSResult,
+  TemplateResult,
+  internalProperty,
+  PropertyValues,
+} from 'lit-element';
 
 import {
   HomeAssistant,
@@ -81,6 +90,11 @@ export class PowerDistributionCard extends LitElement {
       }
     });
     this._config = _config;
+
+    //Setting up card if needed
+    if (this._config.center.type == 'card') {
+      this._card = this._createCardElement(this._config.center as LovelaceCardConfig);
+    }
   }
 
   public firstUpdated(): void {
@@ -93,15 +107,19 @@ export class PowerDistributionCard extends LitElement {
       !item.unit_of_measurement ? (this._config.entities[index].unit_of_measurement = hass_uom || 'W') : undefined;
     });
 
-    //Setting up card if needed
-    const center = this._config.center;
-    if (center.type == 'card') {
-      this._card = this._createCardElement(center as LovelaceCardConfig);
-    }
-
     //Resize Observer
     this._adjustWidth();
     this._attachObserver();
+  }
+
+  protected updated(changedProps: PropertyValues): void {
+    super.updated(changedProps);
+    if (!this._card || (!changedProps.has('hass') && !changedProps.has('editMode'))) {
+      return;
+    }
+    if (this.hass) {
+      this._card.hass = this.hass;
+    }
   }
 
   public static get styles(): CSSResult {
@@ -195,7 +213,7 @@ export class PowerDistributionCard extends LitElement {
       case 'none':
         break;
       case 'card':
-        center_panel.push(this._createCardElement(center.content as LovelaceCardConfig));
+        this._card ? center_panel.push(this._card) : console.log('NO CARD');
         break;
       case 'bars':
         center_panel.push(this._render_bars(consumption, production));
@@ -275,7 +293,7 @@ export class PowerDistributionCard extends LitElement {
             !item.hide_arrows
               ? this._render_arrow(
                   //This takes the side the item is on (index even = left) into account for the arrows
-                  state == 0 ? 'none' : index % 2 == 0 ? (state > 0 ? 'right' : 'left') : state > 0 ? 'left' : 'right',
+                  value == 0 ? 'none' : index % 2 == 0 ? (state > 0 ? 'right' : 'left') : state > 0 ? 'left' : 'right',
                   index,
                 )
               : html``
@@ -369,6 +387,7 @@ export class PowerDistributionCard extends LitElement {
   }
 
   private _createCardElement(cardConfig: LovelaceCardConfig) {
+    console.log('Creating Card');
     const element = createThing(cardConfig) as LovelaceCard;
     if (this.hass) {
       element.hass = this.hass;
@@ -385,6 +404,7 @@ export class PowerDistributionCard extends LitElement {
   }
 
   private _rebuildCard(cardElToReplace: LovelaceCard, config: LovelaceCardConfig): void {
+    console.log('REBUILDING CARD');
     const newCardEl = this._createCardElement(config);
     if (cardElToReplace.parentElement) {
       cardElToReplace.parentElement.replaceChild(newCardEl, cardElToReplace);
