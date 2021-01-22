@@ -55,8 +55,8 @@ export class PowerDistributionCard extends LitElement {
       center: {
         type: 'bars',
         content: [
-          { preset: 'autarky', name: 'autarky' },
-          { preset: 'ratio', name: 'ratio' },
+          { preset: 'autarky', name: localize('editor.settings.autarky') },
+          { preset: 'ratio', name: localize('editor.settings.ratio') },
         ],
       },
     };

@@ -16,6 +16,7 @@
     "required": "Required",
     "settings": {
       "animation": "Animation",
+      "autarky": "autarky",
       "attribute": "Attribute",
       "background_color": "Background Color",
       "bigger": "Bigger",
@@ -32,6 +33,7 @@
       "invert-value": "Invert Value",
       "name": "Name",
       "preset": "Preset",
+      "ratio": "ratio",
       "smaller": "Smaller",
       "title": "Title",
       "unit_of_display": "Unit of Display"

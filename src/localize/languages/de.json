@@ -16,6 +16,7 @@
     "required": "Erforderlich",
     "settings": {
       "animation": "Animation",
+      "autarky": "Autarkie",
       "attribute": "Attribut",
       "background_color": "Hintergrundfarbe",
       "bigger": "Größer ",
@@ -32,6 +33,7 @@
       "invert-value": "Invertierter Wert",
       "name": "Name",
       "preset": "Vorlagen",
+      "ratio": "Anteil",
       "smaller": "Kleiner",
       "title": "Titel",
       "unit_of_display": "Angezeigte Einheit"
