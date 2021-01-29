@@ -10,6 +10,7 @@ import {
 } from 'lit-element';
 
 import {
+  debounce,
   HomeAssistant,
   fireEvent,
   LovelaceCardEditor,
@@ -27,7 +28,7 @@ import { DefaultItem, DefaultConfig, PresetList, PresetObject, PresetType } from
 import { styles, narrow_styles } from './styles';
 import { localize } from './localize/localize';
 import ResizeObserver from 'resize-observer-polyfill';
-import { debounce, installResizeObserver } from './util';
+import { installResizeObserver } from './util';
 //import { formatNumber } from './format-number';
 
 console.info(
