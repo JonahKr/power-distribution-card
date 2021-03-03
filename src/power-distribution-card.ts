@@ -94,7 +94,7 @@ export class PowerDistributionCard extends LitElement {
 
     //Setting up card if needed
     if (this._config.center.type == 'card') {
-      this._card = this._createCardElement(this._config.center as LovelaceCardConfig);
+      this._card = this._createCardElement(this._config.center.content as LovelaceCardConfig);
     }
   }
 
