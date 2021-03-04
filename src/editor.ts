@@ -248,7 +248,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         </paper-dropdown-menu>
       </div>
       <br />
-      <h3>Value Settings</h3>
+      <h3>${localize('editor.settings.value', true)} ${localize('editor.settings.settings', true)}</h3>
       <div class="side-by-side">
         <div class="checkbox">
           <input
@@ -298,7 +298,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         ></paper-input>
       </div>
       <br />
-      <h3>Preset Settings</h3>
+      <h3>${localize('editor.settings.preset', true)} ${localize('editor.settings.settings', true)}</h3>
       <div class="side-by-side">
         <paper-dropdown-menu
           label="${localize('editor.settings.preset')}"
@@ -321,7 +321,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         </div>
       </div>
       <br />
-      <h3>Secondary Info</h3>
+      <h3>${localize('editor.settings.secondary-info', true)}</h3>
       <div class="side-by-side">
         <ha-entity-picker
           label="${localize('editor.settings.entity')}"
@@ -349,7 +349,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         </paper-dropdown-menu>
       </div>
       <br />
-      <h3>Color Settings</h3>
+      <h3>${localize('editor.settings.color-settings', true)}</h3>
       <table>
         <tr>
           <th>Element</th>
