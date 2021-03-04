@@ -11,7 +11,7 @@ import {
 } from 'lit-element';
 import { guard } from 'lit-html/directives/guard';
 
-import Sortable, { AutoScroll, OnSpill, SortableEvent } from 'sortablejs/modular/sortable.core.esm';
+import Sortable, { SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
 import { fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
 import { PDCConfig, HTMLElementValue, CustomValueEvent, SubElementConfig, EntitySettings, BarSettings } from './types';
@@ -205,6 +205,9 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   private _entityEditor(): TemplateResult {
     const item = <EntitySettings>this._subElementEditor?.element || DefaultItem;
     const attributes = Object.keys({ ...this.hass?.states[item.entity || 0].attributes }) || [];
+    const secondary_info_attributes = item.secondary_info_entity
+      ? Object.keys({ ...this.hass?.states[item.secondary_info_entity || 0].attributes })
+      : [];
     return html`
       <div class="side-by-side">
         <paper-input
@@ -235,7 +238,11 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           .configValue=${'attribute'}
           @value-changed=${this._itemEntityChanged}
         >
-          <paper-listbox slot="dropdown-content" .selected=${attributes.indexOf(item.attribute || '')}>
+          <paper-listbox
+            slot="dropdown-content"
+            .selected=${attributes.indexOf(item.attribute || '') + (item.attribute ? 1 : 0)}
+          >
+            ${attributes.length > 0 ? html`<paper-item></paper-item>` : undefined}
             ${attributes.map((val) => html`<paper-item>${val}</paper-item>`)}
           </paper-listbox>
         </paper-dropdown-menu>
@@ -290,6 +297,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           @value-changed=${this._itemEntityChanged}
         ></paper-input>
       </div>
+      <br />
       <h3>Preset Settings</h3>
       <div class="side-by-side">
         <paper-dropdown-menu
@@ -312,6 +320,35 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           <label for="calc_excluded"> ${localize('editor.settings.calc_excluded')} </label>
         </div>
       </div>
+      <br />
+      <h3>Secondary Info</h3>
+      <div class="side-by-side">
+        <ha-entity-picker
+          label="${localize('editor.settings.entity')}"
+          allow-custom-entity
+          hideClearIcon
+          .hass=${this.hass}
+          .configValue=${'secondary_info_entity'}
+          .value=${item.secondary_info_entity}
+          @value-changed=${this._itemEntityChanged}
+        ></ha-entity-picker>
+        <paper-dropdown-menu
+          allow-custom-entity
+          label="${localize('editor.settings.attribute')} (${localize('editor.optional')})"
+          .configValue=${'secondary_info_attribute'}
+          @value-changed=${this._itemEntityChanged}
+        >
+          <paper-listbox
+            slot="dropdown-content"
+            .selected=${secondary_info_attributes.indexOf(item.secondary_info_attribute || '') +
+            (item.secondary_info_attribute ? 1 : 0)}
+          >
+            ${secondary_info_attributes.length > 0 ? html`<paper-item></paper-item>` : undefined}
+            ${secondary_info_attributes.map((val) => html`<paper-item>${val}</paper-item>`)}
+          </paper-listbox>
+        </paper-dropdown-menu>
+      </div>
+      <br />
       <h3>Color Settings</h3>
       <table>
         <tr>

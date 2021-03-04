@@ -92,6 +92,8 @@ export const styles = css`
     border: 1px solid;
     border-color: var(--disabled-text-color);
     border-radius: 1em;
+
+    position: relative;
   }
 
   icon > ha-icon {
@@ -101,6 +103,13 @@ export const styles = css`
     margin: 0 auto;
 
     color: var(--paper-item-icon-color);
+  }
+
+  .secondary {
+    position: absolute;
+    top: 4px;
+    right: 8%;
+    font-size: 80%;
   }
 
   value {

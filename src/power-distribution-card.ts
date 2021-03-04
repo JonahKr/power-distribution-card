@@ -258,7 +258,7 @@ export class PowerDistributionCard extends LitElement {
     if (unit_of_display.startsWith('k')) {
       value /= 1000;
     } else if (item.unit_of_display == 'adaptive') {
-      if (value > 999) {
+      if (Math.abs(value) > 999) {
         value = value / 1000;
         unit_of_display = 'kW';
       } else {
@@ -285,6 +285,18 @@ export class PowerDistributionCard extends LitElement {
         <badge>
           <icon>
             <ha-icon icon="${item.icon}" style="${icon_color ? `color:${icon_color};` : ''}"></ha-icon>
+            ${
+              item.secondary_info_attribute
+                ? html`<p class="secondary">
+                    ${this._val({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute })}
+                  </p>`
+                : item.secondary_info_entity
+                ? html`<p class="secondary">
+                    ${this._val({ entity: item.secondary_info_entity })}
+                    ${this.hass.states[item.secondary_info_entity].attributes.unit_of_measurement}
+                  </p>`
+                : ''
+            }
           </icon>
           <p class="subtitle">${item.name}</p>
         </badge>
