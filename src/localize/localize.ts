@@ -13,7 +13,7 @@ const languages = {
  * @param search String which should be replaced
  * @param replace String to replace with
  */
-export function localize(string: string, search = '', replace = ''): string {
+export function localize(string: string, capitalized = false, search = '', replace = ''): string {
   const lang = (localStorage.getItem('selectedLanguage') || navigator.language.split('-')[0] || 'en')
     .replace(/['"]+/g, '')
     .replace('-', '_');
@@ -31,5 +31,9 @@ export function localize(string: string, search = '', replace = ''): string {
   if (search !== '' && replace !== '') {
     translated = translated.replace(search, replace);
   }
-  return translated;
+  return capitalized ? capitalizeFirstLetter(translated) : translated;
+}
+
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }

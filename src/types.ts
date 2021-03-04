@@ -23,6 +23,8 @@ export interface EntitySettings {
   preset?: PresetType;
   producer?: boolean;
   hide_arrows?: boolean;
+  secondary_info_entity?: string;
+  secondary_info_attribute?: string;
   unit_of_display?: string;
   unit_of_measurement?: string;
 }

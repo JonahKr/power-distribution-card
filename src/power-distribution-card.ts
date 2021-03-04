@@ -1,6 +1,16 @@
-import { LitElement, html, customElement, property, CSSResult, TemplateResult, internalProperty } from 'lit-element';
+import {
+  LitElement,
+  html,
+  customElement,
+  property,
+  CSSResult,
+  TemplateResult,
+  internalProperty,
+  PropertyValues,
+} from 'lit-element';
 
 import {
+  debounce,
   HomeAssistant,
   fireEvent,
   LovelaceCardEditor,
@@ -18,7 +28,7 @@ import { DefaultItem, DefaultConfig, PresetList, PresetObject, PresetType } from
 import { styles, narrow_styles } from './styles';
 import { localize } from './localize/localize';
 import ResizeObserver from 'resize-observer-polyfill';
-import { debounce, installResizeObserver } from './util';
+import { installResizeObserver } from './util';
 //import { formatNumber } from './format-number';
 
 console.info(
@@ -46,8 +56,8 @@ export class PowerDistributionCard extends LitElement {
       center: {
         type: 'bars',
         content: [
-          { preset: 'autarky', name: 'autarky' },
-          { preset: 'ratio', name: 'ratio' },
+          { preset: 'autarky', name: localize('editor.settings.autarky') },
+          { preset: 'ratio', name: localize('editor.settings.ratio') },
         ],
       },
     };
@@ -81,6 +91,11 @@ export class PowerDistributionCard extends LitElement {
       }
     });
     this._config = _config;
+
+    //Setting up card if needed
+    if (this._config.center.type == 'card') {
+      this._card = this._createCardElement(this._config.center.content as LovelaceCardConfig);
+    }
   }
 
   public firstUpdated(): void {
@@ -93,15 +108,19 @@ export class PowerDistributionCard extends LitElement {
       !item.unit_of_measurement ? (this._config.entities[index].unit_of_measurement = hass_uom || 'W') : undefined;
     });
 
-    //Setting up card if needed
-    const center = this._config.center;
-    if (center.type == 'card') {
-      this._card = this._createCardElement(center as LovelaceCardConfig);
-    }
-
     //Resize Observer
     this._adjustWidth();
     this._attachObserver();
+  }
+
+  protected updated(changedProps: PropertyValues): void {
+    super.updated(changedProps);
+    if (!this._card || (!changedProps.has('hass') && !changedProps.has('editMode'))) {
+      return;
+    }
+    if (this.hass) {
+      this._card.hass = this.hass;
+    }
   }
 
   public static get styles(): CSSResult {
@@ -195,7 +214,7 @@ export class PowerDistributionCard extends LitElement {
       case 'none':
         break;
       case 'card':
-        center_panel.push(this._createCardElement(center.content as LovelaceCardConfig));
+        this._card ? center_panel.push(this._card) : console.log('NO CARD');
         break;
       case 'bars':
         center_panel.push(this._render_bars(consumption, production));
@@ -239,7 +258,7 @@ export class PowerDistributionCard extends LitElement {
     if (unit_of_display.startsWith('k')) {
       value /= 1000;
     } else if (item.unit_of_display == 'adaptive') {
-      if (value > 999) {
+      if (Math.abs(value) > 999) {
         value = value / 1000;
         unit_of_display = 'kW';
       } else {
@@ -266,6 +285,18 @@ export class PowerDistributionCard extends LitElement {
         <badge>
           <icon>
             <ha-icon icon="${item.icon}" style="${icon_color ? `color:${icon_color};` : ''}"></ha-icon>
+            ${
+              item.secondary_info_attribute
+                ? html`<p class="secondary">
+                    ${this._val({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute })}
+                  </p>`
+                : item.secondary_info_entity
+                ? html`<p class="secondary">
+                    ${this._val({ entity: item.secondary_info_entity })}
+                    ${this.hass.states[item.secondary_info_entity].attributes.unit_of_measurement}
+                  </p>`
+                : ''
+            }
           </icon>
           <p class="subtitle">${item.name}</p>
         </badge>
@@ -275,7 +306,7 @@ export class PowerDistributionCard extends LitElement {
             !item.hide_arrows
               ? this._render_arrow(
                   //This takes the side the item is on (index even = left) into account for the arrows
-                  state == 0 ? 'none' : index % 2 == 0 ? (state > 0 ? 'right' : 'left') : state > 0 ? 'left' : 'right',
+                  value == 0 ? 'none' : index % 2 == 0 ? (state > 0 ? 'right' : 'left') : state > 0 ? 'left' : 'right',
                   index,
                 )
               : html``
@@ -369,6 +400,7 @@ export class PowerDistributionCard extends LitElement {
   }
 
   private _createCardElement(cardConfig: LovelaceCardConfig) {
+    console.log('Creating Card');
     const element = createThing(cardConfig) as LovelaceCard;
     if (this.hass) {
       element.hass = this.hass;
@@ -385,6 +417,7 @@ export class PowerDistributionCard extends LitElement {
   }
 
   private _rebuildCard(cardElToReplace: LovelaceCard, config: LovelaceCardConfig): void {
+    console.log('REBUILDING CARD');
     const newCardEl = this._createCardElement(config);
     if (cardElToReplace.parentElement) {
       cardElToReplace.parentElement.replaceChild(newCardEl, cardElToReplace);

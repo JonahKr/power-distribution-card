@@ -16,12 +16,14 @@
     "required": "Erforderlich",
     "settings": {
       "animation": "Animation",
+      "autarky": "Autarkie",
       "attribute": "Attribut",
       "background_color": "Hintergrundfarbe",
       "bigger": "Größer ",
       "calc_excluded": "Von Rechnungen ausgeschlossen",
       "center": "Mittelbereich",
       "color": "Farbe",
+      "color-settings": "Farb Einstellungen",
       "decimals": "Dezimalstellen",
       "display-abs": "Absolute Wertanzeige",
       "entities": "Entities",
@@ -32,9 +34,13 @@
       "invert-value": "Invertierter Wert",
       "name": "Name",
       "preset": "Vorlagen",
+      "ratio": "Anteil",
+      "secondary-info": "Zusatzinformationen",
+      "settings": "Einstellungen",
       "smaller": "Kleiner",
       "title": "Titel",
-      "unit_of_display": "Angezeigte Einheit"
+      "unit_of_display": "Angezeigte Einheit",
+      "value": "Wert"
     }
   }
 }

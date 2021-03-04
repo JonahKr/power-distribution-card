@@ -16,12 +16,14 @@
     "required": "Required",
     "settings": {
       "animation": "Animation",
+      "autarky": "autarky",
       "attribute": "Attribute",
       "background_color": "Background Color",
       "bigger": "Bigger",
       "calc_excluded": "Excluded from Calculations",
       "center": "Center",
       "color": "Color",
+      "color-settings": "Color Settings",
       "decimals": "Decimals",
       "display-abs": "Display Absolute Value",
       "entities": "Entities",
@@ -32,9 +34,13 @@
       "invert-value": "Invert Value",
       "name": "Name",
       "preset": "Preset",
+      "ratio": "ratio",
+      "secondary-info": "Secondary Info",
+      "settings": "settings",
       "smaller": "Smaller",
       "title": "Title",
-      "unit_of_display": "Unit of Display"
+      "unit_of_display": "Unit of Display",
+      "value": "value"
     }
   }
 }
