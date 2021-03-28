@@ -75,6 +75,10 @@ export const styles = css`
     cursor: pointer;
   }
 
+  .placeholder {
+    height: 62px;
+  }
+
   #right-panel > item > value {
     float: left;
   }
@@ -114,6 +118,10 @@ export const styles = css`
 
   value {
     float: right;
+  }
+
+  value > p {
+    height: 1em;
   }
 
   table {
@@ -190,6 +198,9 @@ export const narrow_styles = html`
     **********/
     .card-content {
       grid-template-columns: 1fr 1fr 1fr;
+    }
+    .placeholder {
+      height: 114px !important;
     }
     item > badge,
     item > value {

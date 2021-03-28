@@ -168,8 +168,8 @@ export class PowerDistributionCard extends LitElement {
       ? attr
         ? Number(this.hass.states[item.entity].attributes[attr])
         : Number(this.hass.states[item.entity].state)
-      : 0;
-    return item.entity ? num * modifier : 0;
+      : NaN;
+    return isNaN(num) ? NaN : num * modifier;
   }
 
   /**
@@ -250,6 +250,10 @@ export class PowerDistributionCard extends LitElement {
    * @returns Html for a single Item
    */
   private _render_item(value: number, item: EntitySettings, index: number): TemplateResult {
+    //Placeholder item
+    if (!item.entity) {
+      return html`<item class="placeholder"></item>`;
+    }
     const state = item.invert_arrow ? value * -1 : value;
     //Toggle Absolute Values
     value = item.display_abs ? Math.abs(value) : value;
@@ -279,7 +283,6 @@ export class PowerDistributionCard extends LitElement {
       if (state < 0) icon_color = item.icon_color.smaller;
       if (state == 0) icon_color = item.icon_color.equal;
     }
-
     return html`
       <item .entity=${item.entity} @click="${this._moreInfo}">
         <badge>
@@ -301,12 +304,20 @@ export class PowerDistributionCard extends LitElement {
           <p class="subtitle">${item.name}</p>
         </badge>
         <value>
-          <p>${formatValue} ${unit_of_display}</p>
+          <p>${isNaN(value) ? `` : formatValue} ${isNaN(value) ? `` : unit_of_display}</p>
           ${
             !item.hide_arrows
               ? this._render_arrow(
                   //This takes the side the item is on (index even = left) into account for the arrows
-                  value == 0 ? 'none' : index % 2 == 0 ? (state > 0 ? 'right' : 'left') : state > 0 ? 'left' : 'right',
+                  value == 0 || isNaN(value)
+                    ? 'none'
+                    : index % 2 == 0
+                    ? state > 0
+                      ? 'right'
+                      : 'left'
+                    : state > 0
+                    ? 'left'
+                    : 'right',
                   index,
                 )
               : html``
@@ -400,7 +411,6 @@ export class PowerDistributionCard extends LitElement {
   }
 
   private _createCardElement(cardConfig: LovelaceCardConfig) {
-    console.log('Creating Card');
     const element = createThing(cardConfig) as LovelaceCard;
     if (this.hass) {
       element.hass = this.hass;
@@ -417,7 +427,6 @@ export class PowerDistributionCard extends LitElement {
   }
 
   private _rebuildCard(cardElToReplace: LovelaceCard, config: LovelaceCardConfig): void {
-    console.log('REBUILDING CARD');
     const newCardEl = this._createCardElement(config);
     if (cardElToReplace.parentElement) {
       cardElToReplace.parentElement.replaceChild(newCardEl, cardElToReplace);
