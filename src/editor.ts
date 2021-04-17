@@ -13,7 +13,7 @@ import { guard } from 'lit-html/directives/guard';
 
 import Sortable, { SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
-import { fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
+import { ActionConfig, fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
 import { PDCConfig, HTMLElementValue, CustomValueEvent, SubElementConfig, EntitySettings, BarSettings } from './types';
 import { localize } from './localize/localize';
 
@@ -24,6 +24,7 @@ import { DefaultItem, PresetList, PresetObject } from './presets';
 const animation = ['none', 'flash', 'slide'];
 const center = ['none', 'card', 'bars'];
 const bar_presets = ['autarky', 'ratio', ''];
+const actions = ['more-info', 'call-service'];
 
 @customElement('power-distribution-editor')
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
@@ -385,7 +386,38 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           </td>
         </tr>
       </table>
+      <br />
+      <h3>TODO: Action Editor</h3>
+      ${this.renderActionEditor(item)}
     `;
+  }
+
+  /**
+   * Action Editor for adjusting
+   * @param item
+   * @returns
+   */
+  private renderActionEditor(item: EntitySettings): TemplateResult {
+    const retlist: TemplateResult[] = [];
+    ['tap_action', 'double_tap_action'].forEach((action) => {
+      if (item[action]) {
+        retlist.push(html`
+          <paper-dropdown-menu label="Action" .configValue=${'preset'} @value-changed=${this._itemEntityChanged}>
+            <paper-listbox slot="dropdown-content" .selected=${actions.indexOf(item[action].action || '')}>
+              ${actions.map((val) => html`<paper-item>${val}</paper-item>`)}
+            </paper-listbox>
+          </paper-dropdown-menu>
+        `);
+        switch (item[action].action) {
+          case 'call-service':
+            retlist.push(html``);
+            break;
+          default:
+            break;
+        }
+      }
+    });
+    return html`${retlist.map((e) => html`${e}`)}`;
   }
 
   /**
