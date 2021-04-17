@@ -1,4 +1,4 @@
-import { LovelaceCardConfig } from 'custom-card-helpers';
+import { ActionConfig, LovelaceCardConfig } from 'custom-card-helpers';
 import { PresetType } from './presets';
 
 export interface PDCConfig extends LovelaceCardConfig {
@@ -15,6 +15,7 @@ export interface EntitySettings {
   decimals?: number;
   display_abs?: boolean;
   entity?: string;
+  hide_arrows?: boolean;
   icon?: string;
   icon_color?: { bigger: string; equal: string; smaller: string };
   invert_value?: boolean;
@@ -22,9 +23,10 @@ export interface EntitySettings {
   name?: string | undefined;
   preset?: PresetType;
   producer?: boolean;
-  hide_arrows?: boolean;
   secondary_info_entity?: string;
   secondary_info_attribute?: string;
+  tap_action?: ActionConfig;
+  double_tap_action?: ActionConfig;
   unit_of_display?: string;
   unit_of_measurement?: string;
 }

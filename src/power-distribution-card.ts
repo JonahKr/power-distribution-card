@@ -17,6 +17,9 @@ import {
   LovelaceCard,
   LovelaceCardConfig,
   createThing,
+  hasAction,
+  ActionHandlerEvent,
+  handleAction,
 } from 'custom-card-helpers';
 
 import { version } from '../package.json';
@@ -29,6 +32,7 @@ import { styles, narrow_styles } from './styles';
 import { localize } from './localize/localize';
 import ResizeObserver from 'resize-observer-polyfill';
 import { installResizeObserver } from './util';
+import { actionHandler } from './action-handler';
 //import { formatNumber } from './format-number';
 
 console.info(
@@ -45,10 +49,18 @@ window.customCards.push({
 
 @customElement('power-distribution')
 export class PowerDistributionCard extends LitElement {
+  /**
+   * Linking to the visual Editor Element
+   * @returns Editor DOM Element
+   */
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
     return document.createElement('power-distribution-editor') as LovelaceCardEditor;
   }
 
+  /**
+   * Function for creating the standard power-distribution-card
+   * @returns Example Config for this Card
+   */
   public static getStubConfig(): Record<string, unknown> {
     return {
       title: 'Title',
@@ -103,7 +115,7 @@ export class PowerDistributionCard extends LitElement {
 
     _config.entities.forEach((item, index) => {
       if (!item.entity) return;
-      //unit-of-measurement Auto Configuration
+      //unit-of-measurement Auto Configuration from hass element
       const hass_uom = this.hass.states[item.entity].attributes.unit_of_measurement;
       !item.unit_of_measurement ? (this._config.entities[index].unit_of_measurement = hass_uom || 'W') : undefined;
     });
@@ -214,7 +226,7 @@ export class PowerDistributionCard extends LitElement {
       case 'none':
         break;
       case 'card':
-        this._card ? center_panel.push(this._card) : console.log('NO CARD');
+        this._card ? center_panel.push(this._card) : console.warn('NO CARD');
         break;
       case 'bars':
         center_panel.push(this._render_bars(consumption, production));
@@ -230,16 +242,24 @@ export class PowerDistributionCard extends LitElement {
         </div>
       </ha-card>`;
   }
-  /**
-   * Fires the Hass More Info Event
-   * @param ev Event Object
-   * @event hass-more-info
-   */
-  private _moreInfo(ev: CustomEvent): void {
-    fireEvent(this, 'hass-more-info', {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      entityId: (ev.currentTarget as any).entity,
-    });
+
+  private _handleAction(ev: ActionHandlerEvent): void {
+    if (this.hass && this._config && ev.detail.action) {
+      console.dir(ev);
+      handleAction(
+        this,
+        this.hass,
+        {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          entity: (ev.currentTarget as any).entity,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          tap_action: (ev.currentTarget as any).tap_action,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          double_tap_action: (ev.currentTarget as any).double_tap_action,
+        },
+        ev.detail.action,
+      );
+    }
   }
 
   /**
@@ -284,7 +304,13 @@ export class PowerDistributionCard extends LitElement {
       if (state == 0) icon_color = item.icon_color.equal;
     }
     return html`
-      <item .entity=${item.entity} @click="${this._moreInfo}">
+      <item
+        .entity=${item.entity}
+        @action=${this._handleAction}
+        .actionHandler=${actionHandler({
+          hasDoubleClick: hasAction(item.double_tap_action),
+        })}
+    ">
         <badge>
           <icon>
             <ha-icon icon="${item.icon}" style="${icon_color ? `color:${icon_color};` : ''}"></ha-icon>
