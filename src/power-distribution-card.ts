@@ -17,6 +17,7 @@ import {
   LovelaceCard,
   LovelaceCardConfig,
   createThing,
+  formatNumber,
 } from 'custom-card-helpers';
 
 import { version } from '../package.json';
@@ -274,7 +275,7 @@ export class PowerDistributionCard extends LitElement {
     const decFakTen = 10 ** (item.decimals || item.decimals == 0 ? item.decimals : 2);
     value = Math.round(value * decFakTen) / decFakTen;
     //Format Number
-    const formatValue = value; //formatNumber(value, this.hass.language);
+    const formatValue = formatNumber(value, this.hass);
 
     //Icon color dependant on state
     let icon_color: string | undefined;
