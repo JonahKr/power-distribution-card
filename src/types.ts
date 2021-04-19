@@ -16,7 +16,7 @@ export interface EntitySettings {
   display_abs?: boolean;
   entity?: string;
   icon?: string;
-  icon_color?: { bigger: string; equal: string; smaller: string };
+  icon_color?: { bigger?: string; equal?: string; smaller?: string };
   invert_value?: boolean;
   invert_arrow?: boolean;
   name?: string | undefined;
