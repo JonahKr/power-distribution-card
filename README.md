@@ -31,7 +31,7 @@
       <h4><a href="#presets">Presets</a></h4>
       <h4><a href="#simple">Simple Configuration</a></h4>
       <h4><a href="#yaml">YAML Configuration</a></h4>
-      <h4><a href="#animation">Center Panel</a></h4>
+      <h4><a href="#animation">Animation Options</a></h4>
       <h4><a href="#center">Center Panel</a></h4>
       <h4><a href="#entity">Advanced Configuration</a></h4>
     </li>
