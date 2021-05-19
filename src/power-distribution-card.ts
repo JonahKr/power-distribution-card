@@ -1,13 +1,6 @@
-import {
-  LitElement,
-  html,
-  customElement,
-  property,
-  CSSResult,
-  TemplateResult,
-  internalProperty,
-  PropertyValues,
-} from 'lit-element';
+import { LitElement, html, TemplateResult, PropertyValues, CSSResultGroup } from 'lit';
+
+import { customElement, property, state } from 'lit/decorators.js';
 
 import {
   debounce,
@@ -66,12 +59,12 @@ export class PowerDistributionCard extends LitElement {
 
   @property() public hass!: HomeAssistant;
 
-  @internalProperty() private _config!: PDCConfig;
+  @state() private _config!: PDCConfig;
 
   @property() private _card!: LovelaceCard;
 
   private _resizeObserver?: ResizeObserver;
-  @internalProperty() private _narrow = false;
+  @state() private _narrow = false;
 
   /**
    * Configuring all the passed Settings and Changing it to a more usefull Internal one.
@@ -124,7 +117,7 @@ export class PowerDistributionCard extends LitElement {
     }
   }
 
-  public static get styles(): CSSResult {
+  public static get styles(): CSSResultGroup {
     return styles;
   }
 
@@ -275,7 +268,7 @@ export class PowerDistributionCard extends LitElement {
     const decFakTen = 10 ** (item.decimals || item.decimals == 0 ? item.decimals : 2);
     value = Math.round(value * decFakTen) / decFakTen;
     //Format Number
-    const formatValue = formatNumber(value, this.hass);
+    const formatValue = value; // formatNumber(value, this.hass.locale);
 
     //Icon color dependant on state
     let icon_color: string | undefined;

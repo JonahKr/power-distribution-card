@@ -1,15 +1,7 @@
-import {
-  LitElement,
-  customElement,
-  property,
-  TemplateResult,
-  html,
-  internalProperty,
-  PropertyValues,
-  CSSResult,
-  css,
-} from 'lit-element';
-import { guard } from 'lit-html/directives/guard';
+import { LitElement, TemplateResult, html, PropertyValues, css, CSSResultGroup } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+
+import { guard } from 'lit/directives/guard.js';
 
 import Sortable, { SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
@@ -28,7 +20,7 @@ const bar_presets = ['autarky', 'ratio', ''];
 @customElement('power-distribution-editor')
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
   @property({ attribute: false }) public hass?: HomeAssistant;
-  @internalProperty() private _config!: PDCConfig;
+  @state() private _config!: PDCConfig;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _helpers: any;
 
@@ -136,10 +128,10 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    * SubElementEditor
    */
 
-  @internalProperty() private _subElementEditor: SubElementConfig | undefined = undefined;
+  @state() private _subElementEditor: SubElementConfig | undefined = undefined;
 
   private _renderSubElementEditor(): TemplateResult {
-    const subel = [
+    const subel: TemplateResult[] = [
       html`<div class="header">
         <div class="back-title">
           <mwc-icon-button @click=${this._goBack}>
@@ -549,10 +541,10 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    * If you are interested in using the Editor for your own card, i tried explaining everything with incode documentation
    */
 
-  @internalProperty() private _renderEmptySortable = false;
+  @state() private _renderEmptySortable = false;
   private _sortable?: Sortable;
 
-  @internalProperty() private _attached = false;
+  @state() private _attached = false;
 
   /**
    * Generator for all entities in the config.entities list
@@ -768,7 +760,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    * The Second Part comes from here: https://github.com/home-assistant/frontend/blob/dev/src/resources/ha-sortable-style.ts
    * @returns Editor CSS
    */
-  static get styles(): CSSResult[] {
+  static get styles(): CSSResultGroup[] {
     return [
       css`
         .checkbox {
