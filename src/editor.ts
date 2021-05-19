@@ -1,15 +1,7 @@
-import {
-  LitElement,
-  customElement,
-  property,
-  TemplateResult,
-  html,
-  internalProperty,
-  PropertyValues,
-  CSSResult,
-  css,
-} from 'lit-element';
-import { guard } from 'lit-html/directives/guard';
+import { LitElement, TemplateResult, html, PropertyValues, css, CSSResultGroup } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+
+import { guard } from 'lit/directives/guard.js';
 
 import Sortable, { SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
@@ -29,7 +21,7 @@ const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'none
 @customElement('power-distribution-editor')
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
   @property({ attribute: false }) public hass?: HomeAssistant;
-  @internalProperty() private _config!: PDCConfig;
+  @state() private _config!: PDCConfig;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _helpers: any;
 
@@ -137,10 +129,10 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    * SubElementEditor
    */
 
-  @internalProperty() private _subElementEditor: SubElementConfig | undefined = undefined;
+  @state() private _subElementEditor: SubElementConfig | undefined = undefined;
 
   private _renderSubElementEditor(): TemplateResult {
-    const subel = [
+    const subel: TemplateResult[] = [
       html`<div class="header">
         <div class="back-title">
           <mwc-icon-button @click=${this._goBack}>
@@ -179,29 +171,25 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     if (!ev.target) return;
     const target = ev.target;
     if (!target.configValue) return;
-    const configEntities = [...this._config.entities];
+
+    // Extracting event Data
     const index = target.index || this._subElementEditor?.index || 0;
+    const configValue = target.configValue.split('.');
+    const value = target.checked != undefined ? target.checked : target.value;
+
+    const configItem = this._config.entities[index][configValue[0]] || undefined;
+    if ((configItem ? (configValue[1] ? configItem[configValue[1]] : configItem) : undefined) == value) {
+      return;
+    }
+    const configEntities = [...this._config.entities];
+
     configEntities[index] = {
       ...configEntities[index],
-      [target.configValue]: target.checked != undefined ? target.checked : target.value,
+      [configValue[0]]: configValue[1] ? { ...configEntities[index][configValue[0]], [configValue[1]]: value } : value,
     };
 
     this._config = { ...this._config, entities: configEntities };
     fireEvent(this, 'config-changed', { config: this._config });
-  }
-
-  private _icon_colorChanged(ev: CustomValueEvent): void {
-    if (!ev.target) return;
-    const target = ev.target;
-    if (!target.configValue) return;
-    const icon_color = {
-      ...this._config.entities[this._subElementEditor?.index || 0].icon_color,
-      [target.configValue]: target.value as string,
-    };
-
-    this._itemEntityChanged({
-      target: { configValue: 'icon_color', value: <{ bigger: string; equal: string; smaller: string }>icon_color },
-    });
   }
 
   private _entityEditor(): TemplateResult {
@@ -220,7 +208,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         ></ha-icon-input>
         <paper-input
           .label="${localize('editor.settings.name')} (${localize('editor.optional')})"
-          .value=${item.name || ''}
+          .value=${item.name || undefined}
           .configValue=${'name'}
           @value-changed=${this._itemEntityChanged}
         ></paper-input>
@@ -264,7 +252,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       <div class="side-by-side">
         <paper-input
           .label="${localize('editor.settings.unit_of_display')}"
-          .value=${item.unit_of_display || ''}
+          .value=${item.unit_of_display || undefined}
           .configValue=${'unit_of_display'}
           @value-changed=${this._itemEntityChanged}
         ></paper-input>
@@ -272,7 +260,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           auto-validate
           pattern="[0-9]"
           .label="${localize('editor.settings.decimals')}"
-          .value=${item.decimals || ''}
+          .value=${item.decimals || undefined}
           .configValue=${'decimals'}
           @value-changed=${this._itemEntityChanged}
         ></paper-input>
@@ -363,25 +351,25 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           <td>
             <paper-input
               .label="${localize('editor.settings.bigger')}"
-              .value=${item.icon_color?.bigger || ''}
-              .configValue=${'bigger'}
-              @value-changed=${this._icon_colorChanged}
+              .value=${item.icon_color?.bigger || undefined}
+              .configValue=${'icon_color.bigger'}
+              @value-changed=${this._itemEntityChanged}
             ></paper-input>
           </td>
           <td>
             <paper-input
               .label="${localize('editor.settings.equal')}"
-              .value=${item.icon_color?.equal || ''}
-              .configValue=${'equal'}
-              @value-changed=${this._icon_colorChanged}
+              .value=${item.icon_color?.equal || undefined}
+              .configValue=${'icon_color.equal'}
+              @value-changed=${this._itemEntityChanged}
             ></paper-input>
           </td>
           <td>
             <paper-input
               .label="${localize('editor.settings.smaller')}"
-              .value=${item.icon_color?.smaller || ''}
-              .configValue=${'smaller'}
-              @value-changed=${this._icon_colorChanged}
+              .value=${item.icon_color?.smaller || undefined}
+              .configValue=${'icon_color.smaller'}
+              @value-changed=${this._itemEntityChanged}
             ></paper-input>
           </td>
         </tr>
@@ -563,10 +551,10 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    * If you are interested in using the Editor for your own card, i tried explaining everything with incode documentation
    */
 
-  @internalProperty() private _renderEmptySortable = false;
+  @state() private _renderEmptySortable = false;
   private _sortable?: Sortable;
 
-  @internalProperty() private _attached = false;
+  @state() private _attached = false;
 
   /**
    * Generator for all entities in the config.entities list
@@ -782,7 +770,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    * The Second Part comes from here: https://github.com/home-assistant/frontend/blob/dev/src/resources/ha-sortable-style.ts
    * @returns Editor CSS
    */
-  static get styles(): CSSResult[] {
+  static get styles(): CSSResultGroup[] {
     return [
       css`
         .checkbox {

@@ -30,6 +30,8 @@
       <h3><a href="#configuration">Configuration</a></h3>
       <h4><a href="#presets">Presets</a></h4>
       <h4><a href="#simple">Simple Configuration</a></h4>
+      <h4><a href="#yaml">YAML Configuration</a></h4>
+      <h4><a href="#animation">Animation Options</a></h4>
       <h4><a href="#center">Center Panel</a></h4>
       <h4><a href="#entity">Advanced Configuration</a></h4>
     </li>
@@ -189,6 +191,49 @@ The easiest way to get your Card up and running, is by defining the entities for
 
 </div>
 <br/><br/>
+
+
+<div id="yaml">
+
+## YAML Only
+
+If you are a real hardcore YAML connoisseur here is a basic example to get things started:
+```yaml
+type: 'custom:power-distribution-card'
+title: Title
+animation: flash
+entities:
+  - entity: sensor.e3dc_home
+    preset: home
+  - entity: sensor.e3dc_solar
+    preset: solar
+  - entity: sensor.e3dc_battery
+    preset: battery
+center:
+  type: bars
+  content:
+    - preset: autarky
+      name: autarky
+    - preset: ratio
+      name: ratio
+```
+You can find all options for every entity <a href="#entity">here</a>.
+If you want to further modify the center panel youz can find the documentation <a href="#center">here</a>.
+</div>
+<br/><br/>
+
+
+<div id="animation">
+
+## Animation
+
+For the animation you have 3 options: `flash`, `slide`, `none`
+```yaml
+type: 'custom:power-distribution-card'
+animation: 'slide'
+```
+</div>
+<br/>
 
 <div id="center">
 
