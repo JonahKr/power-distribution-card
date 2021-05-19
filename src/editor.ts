@@ -5,7 +5,7 @@ import { guard } from 'lit/directives/guard.js';
 
 import Sortable, { SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
-import { fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
+import { ActionConfig, fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
 import { PDCConfig, HTMLElementValue, CustomValueEvent, SubElementConfig, EntitySettings, BarSettings } from './types';
 import { localize } from './localize/localize';
 
@@ -16,6 +16,7 @@ import { DefaultItem, PresetList, PresetObject } from './presets';
 const animation = ['none', 'flash', 'slide'];
 const center = ['none', 'card', 'bars'];
 const bar_presets = ['autarky', 'ratio', ''];
+const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'none'];
 
 @customElement('power-distribution-editor')
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
@@ -373,6 +374,15 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           </td>
         </tr>
       </table>
+      <br />
+      <h3>TODO: Action Editor</h3>
+      <hui-action-editor
+        .hass=${this.hass}
+        .config=${item.tap_action}
+        .configValue=${'tap_action'}
+        @value-changed=${this._itemEntityChanged}
+      >
+      </hui-action-editor>
     `;
   }
 
