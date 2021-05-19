@@ -24,7 +24,7 @@ import { DefaultItem, PresetList, PresetObject } from './presets';
 const animation = ['none', 'flash', 'slide'];
 const center = ['none', 'card', 'bars'];
 const bar_presets = ['autarky', 'ratio', ''];
-const actions = ['more-info', 'call-service'];
+const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'none'];
 
 @customElement('power-distribution-editor')
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
@@ -388,36 +388,14 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       </table>
       <br />
       <h3>TODO: Action Editor</h3>
-      ${this.renderActionEditor(item)}
+      <hui-action-editor
+        .hass=${this.hass}
+        .config=${item.tap_action}
+        .configValue=${'tap_action'}
+        @value-changed=${this._itemEntityChanged}
+      >
+      </hui-action-editor>
     `;
-  }
-
-  /**
-   * Action Editor for adjusting
-   * @param item
-   * @returns
-   */
-  private renderActionEditor(item: EntitySettings): TemplateResult {
-    const retlist: TemplateResult[] = [];
-    ['tap_action', 'double_tap_action'].forEach((action) => {
-      if (item[action]) {
-        retlist.push(html`
-          <paper-dropdown-menu label="Action" .configValue=${'preset'} @value-changed=${this._itemEntityChanged}>
-            <paper-listbox slot="dropdown-content" .selected=${actions.indexOf(item[action].action || '')}>
-              ${actions.map((val) => html`<paper-item>${val}</paper-item>`)}
-            </paper-listbox>
-          </paper-dropdown-menu>
-        `);
-        switch (item[action].action) {
-          case 'call-service':
-            retlist.push(html``);
-            break;
-          default:
-            break;
-        }
-      }
-    });
-    return html`${retlist.map((e) => html`${e}`)}`;
   }
 
   /**
