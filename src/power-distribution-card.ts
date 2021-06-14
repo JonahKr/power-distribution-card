@@ -5,7 +5,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import {
   debounce,
   HomeAssistant,
-  fireEvent,
+  formatNumber,
   LovelaceCardEditor,
   LovelaceCard,
   LovelaceCardConfig,
@@ -26,7 +26,6 @@ import { localize } from './localize/localize';
 import ResizeObserver from 'resize-observer-polyfill';
 import { installResizeObserver } from './util';
 import { actionHandler } from './action-handler';
-//import { formatNumber } from './format-number';
 
 console.info(
   `%c POWER-DISTRIBUTION-CARD %c ${version}`,
@@ -287,7 +286,7 @@ export class PowerDistributionCard extends LitElement {
     const decFakTen = 10 ** (item.decimals || item.decimals == 0 ? item.decimals : 2);
     value = Math.round(value * decFakTen) / decFakTen;
     //Format Number
-    const formatValue = value; // formatNumber(value, this.hass.locale);
+    const formatValue = formatNumber(value, this.hass.locale);
 
     //Icon color dependant on state
     let icon_color: string | undefined;
