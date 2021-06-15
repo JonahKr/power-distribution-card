@@ -57,12 +57,14 @@ export interface CustomValueEvent {
     index?: number;
     value?: string;
   };
+  detail?: {
+    value?: string;
+  };
 }
 
 export interface SubElementConfig {
   type: 'entity' | 'bars' | 'card';
   index?: number;
-  element?: EntitySettings | LovelaceCardConfig | BarSettings[];
 }
 
 export interface HTMLElementValue extends HTMLElement {

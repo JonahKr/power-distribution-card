@@ -5,8 +5,8 @@ import { guard } from 'lit/directives/guard.js';
 
 import Sortable, { SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
-import { ActionConfig, fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
-import { PDCConfig, HTMLElementValue, CustomValueEvent, SubElementConfig, EntitySettings, BarSettings } from './types';
+import { fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
+import { PDCConfig, HTMLElementValue, CustomValueEvent, SubElementConfig, BarSettings } from './types';
 import { localize } from './localize/localize';
 
 import { DefaultItem, PresetList, PresetObject } from './presets';
@@ -38,8 +38,10 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     await this.loadCardHelpers();
     try {
       await this._helpers.createCardElement({ type: 'calendar', entities: ['calendar.does_not_exist'] });
+      await this._helpers.createCardElement({ type: 'button', entity: 'demo.demo' });
     } catch (e) {}
     await customElements.get('hui-calendar-card').getConfigElement();
+    await customElements.get('hui-button-card').getConfigElement();
   }
 
   private async loadCardHelpers(): Promise<void> {
@@ -94,6 +96,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     `;
   }
   /**
+   * TODO: Get rid of duplicated Updating functions
    * Custom handeling for Center panel
    */
   private _centerChanged(ev: CustomValueEvent): void {
@@ -120,7 +123,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       const target = ev.currentTarget;
       this._subElementEditor = {
         type: <'card' | 'bars'>target.value,
-        element: this._config.center.content,
       };
     }
   }
@@ -175,7 +177,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     // Extracting event Data
     const index = target.index || this._subElementEditor?.index || 0;
     const configValue = target.configValue.split('.');
-    const value = target.checked != undefined ? target.checked : target.value;
+    const value = target.checked != undefined ? target.checked : ev.detail?.value;
 
     const configItem = this._config.entities[index][configValue[0]] || undefined;
     if ((configItem ? (configValue[1] ? configItem[configValue[1]] : configItem) : undefined) == value) {
@@ -187,13 +189,11 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       ...configEntities[index],
       [configValue[0]]: configValue[1] ? { ...configEntities[index][configValue[0]], [configValue[1]]: value } : value,
     };
-
-    this._config = { ...this._config, entities: configEntities };
-    fireEvent(this, 'config-changed', { config: this._config });
+    fireEvent(this, 'config-changed', { config: { ...this._config, entities: configEntities } });
   }
 
   private _entityEditor(): TemplateResult {
-    const item = <EntitySettings>this._subElementEditor?.element || DefaultItem;
+    const item = this._config.entities[this._subElementEditor?.index || 0];
     const attributes = Object.keys({ ...this.hass?.states[item.entity || 0].attributes }) || [];
     const secondary_info_attributes = item.secondary_info_entity
       ? Object.keys({ ...this.hass?.states[item.secondary_info_entity || 0].attributes })
@@ -375,14 +375,27 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         </tr>
       </table>
       <br />
-      <h3>TODO: Action Editor</h3>
-      <hui-action-editor
-        .hass=${this.hass}
-        .config=${item.tap_action}
-        .configValue=${'tap_action'}
-        @value-changed=${this._itemEntityChanged}
-      >
-      </hui-action-editor>
+      <h3>Action Editor</h3>
+      <div class="side-by-side">
+        <hui-action-editor
+          .label="123"
+          .hass=${this.hass}
+          .config=${item.tap_action || { action: 'more-info' }}
+          .actions=${actions}
+          .configValue=${'tap_action'}
+          @value-changed=${this._itemEntityChanged}
+        >
+        </hui-action-editor>
+        <hui-action-editor
+          .label="123"
+          .hass=${this.hass}
+          .config=${item.double_tap_action}
+          .actions=${actions}
+          .configValue=${'double_tap_action'}
+          @value-changed=${this._itemEntityChanged}
+        >
+        </hui-action-editor>
+      </div>
     `;
   }
 
@@ -761,7 +774,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
 
     this._subElementEditor = {
       type: 'entity',
-      element: this._config.entities[index],
       index: index,
     };
   }
