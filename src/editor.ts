@@ -378,7 +378,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       <h3>Action Editor</h3>
       <div class="side-by-side">
         <hui-action-editor
-          .label="123"
           .hass=${this.hass}
           .config=${item.tap_action || { action: 'more-info' }}
           .actions=${actions}
@@ -387,7 +386,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         >
         </hui-action-editor>
         <hui-action-editor
-          .label="123"
           .hass=${this.hass}
           .config=${item.double_tap_action}
           .actions=${actions}
@@ -417,7 +415,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       const index = target.index || this._subElementEditor?.index || 0;
       content[index] = {
         ...content[index],
-        [target.configValue]: target.checked != undefined ? target.checked : (target.value as string),
+        [target.configValue]: target.checked != undefined ? target.checked : ev.detail?.value,
       };
     }
 
@@ -516,6 +514,27 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
               .index=${index}
             ></paper-input>
           </div>
+          <h3>Action Editor</h3>
+      <div class="side-by-side">
+        <hui-action-editor
+          .hass=${this.hass}
+          .config=${e.tap_action}
+          .actions=${actions}
+          .configValue=${'tap_action'}
+          @value-changed=${this._barChanged}
+          .index=${index}
+        >
+        </hui-action-editor>
+        <hui-action-editor
+          .hass=${this.hass}
+          .config=${e.double_tap_action}
+          .actions=${actions}
+          .configValue=${'double_tap_action'}
+          @value-changed=${this._barChanged}
+          .index=${index}
+        >
+        </hui-action-editor>
+      </div>
         </div>
         <br/>
       `),

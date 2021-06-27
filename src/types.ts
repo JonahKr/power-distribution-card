@@ -42,6 +42,8 @@ export interface BarSettings {
   invert_value?: boolean;
   name?: string | undefined;
   preset?: 'autarky' | 'ratio' | '';
+  tap_action?: ActionConfig;
+  double_tap_action?: ActionConfig;
 }
 
 export type ArrowStates = 'right' | 'left' | 'none';

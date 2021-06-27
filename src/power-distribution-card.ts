@@ -417,7 +417,17 @@ export class PowerDistributionCard extends LitElement {
       }
       if (value < 0) value = this._val(element);
       bars.push(html`
-        <div class="bar-element">
+        <div
+          class="bar-element"
+          .entity=${element.entity}
+          .tap_action=${element.tap_action}
+          .double_tap_action=${element.double_tap_action}
+          @action=${this._handleAction}
+          .actionHandler=${actionHandler({
+            hasDoubleClick: hasAction(element.double_tap_action),
+          })}
+          style="${element.tap_action || element.double_tap_action ? 'cursor: pointer;' : ''}"
+        >
           <p class="bar-percentage">${value}%</p>
           <div class="bar-wrapper" style="${element.bar_bg_color ? `background-color:${element.bar_bg_color};` : ''}">
             <bar style="height:${value}%; background-color:${element.bar_color};" />
