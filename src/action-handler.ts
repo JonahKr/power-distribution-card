@@ -1,14 +1,26 @@
 import { fireEvent } from 'custom-card-helpers';
-import { ActionHandlerOptions } from 'custom-card-helpers/dist/types';
-import { directive, PropertyPart } from 'lit-html';
+import { noChange } from 'lit';
+import { AttributePart, directive, Directive, DirectiveParameters } from 'lit/directive.js';
+
+import { deepEqual } from './deep-equal';
 
 interface ActionHandler extends HTMLElement {
   holdTime: number;
-  bind(element: Element, options): void;
+  bind(element: Element, options?: ActionHandlerOptions): void;
+}
+interface ActionHandlerElement extends HTMLElement {
+  actionHandler?: {
+    options: ActionHandlerOptions;
+    start?: (ev: Event) => void;
+    end?: (ev: Event) => void;
+    handleEnter?: (ev: KeyboardEvent) => void;
+  };
 }
 
-interface ActionHandlerElement extends HTMLElement {
-  actionHandler?: boolean;
+export interface ActionHandlerOptions {
+  hasHold?: boolean;
+  hasDoubleClick?: boolean;
+  disabled?: boolean;
 }
 
 class ActionHandler extends HTMLElement implements ActionHandler {
@@ -16,34 +28,44 @@ class ActionHandler extends HTMLElement implements ActionHandler {
   protected timer?: number;
   private dblClickTimeout?: number;
 
-  public bind(element: ActionHandlerElement, options): void {
-    if (element.actionHandler) {
+  public bind(element: ActionHandlerElement, options: ActionHandlerOptions) {
+    if (element.actionHandler && deepEqual(options, element.actionHandler.options)) {
       return;
     }
-    element.actionHandler = true;
 
-    const end = (ev: Event): void => {
+    if (element.actionHandler) {
+      element.removeEventListener('click', element.actionHandler.end!);
+    }
+    element.actionHandler = { options };
+
+    if (options.disabled) {
+      return;
+    }
+
+    element.actionHandler.end = (ev: Event): void => {
+      const target = element; //ev.target as HTMLElement;
       // Prevent mouse event if touch event
-      ev.preventDefault();
+      if (ev.cancelable) {
+        ev.preventDefault();
+      }
       clearTimeout(this.timer);
       this.timer = undefined;
       if (options.hasDoubleClick) {
         if ((ev.type === 'click' && (ev as MouseEvent).detail < 2) || !this.dblClickTimeout) {
           this.dblClickTimeout = window.setTimeout(() => {
             this.dblClickTimeout = undefined;
-            fireEvent(element, 'action', { action: 'tap' });
+            fireEvent(target, 'action', { action: 'tap' });
           }, 250);
         } else {
           clearTimeout(this.dblClickTimeout);
           this.dblClickTimeout = undefined;
-          fireEvent(element, 'action', { action: 'double_tap' });
+          fireEvent(target, 'action', { action: 'double_tap' });
         }
       } else {
-        fireEvent(element, 'action', { action: 'tap' });
+        fireEvent(target, 'action', { action: 'tap' });
       }
     };
-
-    element.addEventListener('click', end);
+    element.addEventListener('click', element.actionHandler.end);
   }
 }
 
@@ -61,7 +83,7 @@ const getActionHandler = (): ActionHandler => {
   return actionhandler as ActionHandler;
 };
 
-export const actionHandlerBind = (element: ActionHandlerElement, options: ActionHandlerOptions): void => {
+export const actionHandlerBind = (element: ActionHandlerElement, options?: ActionHandlerOptions): void => {
   const actionhandler: ActionHandler = getActionHandler();
   if (!actionhandler) {
     return;
@@ -69,6 +91,13 @@ export const actionHandlerBind = (element: ActionHandlerElement, options: Action
   actionhandler.bind(element, options);
 };
 
-export const actionHandler = directive((options: ActionHandlerOptions = {}) => (part: PropertyPart): void => {
-  actionHandlerBind(part.committer.element as ActionHandlerElement, options);
-});
+export const actionHandler = directive(
+  class extends Directive {
+    update(part: AttributePart, [options]: DirectiveParameters<this>) {
+      actionHandlerBind(part.element as ActionHandlerElement, options);
+      return noChange;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    render(_options?: ActionHandlerOptions) {}
+  },
+);

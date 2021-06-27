@@ -237,7 +237,6 @@ export class PowerDistributionCard extends LitElement {
 
   private _handleAction(ev: ActionHandlerEvent): void {
     if (this.hass && this._config && ev.detail.action) {
-      console.dir(ev);
       handleAction(
         this,
         this.hass,
@@ -298,6 +297,8 @@ export class PowerDistributionCard extends LitElement {
     return html`
       <item
         .entity=${item.entity}
+        .tap_action=${item.tap_action}
+        .double_tap_action=${item.double_tap_action}
         @action=${this._handleAction}
         .actionHandler=${actionHandler({
           hasDoubleClick: hasAction(item.double_tap_action),
