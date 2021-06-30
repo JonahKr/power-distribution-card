@@ -14,6 +14,7 @@ export interface EntitySettings {
   consumer?: boolean;
   decimals?: number;
   display_abs?: boolean;
+  double_tap_action?: ActionConfig;
   entity?: string;
   hide_arrows?: boolean;
   icon?: string;
@@ -26,7 +27,7 @@ export interface EntitySettings {
   secondary_info_entity?: string;
   secondary_info_attribute?: string;
   tap_action?: ActionConfig;
-  double_tap_action?: ActionConfig;
+  threshold?: number;
   unit_of_display?: string;
   unit_of_measurement?: string;
 }

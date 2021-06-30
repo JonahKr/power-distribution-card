@@ -166,14 +166,20 @@ export class PowerDistributionCard extends LitElement {
    */
   private _val(item: EntitySettings | BarSettings): number {
     let modifier = item.invert_value ? -1 : 1;
+    //Proper K Scaling e.g. 1kW = 1000W
     if ((item as EntitySettings).unit_of_measurement?.startsWith('k')) modifier *= 1000;
+    //Checking if an attribute was defined to pull the value from
     const attr = (item as EntitySettings).attribute || null;
-    const num = item.entity
+    // If an entity exists, check if the attribute setting is entered -> value from attribute else value from entity
+    let num = item.entity
       ? attr
         ? Number(this.hass.states[item.entity].attributes[attr])
         : Number(this.hass.states[item.entity].state)
       : NaN;
-    return isNaN(num) ? NaN : num * modifier;
+    //Applying Threshold
+    const threshold = (item as EntitySettings).threshold || null;
+    num = threshold ? (Math.abs(num) < threshold ? 0 : num) : num;
+    return num * modifier;
   }
 
   /**
@@ -268,16 +274,24 @@ export class PowerDistributionCard extends LitElement {
     const state = item.invert_arrow ? value * -1 : value;
     //Toggle Absolute Values
     value = item.display_abs ? Math.abs(value) : value;
-    //Unit-Of-Display
+
+    //Unit-Of-Display and Unit_of_measurement
     let unit_of_display = item.unit_of_display || 'W';
-    if (unit_of_display.startsWith('k')) {
+    const uod_split = unit_of_display.split('k');
+    if (uod_split[0] == 'k') {
       value /= 1000;
     } else if (item.unit_of_display == 'adaptive') {
+      //Using the uom suffix enables to adapt the initial unit to the automatic scaling naming
+      let uom_suffix = 'W';
+      if (item.unit_of_measurement) {
+        uom_suffix =
+          item.unit_of_measurement[0] == 'k' ? item.unit_of_measurement.substring(1) : item.unit_of_measurement;
+      }
       if (Math.abs(value) > 999) {
         value = value / 1000;
-        unit_of_display = 'kW';
+        unit_of_display = 'k' + uom_suffix;
       } else {
-        unit_of_display = 'W';
+        unit_of_display = uom_suffix;
       }
     }
 
@@ -294,6 +308,10 @@ export class PowerDistributionCard extends LitElement {
       if (state < 0) icon_color = item.icon_color.smaller;
       if (state == 0) icon_color = item.icon_color.equal;
     }
+
+    //NaNFlag for Offline Sensors for example
+    const NanFlag = isNaN(value);
+
     return html`
       <item
         .entity=${item.entity}
@@ -323,12 +341,12 @@ export class PowerDistributionCard extends LitElement {
           <p class="subtitle">${item.name}</p>
         </badge>
         <value>
-          <p>${isNaN(value) ? `` : formatValue} ${isNaN(value) ? `` : unit_of_display}</p>
+          <p>${NanFlag ? `` : formatValue} ${NanFlag ? `` : unit_of_display}</p>
           ${
             !item.hide_arrows
               ? this._render_arrow(
                   //This takes the side the item is on (index even = left) into account for the arrows
-                  value == 0 || isNaN(value)
+                  value == 0 || NanFlag
                     ? 'none'
                     : index % 2 == 0
                     ? state > 0
