@@ -15,6 +15,7 @@
     "optional": "Optional",
     "required": "Required",
     "settings": {
+      "action_settings": "Action Settings",
       "animation": "Animation",
       "autarky": "autarky",
       "attribute": "Attribute",
@@ -38,6 +39,7 @@
       "secondary-info": "Secondary Info",
       "settings": "settings",
       "smaller": "Smaller",
+      "threshold": "Threshold",
       "title": "Title",
       "unit_of_display": "Unit of Display",
       "value": "value"

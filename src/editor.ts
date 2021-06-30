@@ -237,16 +237,27 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           </paper-listbox>
         </paper-dropdown-menu>
       </div>
-      <paper-dropdown-menu
-        label="${localize('editor.settings.preset')}"
-        .configValue=${'preset'}
-        @value-changed=${this._itemEntityChanged}
-      >
-        <paper-listbox slot="dropdown-content" .selected=${PresetList.indexOf(item.preset || PresetList[0])}>
-          ${PresetList.map((val) => html`<paper-item>${val}</paper-item>`)}
-        </paper-listbox>
-      </paper-dropdown-menu>
-
+      <div class="side-by-side">
+        <paper-dropdown-menu
+          label="${localize('editor.settings.preset')}"
+          .configValue=${'preset'}
+          @value-changed=${this._itemEntityChanged}
+        >
+          <paper-listbox slot="dropdown-content" .selected=${PresetList.indexOf(item.preset || PresetList[0])}>
+            ${PresetList.map((val) => html`<paper-item>${val}</paper-item>`)}
+          </paper-listbox>
+        </paper-dropdown-menu>
+        <div class="checkbox">
+          <input
+            type="checkbox"
+            id="hide-arrows"
+            .checked="${item.hide_arrows || false}"
+            .configValue=${'hide_arrows'}
+            @change=${this._itemEntityChanged}
+          />
+          <label for="invert-value"> ${localize('editor.settings.hide-arrows')}</label>
+        </div>
+      </div>
       <br /><br />
       <h3>${localize('editor.settings.value', true)} ${localize('editor.settings.settings', true)}</h3>
       <div class="side-by-side">
@@ -298,16 +309,12 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           />
           <label for="calc_excluded"> ${localize('editor.settings.calc_excluded')} </label>
         </div>
-        <div class="checkbox">
-          <input
-            type="checkbox"
-            id="hide-arrows"
-            .checked="${item.hide_arrows || false}"
-            .configValue=${'hide_arrows'}
-            @change=${this._itemEntityChanged}
-          />
-          <label for="invert-value"> ${localize('editor.settings.hide-arrows')}</label>
-        </div>
+        <paper-input
+          .label="${localize('editor.settings.threshold')}"
+          .value=${item.threshold || undefined}
+          .configValue=${'threshold'}
+          @value-changed=${this._itemEntityChanged}
+        ></paper-input>
       </div>
       <br />
       <h3>${localize('editor.settings.secondary-info', true)}</h3>
@@ -375,7 +382,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         </tr>
       </table>
       <br />
-      <h3>Action Editor</h3>
+      <h3>${localize('editor.settings.action_settings')}</h3>
       <div class="side-by-side">
         <hui-action-editor
           .hass=${this.hass}
@@ -514,7 +521,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
               .index=${index}
             ></paper-input>
           </div>
-          <h3>Action Editor</h3>
+          <h3>${localize('editor.settings.action_settings')}</h3>
       <div class="side-by-side">
         <hui-action-editor
           .hass=${this.hass}

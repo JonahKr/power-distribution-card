@@ -15,6 +15,7 @@
     "optional": "Optional",
     "required": "Erforderlich",
     "settings": {
+      "action_settings": "Aktions Einstellungen",
       "animation": "Animation",
       "autarky": "Autarkie",
       "attribute": "Attribut",
@@ -38,6 +39,7 @@
       "secondary-info": "Zusatzinformationen",
       "settings": "Einstellungen",
       "smaller": "Kleiner",
+      "threshold": "Schwellenwert",
       "title": "Titel",
       "unit_of_display": "Angezeigte Einheit",
       "value": "Wert"
