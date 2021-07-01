@@ -1,22 +1,18 @@
-import {
-  LitElement,
-  html,
-  customElement,
-  property,
-  CSSResult,
-  TemplateResult,
-  internalProperty,
-  PropertyValues,
-} from 'lit-element';
+import { LitElement, html, TemplateResult, PropertyValues, CSSResultGroup } from 'lit';
+
+import { customElement, property, state } from 'lit/decorators.js';
 
 import {
   debounce,
   HomeAssistant,
-  fireEvent,
+  formatNumber,
   LovelaceCardEditor,
   LovelaceCard,
   LovelaceCardConfig,
   createThing,
+  hasAction,
+  ActionHandlerEvent,
+  handleAction,
 } from 'custom-card-helpers';
 
 import { version } from '../package.json';
@@ -29,7 +25,7 @@ import { styles, narrow_styles } from './styles';
 import { localize } from './localize/localize';
 import ResizeObserver from 'resize-observer-polyfill';
 import { installResizeObserver } from './util';
-//import { formatNumber } from './format-number';
+import { actionHandler } from './action-handler';
 
 console.info(
   `%c POWER-DISTRIBUTION-CARD %c ${version}`,
@@ -45,10 +41,18 @@ window.customCards.push({
 
 @customElement('power-distribution-card')
 export class PowerDistributionCard extends LitElement {
+  /**
+   * Linking to the visual Editor Element
+   * @returns Editor DOM Element
+   */
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
     return document.createElement('power-distribution-card-editor') as LovelaceCardEditor;
   }
 
+  /**
+   * Function for creating the standard power-distribution-card
+   * @returns Example Config for this Card
+   */
   public static getStubConfig(): Record<string, unknown> {
     return {
       title: 'Title',
@@ -65,12 +69,12 @@ export class PowerDistributionCard extends LitElement {
 
   @property() public hass!: HomeAssistant;
 
-  @internalProperty() private _config!: PDCConfig;
+  @state() private _config!: PDCConfig;
 
   @property() private _card!: LovelaceCard;
 
   private _resizeObserver?: ResizeObserver;
-  @internalProperty() private _narrow = false;
+  @state() private _narrow = false;
 
   /**
    * Configuring all the passed Settings and Changing it to a more usefull Internal one.
@@ -103,7 +107,7 @@ export class PowerDistributionCard extends LitElement {
 
     _config.entities.forEach((item, index) => {
       if (!item.entity) return;
-      //unit-of-measurement Auto Configuration
+      //unit-of-measurement Auto Configuration from hass element
       const hass_uom = this.hass.states[item.entity].attributes.unit_of_measurement;
       !item.unit_of_measurement ? (this._config.entities[index].unit_of_measurement = hass_uom || 'W') : undefined;
     });
@@ -123,7 +127,7 @@ export class PowerDistributionCard extends LitElement {
     }
   }
 
-  public static get styles(): CSSResult {
+  public static get styles(): CSSResultGroup {
     return styles;
   }
 
@@ -162,14 +166,20 @@ export class PowerDistributionCard extends LitElement {
    */
   private _val(item: EntitySettings | BarSettings): number {
     let modifier = item.invert_value ? -1 : 1;
+    //Proper K Scaling e.g. 1kW = 1000W
     if ((item as EntitySettings).unit_of_measurement?.startsWith('k')) modifier *= 1000;
+    //Checking if an attribute was defined to pull the value from
     const attr = (item as EntitySettings).attribute || null;
-    const num = item.entity
+    // If an entity exists, check if the attribute setting is entered -> value from attribute else value from entity
+    let num = item.entity
       ? attr
         ? Number(this.hass.states[item.entity].attributes[attr])
         : Number(this.hass.states[item.entity].state)
-      : 0;
-    return item.entity ? num * modifier : 0;
+      : NaN;
+    //Applying Threshold
+    const threshold = (item as EntitySettings).threshold || null;
+    num = threshold ? (Math.abs(num) < threshold ? 0 : num) : num;
+    return num * modifier;
   }
 
   /**
@@ -214,7 +224,7 @@ export class PowerDistributionCard extends LitElement {
       case 'none':
         break;
       case 'card':
-        this._card ? center_panel.push(this._card) : console.log('NO CARD');
+        this._card ? center_panel.push(this._card) : console.warn('NO CARD');
         break;
       case 'bars':
         center_panel.push(this._render_bars(consumption, production));
@@ -230,16 +240,23 @@ export class PowerDistributionCard extends LitElement {
         </div>
       </ha-card>`;
   }
-  /**
-   * Fires the Hass More Info Event
-   * @param ev Event Object
-   * @event hass-more-info
-   */
-  private _moreInfo(ev: CustomEvent): void {
-    fireEvent(this, 'hass-more-info', {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      entityId: (ev.currentTarget as any).entity,
-    });
+
+  private _handleAction(ev: ActionHandlerEvent): void {
+    if (this.hass && this._config && ev.detail.action) {
+      handleAction(
+        this,
+        this.hass,
+        {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          entity: (ev.currentTarget as any).entity,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          tap_action: (ev.currentTarget as any).tap_action,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          double_tap_action: (ev.currentTarget as any).double_tap_action,
+        },
+        ev.detail.action,
+      );
+    }
   }
 
   /**
@@ -250,19 +267,31 @@ export class PowerDistributionCard extends LitElement {
    * @returns Html for a single Item
    */
   private _render_item(value: number, item: EntitySettings, index: number): TemplateResult {
+    //Placeholder item
+    if (!item.entity) {
+      return html`<item class="placeholder"></item>`;
+    }
     const state = item.invert_arrow ? value * -1 : value;
     //Toggle Absolute Values
     value = item.display_abs ? Math.abs(value) : value;
-    //Unit-Of-Display
+
+    //Unit-Of-Display and Unit_of_measurement
     let unit_of_display = item.unit_of_display || 'W';
-    if (unit_of_display.startsWith('k')) {
+    const uod_split = unit_of_display.split('k');
+    if (uod_split[0] == 'k') {
       value /= 1000;
     } else if (item.unit_of_display == 'adaptive') {
+      //Using the uom suffix enables to adapt the initial unit to the automatic scaling naming
+      let uom_suffix = 'W';
+      if (item.unit_of_measurement) {
+        uom_suffix =
+          item.unit_of_measurement[0] == 'k' ? item.unit_of_measurement.substring(1) : item.unit_of_measurement;
+      }
       if (Math.abs(value) > 999) {
         value = value / 1000;
-        unit_of_display = 'kW';
+        unit_of_display = 'k' + uom_suffix;
       } else {
-        unit_of_display = 'W';
+        unit_of_display = uom_suffix;
       }
     }
 
@@ -270,7 +299,7 @@ export class PowerDistributionCard extends LitElement {
     const decFakTen = 10 ** (item.decimals || item.decimals == 0 ? item.decimals : 2);
     value = Math.round(value * decFakTen) / decFakTen;
     //Format Number
-    const formatValue = value; //formatNumber(value, this.hass.language);
+    const formatValue = formatNumber(value, this.hass.locale);
 
     //Icon color dependant on state
     let icon_color: string | undefined;
@@ -280,8 +309,19 @@ export class PowerDistributionCard extends LitElement {
       if (state == 0) icon_color = item.icon_color.equal;
     }
 
+    //NaNFlag for Offline Sensors for example
+    const NanFlag = isNaN(value);
+
     return html`
-      <item .entity=${item.entity} @click="${this._moreInfo}">
+      <item
+        .entity=${item.entity}
+        .tap_action=${item.tap_action}
+        .double_tap_action=${item.double_tap_action}
+        @action=${this._handleAction}
+        .actionHandler=${actionHandler({
+          hasDoubleClick: hasAction(item.double_tap_action),
+        })}
+    ">
         <badge>
           <icon>
             <ha-icon icon="${item.icon}" style="${icon_color ? `color:${icon_color};` : ''}"></ha-icon>
@@ -301,12 +341,20 @@ export class PowerDistributionCard extends LitElement {
           <p class="subtitle">${item.name}</p>
         </badge>
         <value>
-          <p>${formatValue} ${unit_of_display}</p>
+          <p>${NanFlag ? `` : formatValue} ${NanFlag ? `` : unit_of_display}</p>
           ${
             !item.hide_arrows
               ? this._render_arrow(
                   //This takes the side the item is on (index even = left) into account for the arrows
-                  value == 0 ? 'none' : index % 2 == 0 ? (state > 0 ? 'right' : 'left') : state > 0 ? 'left' : 'right',
+                  value == 0 || NanFlag
+                    ? 'none'
+                    : index % 2 == 0
+                    ? state > 0
+                      ? 'right'
+                      : 'left'
+                    : state > 0
+                    ? 'left'
+                    : 'right',
                   index,
                 )
               : html``
@@ -387,7 +435,17 @@ export class PowerDistributionCard extends LitElement {
       }
       if (value < 0) value = this._val(element);
       bars.push(html`
-        <div class="bar-element">
+        <div
+          class="bar-element"
+          .entity=${element.entity}
+          .tap_action=${element.tap_action}
+          .double_tap_action=${element.double_tap_action}
+          @action=${this._handleAction}
+          .actionHandler=${actionHandler({
+            hasDoubleClick: hasAction(element.double_tap_action),
+          })}
+          style="${element.tap_action || element.double_tap_action ? 'cursor: pointer;' : ''}"
+        >
           <p class="bar-percentage">${value}%</p>
           <div class="bar-wrapper" style="${element.bar_bg_color ? `background-color:${element.bar_bg_color};` : ''}">
             <bar style="height:${value}%; background-color:${element.bar_color};" />
@@ -400,7 +458,6 @@ export class PowerDistributionCard extends LitElement {
   }
 
   private _createCardElement(cardConfig: LovelaceCardConfig) {
-    console.log('Creating Card');
     const element = createThing(cardConfig) as LovelaceCard;
     if (this.hass) {
       element.hass = this.hass;
@@ -417,7 +474,6 @@ export class PowerDistributionCard extends LitElement {
   }
 
   private _rebuildCard(cardElToReplace: LovelaceCard, config: LovelaceCardConfig): void {
-    console.log('REBUILDING CARD');
     const newCardEl = this._createCardElement(config);
     if (cardElToReplace.parentElement) {
       cardElToReplace.parentElement.replaceChild(newCardEl, cardElToReplace);

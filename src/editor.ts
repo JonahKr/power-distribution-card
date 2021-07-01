@@ -1,20 +1,12 @@
-import {
-  LitElement,
-  customElement,
-  property,
-  TemplateResult,
-  html,
-  internalProperty,
-  PropertyValues,
-  CSSResult,
-  css,
-} from 'lit-element';
-import { guard } from 'lit-html/directives/guard';
+import { LitElement, TemplateResult, html, PropertyValues, css, CSSResultGroup } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+
+import { guard } from 'lit/directives/guard.js';
 
 import Sortable, { SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
 import { fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
-import { PDCConfig, HTMLElementValue, CustomValueEvent, SubElementConfig, EntitySettings, BarSettings } from './types';
+import { PDCConfig, HTMLElementValue, CustomValueEvent, SubElementConfig, BarSettings } from './types';
 import { localize } from './localize/localize';
 
 import { DefaultItem, PresetList, PresetObject } from './presets';
@@ -24,11 +16,12 @@ import { DefaultItem, PresetList, PresetObject } from './presets';
 const animation = ['none', 'flash', 'slide'];
 const center = ['none', 'card', 'bars'];
 const bar_presets = ['autarky', 'ratio', ''];
+const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'none'];
 
 @customElement('power-distribution-card-editor')
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
   @property({ attribute: false }) public hass?: HomeAssistant;
-  @internalProperty() private _config!: PDCConfig;
+  @state() private _config!: PDCConfig;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _helpers: any;
 
@@ -45,8 +38,10 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     await this.loadCardHelpers();
     try {
       await this._helpers.createCardElement({ type: 'calendar', entities: ['calendar.does_not_exist'] });
+      await this._helpers.createCardElement({ type: 'button', entity: 'demo.demo' });
     } catch (e) {}
     await customElements.get('hui-calendar-card').getConfigElement();
+    await customElements.get('hui-button-card').getConfigElement();
   }
 
   private async loadCardHelpers(): Promise<void> {
@@ -95,11 +90,13 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
               </mwc-icon-button>`
             : ''}
         </div>
+        <br />
         ${this._renderEntitiesEditor()}
       </div>
     `;
   }
   /**
+   * TODO: Get rid of duplicated Updating functions
    * Custom handeling for Center panel
    */
   private _centerChanged(ev: CustomValueEvent): void {
@@ -126,7 +123,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       const target = ev.currentTarget;
       this._subElementEditor = {
         type: <'card' | 'bars'>target.value,
-        element: this._config.center.content,
       };
     }
   }
@@ -135,10 +131,10 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    * SubElementEditor
    */
 
-  @internalProperty() private _subElementEditor: SubElementConfig | undefined = undefined;
+  @state() private _subElementEditor: SubElementConfig | undefined = undefined;
 
   private _renderSubElementEditor(): TemplateResult {
-    const subel = [
+    const subel: TemplateResult[] = [
       html`<div class="header">
         <div class="back-title">
           <mwc-icon-button @click=${this._goBack}>
@@ -177,51 +173,45 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     if (!ev.target) return;
     const target = ev.target;
     if (!target.configValue) return;
-    const configEntities = [...this._config.entities];
+
+    // Extracting event Data
     const index = target.index || this._subElementEditor?.index || 0;
+    const configValue = target.configValue.split('.');
+    const value = target.checked != undefined ? target.checked : ev.detail?.value;
+
+    const configItem = this._config.entities[index][configValue[0]] || undefined;
+    if ((configItem ? (configValue[1] ? configItem[configValue[1]] : configItem) : undefined) == value) {
+      return;
+    }
+    const configEntities = [...this._config.entities];
+
     configEntities[index] = {
       ...configEntities[index],
-      [target.configValue]: target.checked != undefined ? target.checked : target.value,
+      [configValue[0]]: configValue[1] ? { ...configEntities[index][configValue[0]], [configValue[1]]: value } : value,
     };
-
-    this._config = { ...this._config, entities: configEntities };
-    fireEvent(this, 'config-changed', { config: this._config });
-  }
-
-  private _icon_colorChanged(ev: CustomValueEvent): void {
-    if (!ev.target) return;
-    const target = ev.target;
-    if (!target.configValue) return;
-    const icon_color = {
-      ...this._config.entities[this._subElementEditor?.index || 0].icon_color,
-      [target.configValue]: target.value as string,
-    };
-
-    this._itemEntityChanged({
-      target: { configValue: 'icon_color', value: <{ bigger: string; equal: string; smaller: string }>icon_color },
-    });
+    fireEvent(this, 'config-changed', { config: { ...this._config, entities: configEntities } });
   }
 
   private _entityEditor(): TemplateResult {
-    const item = <EntitySettings>this._subElementEditor?.element || DefaultItem;
+    const item = this._config.entities[this._subElementEditor?.index || 0];
     const attributes = Object.keys({ ...this.hass?.states[item.entity || 0].attributes }) || [];
     const secondary_info_attributes = item.secondary_info_entity
       ? Object.keys({ ...this.hass?.states[item.secondary_info_entity || 0].attributes })
       : [];
     return html`
       <div class="side-by-side">
-        <paper-input
-          .label="${localize('editor.settings.name')} (${localize('editor.optional')})"
-          .value=${item.name || ''}
-          .configValue=${'name'}
-          @value-changed=${this._itemEntityChanged}
-        ></paper-input>
         <ha-icon-input
           .label="${localize('editor.settings.icon')}  (${localize('editor.optional')})"
           .value=${item.icon}
           .configValue=${'icon'}
           @value-changed=${this._itemEntityChanged}
         ></ha-icon-input>
+        <paper-input
+          .label="${localize('editor.settings.name')} (${localize('editor.optional')})"
+          .value=${item.name || undefined}
+          .configValue=${'name'}
+          @value-changed=${this._itemEntityChanged}
+        ></paper-input>
       </div>
       <div class="side-by-side">
         <ha-entity-picker
@@ -247,8 +237,45 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           </paper-listbox>
         </paper-dropdown-menu>
       </div>
-      <br />
+      <div class="side-by-side">
+        <paper-dropdown-menu
+          label="${localize('editor.settings.preset')}"
+          .configValue=${'preset'}
+          @value-changed=${this._itemEntityChanged}
+        >
+          <paper-listbox slot="dropdown-content" .selected=${PresetList.indexOf(item.preset || PresetList[0])}>
+            ${PresetList.map((val) => html`<paper-item>${val}</paper-item>`)}
+          </paper-listbox>
+        </paper-dropdown-menu>
+        <div class="checkbox">
+          <input
+            type="checkbox"
+            id="hide-arrows"
+            .checked="${item.hide_arrows || false}"
+            .configValue=${'hide_arrows'}
+            @change=${this._itemEntityChanged}
+          />
+          <label for="invert-value"> ${localize('editor.settings.hide-arrows')}</label>
+        </div>
+      </div>
+      <br /><br />
       <h3>${localize('editor.settings.value', true)} ${localize('editor.settings.settings', true)}</h3>
+      <div class="side-by-side">
+        <paper-input
+          .label="${localize('editor.settings.unit_of_display')}"
+          .value=${item.unit_of_display || undefined}
+          .configValue=${'unit_of_display'}
+          @value-changed=${this._itemEntityChanged}
+        ></paper-input>
+        <paper-input
+          auto-validate
+          pattern="[0-9]"
+          .label="${localize('editor.settings.decimals')}"
+          .value=${item.decimals || undefined}
+          .configValue=${'decimals'}
+          @value-changed=${this._itemEntityChanged}
+        ></paper-input>
+      </div>
       <div class="side-by-side">
         <div class="checkbox">
           <input
@@ -270,45 +297,8 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           />
           <label for="display-abs"> ${localize('editor.settings.display-abs')} </label>
         </div>
-        <div class="checkbox">
-          <input
-            type="checkbox"
-            id="hide-arrows"
-            .checked="${item.hide_arrows || false}"
-            .configValue=${'hide_arrows'}
-            @change=${this._itemEntityChanged}
-          />
-          <label for="invert-value"> ${localize('editor.settings.hide-arrows')}</label>
-        </div>
       </div>
       <div class="side-by-side">
-        <paper-input
-          auto-validate
-          pattern="[0-9]"
-          .label="${localize('editor.settings.decimals')}"
-          .value=${item.decimals || ''}
-          .configValue=${'decimals'}
-          @value-changed=${this._itemEntityChanged}
-        ></paper-input>
-        <paper-input
-          .label="${localize('editor.settings.unit_of_display')}"
-          .value=${item.unit_of_display || ''}
-          .configValue=${'unit_of_display'}
-          @value-changed=${this._itemEntityChanged}
-        ></paper-input>
-      </div>
-      <br />
-      <h3>${localize('editor.settings.preset', true)} ${localize('editor.settings.settings', true)}</h3>
-      <div class="side-by-side">
-        <paper-dropdown-menu
-          label="${localize('editor.settings.preset')}"
-          .configValue=${'preset'}
-          @value-changed=${this._itemEntityChanged}
-        >
-          <paper-listbox slot="dropdown-content" .selected=${PresetList.indexOf(item.preset || PresetList[0])}>
-            ${PresetList.map((val) => html`<paper-item>${val}</paper-item>`)}
-          </paper-listbox>
-        </paper-dropdown-menu>
         <div class="checkbox">
           <input
             type="checkbox"
@@ -319,6 +309,12 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           />
           <label for="calc_excluded"> ${localize('editor.settings.calc_excluded')} </label>
         </div>
+        <paper-input
+          .label="${localize('editor.settings.threshold')}"
+          .value=${item.threshold || undefined}
+          .configValue=${'threshold'}
+          @value-changed=${this._itemEntityChanged}
+        ></paper-input>
       </div>
       <br />
       <h3>${localize('editor.settings.secondary-info', true)}</h3>
@@ -362,29 +358,49 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           <td>
             <paper-input
               .label="${localize('editor.settings.bigger')}"
-              .value=${item.icon_color?.bigger || ''}
-              .configValue=${'bigger'}
-              @value-changed=${this._icon_colorChanged}
+              .value=${item.icon_color?.bigger || undefined}
+              .configValue=${'icon_color.bigger'}
+              @value-changed=${this._itemEntityChanged}
             ></paper-input>
           </td>
           <td>
             <paper-input
               .label="${localize('editor.settings.equal')}"
-              .value=${item.icon_color?.equal || ''}
-              .configValue=${'equal'}
-              @value-changed=${this._icon_colorChanged}
+              .value=${item.icon_color?.equal || undefined}
+              .configValue=${'icon_color.equal'}
+              @value-changed=${this._itemEntityChanged}
             ></paper-input>
           </td>
           <td>
             <paper-input
               .label="${localize('editor.settings.smaller')}"
-              .value=${item.icon_color?.smaller || ''}
-              .configValue=${'smaller'}
-              @value-changed=${this._icon_colorChanged}
+              .value=${item.icon_color?.smaller || undefined}
+              .configValue=${'icon_color.smaller'}
+              @value-changed=${this._itemEntityChanged}
             ></paper-input>
           </td>
         </tr>
       </table>
+      <br />
+      <h3>${localize('editor.settings.action_settings')}</h3>
+      <div class="side-by-side">
+        <hui-action-editor
+          .hass=${this.hass}
+          .config=${item.tap_action || { action: 'more-info' }}
+          .actions=${actions}
+          .configValue=${'tap_action'}
+          @value-changed=${this._itemEntityChanged}
+        >
+        </hui-action-editor>
+        <hui-action-editor
+          .hass=${this.hass}
+          .config=${item.double_tap_action}
+          .actions=${actions}
+          .configValue=${'double_tap_action'}
+          @value-changed=${this._itemEntityChanged}
+        >
+        </hui-action-editor>
+      </div>
     `;
   }
 
@@ -406,7 +422,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       const index = target.index || this._subElementEditor?.index || 0;
       content[index] = {
         ...content[index],
-        [target.configValue]: target.checked != undefined ? target.checked : (target.value as string),
+        [target.configValue]: target.checked != undefined ? target.checked : ev.detail?.value,
       };
     }
 
@@ -505,6 +521,27 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
               .index=${index}
             ></paper-input>
           </div>
+          <h3>${localize('editor.settings.action_settings')}</h3>
+      <div class="side-by-side">
+        <hui-action-editor
+          .hass=${this.hass}
+          .config=${e.tap_action}
+          .actions=${actions}
+          .configValue=${'tap_action'}
+          @value-changed=${this._barChanged}
+          .index=${index}
+        >
+        </hui-action-editor>
+        <hui-action-editor
+          .hass=${this.hass}
+          .config=${e.double_tap_action}
+          .actions=${actions}
+          .configValue=${'double_tap_action'}
+          @value-changed=${this._barChanged}
+          .index=${index}
+        >
+        </hui-action-editor>
+      </div>
         </div>
         <br/>
       `),
@@ -553,10 +590,10 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    * If you are interested in using the Editor for your own card, i tried explaining everything with incode documentation
    */
 
-  @internalProperty() private _renderEmptySortable = false;
+  @state() private _renderEmptySortable = false;
   private _sortable?: Sortable;
 
-  @internalProperty() private _attached = false;
+  @state() private _attached = false;
 
   /**
    * Generator for all entities in the config.entities list
@@ -566,7 +603,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   private _renderEntitiesEditor(): TemplateResult {
     return html`
       <h3>
-        ${localize('editor.settings.entities')} (${localize('editor.required')})
+        ${localize('editor.settings.entities')}
       </h3>
       <div class="entities">
           ${guard([this._config.entities, this._renderEmptySortable], () =>
@@ -763,7 +800,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
 
     this._subElementEditor = {
       type: 'entity',
-      element: this._config.entities[index],
       index: index,
     };
   }
@@ -772,7 +808,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    * The Second Part comes from here: https://github.com/home-assistant/frontend/blob/dev/src/resources/ha-sortable-style.ts
    * @returns Editor CSS
    */
-  static get styles(): CSSResult[] {
+  static get styles(): CSSResultGroup[] {
     return [
       css`
         .checkbox {
@@ -788,6 +824,12 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         }
       `,
       css`
+        h3 {
+          margin-bottom: 0.5em;
+        }
+        paper-dropdown-menu {
+          width: 100%;
+        }
         .side-by-side {
           display: flex;
         }

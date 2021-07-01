@@ -1,4 +1,4 @@
-import { LovelaceCardConfig } from 'custom-card-helpers';
+import { ActionConfig, LovelaceCardConfig } from 'custom-card-helpers';
 import { PresetType } from './presets';
 
 export interface PDCConfig extends LovelaceCardConfig {
@@ -14,17 +14,20 @@ export interface EntitySettings {
   consumer?: boolean;
   decimals?: number;
   display_abs?: boolean;
+  double_tap_action?: ActionConfig;
   entity?: string;
+  hide_arrows?: boolean;
   icon?: string;
-  icon_color?: { bigger: string; equal: string; smaller: string };
+  icon_color?: { bigger?: string; equal?: string; smaller?: string };
   invert_value?: boolean;
   invert_arrow?: boolean;
   name?: string | undefined;
   preset?: PresetType;
   producer?: boolean;
-  hide_arrows?: boolean;
   secondary_info_entity?: string;
   secondary_info_attribute?: string;
+  tap_action?: ActionConfig;
+  threshold?: number;
   unit_of_display?: string;
   unit_of_measurement?: string;
 }
@@ -40,6 +43,8 @@ export interface BarSettings {
   invert_value?: boolean;
   name?: string | undefined;
   preset?: 'autarky' | 'ratio' | '';
+  tap_action?: ActionConfig;
+  double_tap_action?: ActionConfig;
 }
 
 export type ArrowStates = 'right' | 'left' | 'none';
@@ -55,12 +60,14 @@ export interface CustomValueEvent {
     index?: number;
     value?: string;
   };
+  detail?: {
+    value?: string;
+  };
 }
 
 export interface SubElementConfig {
   type: 'entity' | 'bars' | 'card';
   index?: number;
-  element?: EntitySettings | LovelaceCardConfig | BarSettings[];
 }
 
 export interface HTMLElementValue extends HTMLElement {
