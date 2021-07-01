@@ -167,7 +167,7 @@ The presets *consumer* and *producer* enable to add any custom device into your 
 <br/>
 <div id="simple">
 
-## Simple Configuration 🛠️
+## Simple Configuration 🛠️ <img src="https://img.shields.io/badge/-Recommended-%2303a9f4"/>
 
 With Version 2.0 a Visual Editor got introduced.
 You can find the Card in your Card Selector probably at the bottom.
@@ -189,6 +189,12 @@ The easiest way to get your Card up and running, is by defining the entities for
 <img src="https://user-images.githubusercontent.com/38377070/102943049-44dd7480-44b7-11eb-9a42-912cac357299.gif"/>
 </p>
 
+
+### Placeholder
+By submitting an empty entity_id, you will generate a plain transparent placeholder item which can be used to further customize your layout.
+<p align="center">
+<img src="https://user-images.githubusercontent.com/38377070/124113882-3676a380-da6c-11eb-8f3e-db00466fd601.png"/>
+</p>
 </div>
 <br/><br/>
 
@@ -250,14 +256,16 @@ the *void*
 ### Bars 📊
 
 Bars have the following Settings:
-| Setting          | type          | example           | description  |
-| ---------------- |:-------------:|:-----------------:| :------------|
-| `bar_color`      | string        | red, #C1C1C1      |You can pass any string that CSS will accept as a color. |
-| `bar_bg_color`   | string        | red, #C1C1C1      |The Background Color of the Bar. You can pass any string that CSS will accept as a color. |
-| `entity`         | string        | sensor.ln_autarky | You can specify the entity_id here aswell. |
-| `invert_value`   | bool          | false             | This will invert the value recieved from HASS. This affects calculations aswell! |
-| `name`           | string        | Eigenstrom        | Feel free to change the displayed name of the element. |
-| `preset`         | 'ratio' 'autarky' 'custom'        | all in type        | Option to autocalc ratio/autarky. |
+| Setting             | type          | example           | description  |
+| ------------------- |:-------------:|:-----------------:| :------------|
+| `bar_color`         | string        | red, #C1C1C1      |You can pass any string that CSS will accept as a color. |
+| `bar_bg_color`      | string        | red, #C1C1C1      |The Background Color of the Bar. You can pass any string that CSS will accept as a color. |
+| `entity`            | string        | sensor.ln_autarky | You can specify the entity_id here aswell. |
+| `invert_value`      | bool          | false             | This will invert the value recieved from HASS. This affects calculations aswell! |
+| `name`              | string        | Eigenstrom        | Feel free to change the displayed name of the element. |
+| `preset`            | 'ratio' 'autarky' 'custom'        | all in type        | Option to autocalc ratio/autarky. |
+| `tap_action`        | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Single tap action for item. |
+| `double_tap_action` | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Double tap action for item. |
 
 <br/>
 
@@ -295,6 +303,7 @@ There are alot of settings you can customize your sensors with:
 | `calc_excluded`            | boolean       | true                         | If the Item should be excluded from ratio/autarky calculations |
 | `decimals`                 | number        | 0, 2                         | The Number of Decimals shown. (default: 2) |
 | `display_abs`              | boolean       | false                        | The displayed values are Absolute normally. You can change that here. |
+| `double_tap_action`        | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Double tap action for item. |
 | `entity`                   | string        | sensor.e3dc_grid             | You can specify the entity_id here aswell. |
 | `hide_arrows`              | bool          | true                         | Toggeling the visibility od the *arrows*. |
 | `icon`                     | string        | mdi:dishwasher               | Why not change the displayed Icon to any [MDI](https://cdn.materialdesignicons.com/5.4.55/) one? |
@@ -304,6 +313,8 @@ There are alot of settings you can customize your sensors with:
 | `name`                     | string        | dishwasher                   | Feel free to change the displayed name of the element. |
 | `secondary-info-attribute` | string        | min_temp                     | Requires Entity. Instead of Sensor, the Attribute Value gets displayed.  |
 | `secondary-info-entity`    | string        | sensor.e3dc_grid             | entity_id of the secondary info sensor |
+| `tap_action`        | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Single tap action for item. |
+| `threshold`                | number        | 2                            | Ignoring all abolute values smaller than threshold. |
 | `unit_of_display`          | string        | *W* , *kW* , *adaptive*      | The Unit the value is displayed in (default: W). Adaptive will show kW for values >= 1kW |
 | `unit_of_measurement`      | string        | *W* , *kW*                   | The Unit the value is coming from the Sensor. **This should be detected automatically** |
 <p> 
