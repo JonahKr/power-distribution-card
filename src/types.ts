@@ -44,6 +44,7 @@ export interface BarSettings {
   name?: string | undefined;
   preset?: 'autarky' | 'ratio' | '';
   tap_action?: ActionConfig;
+  unit_of_measurement?: string;
   double_tap_action?: ActionConfig;
 }
 
