@@ -115,6 +115,8 @@ export class PowerDistributionCard extends LitElement {
     //Resize Observer
     this._adjustWidth();
     this._attachObserver();
+    //This is needed to prevent Rendering without the unit_of_measurements
+    this.requestUpdate();
   }
 
   protected updated(changedProps: PropertyValues): void {
@@ -167,7 +169,7 @@ export class PowerDistributionCard extends LitElement {
   private _val(item: EntitySettings | BarSettings): number {
     let modifier = item.invert_value ? -1 : 1;
     //Proper K Scaling e.g. 1kW = 1000W
-    if ((item as EntitySettings).unit_of_measurement?.startsWith('k')) modifier *= 1000;
+    if (item.unit_of_measurement?.charAt(0) == 'k') modifier *= 1000;
     //Checking if an attribute was defined to pull the value from
     const attr = (item as EntitySettings).attribute || null;
     // If an entity exists, check if the attribute setting is entered -> value from attribute else value from entity
@@ -274,10 +276,9 @@ export class PowerDistributionCard extends LitElement {
     const state = item.invert_arrow ? value * -1 : value;
     //Toggle Absolute Values
     value = item.display_abs ? Math.abs(value) : value;
-
     //Unit-Of-Display and Unit_of_measurement
     let unit_of_display = item.unit_of_display || 'W';
-    const uod_split = unit_of_display.split('k');
+    const uod_split = unit_of_display.charAt(0);
     if (uod_split[0] == 'k') {
       value /= 1000;
     } else if (item.unit_of_display == 'adaptive') {
