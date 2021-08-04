@@ -142,23 +142,24 @@ export const styles = css`
 
   .arrow-color {
     fill: var(--secondary-text-color);
-    fill-opacity: 0.8;
+    opacity: 0.8;
   }
 
   #a-flash {
-    animation: flash 3s infinite steps(1);
+    animation: flash 3s infinite step-start;
     fill: var(--secondary-text-color);
-    fill-opacity: 0.2;
+    opacity: 0.2;
   }
 
   @keyframes flash {
     0%,
-    66% {
-      fill-opacity: 0.2;
+    66%,
+    100% {
+      opacity: 0.2;
       fill: var(--secondary-text-color);
     }
     33% {
-      fill-opacity: 0.8;
+      opacity: 0.8;
       fill: var(--secondary-text-color);
     }
   }
