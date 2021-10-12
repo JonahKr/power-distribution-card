@@ -85,3 +85,7 @@ declare global {
     offsetWidth: number;
   }
 }
+
+export interface HassCustomElement extends CustomElementConstructor {
+  getConfigElement(): Promise<unknown>;
+}

@@ -6,10 +6,18 @@ import { guard } from 'lit/directives/guard.js';
 import Sortable, { SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
 import { fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
-import { PDCConfig, HTMLElementValue, CustomValueEvent, SubElementConfig, BarSettings } from './types';
+import {
+  PDCConfig,
+  HTMLElementValue,
+  CustomValueEvent,
+  SubElementConfig,
+  BarSettings,
+  HassCustomElement,
+} from './types';
 import { localize } from './localize/localize';
 
 import { DefaultItem, PresetList, PresetObject } from './presets';
+
 /**
  * Editor Settings
  */
@@ -40,8 +48,11 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       await this._helpers.createCardElement({ type: 'calendar', entities: ['calendar.does_not_exist'] });
       await this._helpers.createCardElement({ type: 'button', entity: 'demo.demo' });
     } catch (e) {}
-    await customElements.get('hui-calendar-card').getConfigElement();
-    await customElements.get('hui-button-card').getConfigElement();
+
+    if (customElements) {
+      await (customElements.get('hui-calendar-card') as HassCustomElement).getConfigElement();
+      await (customElements.get('hui-button-card') as HassCustomElement).getConfigElement();
+    }
   }
 
   private async loadCardHelpers(): Promise<void> {
