@@ -1,5 +1,6 @@
 // From https://github.com/epoberezkin/fast-deep-equal
 // MIT License - Copyright (c) 2017 Evgeny Poberezkin
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const deepEqual = (a: any, b: any): boolean => {
   if (a === b) {
     return true;
@@ -10,6 +11,7 @@ export const deepEqual = (a: any, b: any): boolean => {
       return false;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let i: number | [any, any];
     let length: number;
     if (Array.isArray(a)) {

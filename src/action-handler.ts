@@ -34,6 +34,7 @@ class ActionHandler extends HTMLElement implements ActionHandler {
     }
 
     if (element.actionHandler) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       element.removeEventListener('click', element.actionHandler.end!);
     }
     element.actionHandler = { options };
