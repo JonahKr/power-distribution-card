@@ -285,7 +285,26 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
                 ></ha-entity-picker>
               `
             : item.preset === 'grid'
-            ? html``
+            ? html`
+                <ha-entity-picker
+                  label="${localize('editor.settings.grid-buy')} (${localize('editor.optional')})"
+                  allow-custom-entity
+                  hideClearIcon
+                  .hass=${this.hass}
+                  .configValue=${'grid_buy_entity'}
+                  .value=${item.grid_buy_entity || ''}
+                  @value-changed=${this._itemEntityChanged}
+                ></ha-entity-picker>
+                <ha-entity-picker
+                  label="${localize('editor.settings.grid-sell')} (${localize('editor.optional')})"
+                  allow-custom-entity
+                  hideClearIcon
+                  .hass=${this.hass}
+                  .configValue=${'grid_sell_entity'}
+                  .value=${item.grid_sell_entity || ''}
+                  @value-changed=${this._itemEntityChanged}
+                ></ha-entity-picker>
+              `
             : html``
         }
       </div>

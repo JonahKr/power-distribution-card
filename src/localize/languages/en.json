@@ -31,6 +31,8 @@
       "entities": "Entities",
       "entity": "Entity",
       "equal": "Equal",
+      "grid-buy": "Grid Buy",
+      "grid-sell": "Grid Sell",
       "hide-arrows": "Hide Arrows",
       "icon": "Icon",
       "invert-value": "Invert Value",

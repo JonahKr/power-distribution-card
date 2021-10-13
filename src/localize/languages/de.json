@@ -31,6 +31,8 @@
       "entities": "Entities",
       "entity": "Element",
       "equal": "Gleich",
+      "grid-buy": "Netz Ankauf",
+      "grid-sell": "Netz Verkauf",
       "hide-arrows": "Pfeile Verstecken",
       "icon": "Symbol",
       "invert-value": "Invertierter Wert",

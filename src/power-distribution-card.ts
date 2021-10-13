@@ -317,6 +317,28 @@ export class PowerDistributionCard extends LitElement {
         }
       }
     }
+    // 2. Grid Buy-Sell
+    let nameReplaceFlag = false;
+    let grid_buy_sell = html``;
+    if (item.grid_buy_entity || item.grid_sell_entity) {
+      nameReplaceFlag = true;
+      grid_buy_sell = html`
+        <div class="buy-sell">
+          ${item.grid_buy_entity
+            ? html`<div class="grid-buy">
+                B: ${this._val({ entity: item.grid_buy_entity })}
+                ${this.hass.states[item.grid_buy_entity].attributes.unit_of_measurement || undefined}
+              </div>`
+            : undefined}
+          ${item.grid_sell_entity
+            ? html`<div class="grid-sell">
+                S: ${this._val({ entity: item.grid_sell_entity })}
+                ${this.hass.states[item.grid_sell_entity].attributes.unit_of_measurement || undefined}
+              </div>`
+            : undefined}
+        </div>
+      `;
+    }
 
     //Icon color dependant on state
     let icon_color: string | undefined;
@@ -355,7 +377,7 @@ export class PowerDistributionCard extends LitElement {
                 : ''
             }
           </icon>
-          <p class="subtitle">${item.name}</p>
+          ${nameReplaceFlag ? grid_buy_sell : html`<p class="subtitle">${item.name}</p>`}
         </badge>
         <value>
           <p>${NanFlag ? `` : formatValue} ${NanFlag ? `` : unit_of_display}</p>
