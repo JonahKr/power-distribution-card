@@ -26,7 +26,7 @@ const center = ['none', 'card', 'bars'];
 const bar_presets = ['autarky', 'ratio', ''];
 const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'none'];
 
-@customElement('power-distribution-card-editor')
+@customElement('power-distribution-card-editor-dev')
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
   @property({ attribute: false }) public hass?: HomeAssistant;
   @state() private _config!: PDCConfig;
@@ -268,6 +268,26 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           />
           <label for="invert-value"> ${localize('editor.settings.hide-arrows')}</label>
         </div>
+      </div>
+      <div class="side-by-side">
+        ${
+          // Preset features for Battery and Grid
+          item.preset === 'battery'
+            ? html`
+                <ha-entity-picker
+                  label="${localize('editor.settings.battery_percentage')} (${localize('editor.optional')})"
+                  allow-custom-entity
+                  hideClearIcon
+                  .hass=${this.hass}
+                  .configValue=${'battery_percentage_entity'}
+                  .value=${item.battery_percentage_entity || ''}
+                  @value-changed=${this._itemEntityChanged}
+                ></ha-entity-picker>
+              `
+            : item.preset === 'grid'
+            ? html``
+            : html``
+        }
       </div>
       <br /><br />
       <h3>${localize('editor.settings.value', true)} ${localize('editor.settings.settings', true)}</h3>

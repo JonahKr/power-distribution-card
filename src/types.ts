@@ -8,7 +8,7 @@ export interface PDCConfig extends LovelaceCardConfig {
   center: center;
 }
 
-export interface EntitySettings {
+export interface EntitySettings extends presetFeatures {
   attribute?: string;
   calc_excluded?: boolean;
   consumer?: boolean;
@@ -35,6 +35,12 @@ export interface EntitySettings {
 export interface center {
   type: 'none' | 'card' | 'bars';
   content?: LovelaceCardConfig | BarSettings[];
+}
+
+export interface presetFeatures {
+  battery_percentage_entity: string;
+  grid_sell_entity: string;
+  grid_buy_entity: string;
 }
 export interface BarSettings {
   bar_color?: string;

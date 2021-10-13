@@ -34,19 +34,19 @@ console.info(
 );
 
 window.customCards.push({
-  type: 'power-distribution-card',
+  type: 'power-distribution-card-dev',
   name: 'Power Distribution Card',
   description: localize('common.description'),
 });
 
-@customElement('power-distribution-card')
+@customElement('power-distribution-card-dev')
 export class PowerDistributionCard extends LitElement {
   /**
    * Linking to the visual Editor Element
    * @returns Editor DOM Element
    */
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
-    return document.createElement('power-distribution-card-editor') as LovelaceCardEditor;
+    return document.createElement('power-distribution-card-editor-dev') as LovelaceCardEditor;
   }
 
   /**
@@ -302,6 +302,22 @@ export class PowerDistributionCard extends LitElement {
     //Format Number
     const formatValue = formatNumber(value, this.hass.locale);
 
+    //Preset Features
+    // 1. Battery Icon
+    let icon = item.icon;
+    if (item.preset === 'battery' && item.battery_percentage_entity) {
+      const bat_val = this._val({ entity: item.battery_percentage_entity });
+      if (!isNaN(bat_val)) {
+        icon = 'mdi:battery';
+        // mdi:battery-100 and -0 don't exist thats why we have to handle it seperately
+        if (bat_val < 5) {
+          icon = 'mdi:battery-outline';
+        } else if (bat_val < 95) {
+          icon = 'mdi:battery-' + (bat_val / 10).toFixed(0) + '0';
+        }
+      }
+    }
+
     //Icon color dependant on state
     let icon_color: string | undefined;
     if (item.icon_color) {
@@ -325,7 +341,7 @@ export class PowerDistributionCard extends LitElement {
     ">
         <badge>
           <icon>
-            <ha-icon icon="${item.icon}" style="${icon_color ? `color:${icon_color};` : ''}"></ha-icon>
+            <ha-icon icon="${icon}" style="${icon_color ? `color:${icon_color};` : ''}"></ha-icon>
             ${
               item.secondary_info_attribute
                 ? html`<p class="secondary">

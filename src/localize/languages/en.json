@@ -20,6 +20,7 @@
       "autarky": "autarky",
       "attribute": "Attribute",
       "background_color": "Background Color",
+      "battery_percentage": "Battery Charge %",
       "bigger": "Bigger",
       "calc_excluded": "Excluded from Calculations",
       "center": "Center",
