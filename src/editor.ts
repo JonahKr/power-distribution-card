@@ -26,7 +26,7 @@ const center = ['none', 'card', 'bars'];
 const bar_presets = ['autarky', 'ratio', ''];
 const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'none'];
 
-@customElement('power-distribution-card-editor-dev')
+@customElement('power-distribution-card-editor')
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
   @property({ attribute: false }) public hass?: HomeAssistant;
   @state() private _config!: PDCConfig;

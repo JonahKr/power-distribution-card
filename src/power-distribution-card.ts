@@ -34,19 +34,19 @@ console.info(
 );
 
 window.customCards.push({
-  type: 'power-distribution-card-dev',
+  type: 'power-distribution-card',
   name: 'Power Distribution Card',
   description: localize('common.description'),
 });
 
-@customElement('power-distribution-card-dev')
+@customElement('power-distribution-card')
 export class PowerDistributionCard extends LitElement {
   /**
    * Linking to the visual Editor Element
    * @returns Editor DOM Element
    */
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
-    return document.createElement('power-distribution-card-editor-dev') as LovelaceCardEditor;
+    return document.createElement('power-distribution-card-editor') as LovelaceCardEditor;
   }
 
   /**
@@ -320,7 +320,7 @@ export class PowerDistributionCard extends LitElement {
     // 2. Grid Buy-Sell
     let nameReplaceFlag = false;
     let grid_buy_sell = html``;
-    if (item.grid_buy_entity || item.grid_sell_entity) {
+    if (item.preset === 'grid' && (item.grid_buy_entity || item.grid_sell_entity)) {
       nameReplaceFlag = true;
       grid_buy_sell = html`
         <div class="buy-sell">
