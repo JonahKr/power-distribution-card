@@ -302,6 +302,44 @@ export class PowerDistributionCard extends LitElement {
     //Format Number
     const formatValue = formatNumber(value, this.hass.locale);
 
+    //Preset Features
+    // 1. Battery Icon
+    let icon = item.icon;
+    if (item.preset === 'battery' && item.battery_percentage_entity) {
+      const bat_val = this._val({ entity: item.battery_percentage_entity });
+      if (!isNaN(bat_val)) {
+        icon = 'mdi:battery';
+        // mdi:battery-100 and -0 don't exist thats why we have to handle it seperately
+        if (bat_val < 5) {
+          icon = 'mdi:battery-outline';
+        } else if (bat_val < 95) {
+          icon = 'mdi:battery-' + (bat_val / 10).toFixed(0) + '0';
+        }
+      }
+    }
+    // 2. Grid Buy-Sell
+    let nameReplaceFlag = false;
+    let grid_buy_sell = html``;
+    if (item.preset === 'grid' && (item.grid_buy_entity || item.grid_sell_entity)) {
+      nameReplaceFlag = true;
+      grid_buy_sell = html`
+        <div class="buy-sell">
+          ${item.grid_buy_entity
+            ? html`<div class="grid-buy">
+                B: ${this._val({ entity: item.grid_buy_entity })}
+                ${this.hass.states[item.grid_buy_entity].attributes.unit_of_measurement || undefined}
+              </div>`
+            : undefined}
+          ${item.grid_sell_entity
+            ? html`<div class="grid-sell">
+                S: ${this._val({ entity: item.grid_sell_entity })}
+                ${this.hass.states[item.grid_sell_entity].attributes.unit_of_measurement || undefined}
+              </div>`
+            : undefined}
+        </div>
+      `;
+    }
+
     //Icon color dependant on state
     let icon_color: string | undefined;
     if (item.icon_color) {
@@ -325,7 +363,7 @@ export class PowerDistributionCard extends LitElement {
     ">
         <badge>
           <icon>
-            <ha-icon icon="${item.icon}" style="${icon_color ? `color:${icon_color};` : ''}"></ha-icon>
+            <ha-icon icon="${icon}" style="${icon_color ? `color:${icon_color};` : ''}"></ha-icon>
             ${
               item.secondary_info_attribute
                 ? html`<p class="secondary">
@@ -339,7 +377,7 @@ export class PowerDistributionCard extends LitElement {
                 : ''
             }
           </icon>
-          <p class="subtitle">${item.name}</p>
+          ${nameReplaceFlag ? grid_buy_sell : html`<p class="subtitle">${item.name}</p>`}
         </badge>
         <value>
           <p>${NanFlag ? `` : formatValue} ${NanFlag ? `` : unit_of_display}</p>
@@ -434,7 +472,7 @@ export class PowerDistributionCard extends LitElement {
             value = production != 0 ? Math.min(Math.round((Math.abs(consumption) * 100) / production), 100) : 0;
           break;
       }
-      if (value < 0) value = this._val(element);
+      if (value < 0) value = parseInt(this._val(element).toFixed(0), 10);
       bars.push(html`
         <div
           class="bar-element"

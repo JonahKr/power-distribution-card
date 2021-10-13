@@ -6,10 +6,18 @@ import { guard } from 'lit/directives/guard.js';
 import Sortable, { SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
 import { fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
-import { PDCConfig, HTMLElementValue, CustomValueEvent, SubElementConfig, BarSettings } from './types';
+import {
+  PDCConfig,
+  HTMLElementValue,
+  CustomValueEvent,
+  SubElementConfig,
+  BarSettings,
+  HassCustomElement,
+} from './types';
 import { localize } from './localize/localize';
 
 import { DefaultItem, PresetList, PresetObject } from './presets';
+
 /**
  * Editor Settings
  */
@@ -40,8 +48,11 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       await this._helpers.createCardElement({ type: 'calendar', entities: ['calendar.does_not_exist'] });
       await this._helpers.createCardElement({ type: 'button', entity: 'demo.demo' });
     } catch (e) {}
-    await customElements.get('hui-calendar-card').getConfigElement();
-    await customElements.get('hui-button-card').getConfigElement();
+
+    if (customElements) {
+      await (customElements.get('hui-calendar-card') as HassCustomElement).getConfigElement();
+      await (customElements.get('hui-button-card') as HassCustomElement).getConfigElement();
+    }
   }
 
   private async loadCardHelpers(): Promise<void> {
@@ -257,6 +268,45 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           />
           <label for="invert-value"> ${localize('editor.settings.hide-arrows')}</label>
         </div>
+      </div>
+      <div class="side-by-side">
+        ${
+          // Preset features for Battery and Grid
+          item.preset === 'battery'
+            ? html`
+                <ha-entity-picker
+                  label="${localize('editor.settings.battery_percentage')} (${localize('editor.optional')})"
+                  allow-custom-entity
+                  hideClearIcon
+                  .hass=${this.hass}
+                  .configValue=${'battery_percentage_entity'}
+                  .value=${item.battery_percentage_entity || ''}
+                  @value-changed=${this._itemEntityChanged}
+                ></ha-entity-picker>
+              `
+            : item.preset === 'grid'
+            ? html`
+                <ha-entity-picker
+                  label="${localize('editor.settings.grid-buy')} (${localize('editor.optional')})"
+                  allow-custom-entity
+                  hideClearIcon
+                  .hass=${this.hass}
+                  .configValue=${'grid_buy_entity'}
+                  .value=${item.grid_buy_entity || ''}
+                  @value-changed=${this._itemEntityChanged}
+                ></ha-entity-picker>
+                <ha-entity-picker
+                  label="${localize('editor.settings.grid-sell')} (${localize('editor.optional')})"
+                  allow-custom-entity
+                  hideClearIcon
+                  .hass=${this.hass}
+                  .configValue=${'grid_sell_entity'}
+                  .value=${item.grid_sell_entity || ''}
+                  @value-changed=${this._itemEntityChanged}
+                ></ha-entity-picker>
+              `
+            : html``
+        }
       </div>
       <br /><br />
       <h3>${localize('editor.settings.value', true)} ${localize('editor.settings.settings', true)}</h3>

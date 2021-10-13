@@ -75,6 +75,23 @@ export const styles = css`
     cursor: pointer;
   }
 
+  .buy-sell {
+    height: 28px;
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+    line-height: 14px;
+    text-align: center;
+  }
+
+  .grid-buy {
+    color: red;
+  }
+
+  .grid-sell {
+    color: green;
+  }
+
   .placeholder {
     height: 62px;
   }

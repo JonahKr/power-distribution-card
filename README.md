@@ -341,6 +341,26 @@ entities:
 </div>
 <br/>
 <br/>
+
+<div>
+
+## Preset features
+
+The Presets `battery` and `grid` have some additional features which allow some further customization.
+For the Battery the icon can display the state of charge and the grid preset can have a small display with power sold and bought from the grid.
+
+<img width="600px" src="https://user-images.githubusercontent.com/38377070/137152436-34753a15-86f9-44c4-ad47-87c35d94bd91.png"/>
+
+If one of those presets is selected there will be additional options in the visual editor.
+If you prefer yaml, here are all extra options which can be set per item:
+
+| Setting                     | type          | example                      | description  |
+| --------------------------- |:-------------:|:----------------------------:| :------------|
+| `battery_percentage_entity` | string        | sensor.xyz                   | Sensor containing the battery charge percentage from 0 to 100 |
+| `grid_buy_entity`           | string        | sensor.xyz                   | Sensor containing the imported power from the grid |
+| `grid_sell_entity`          | string        | sensor.xyz                   | Sensor containing the sold power towards the grid |
+
+</div>
 </div> 
 
 <hr>
