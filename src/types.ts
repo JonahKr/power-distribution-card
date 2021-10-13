@@ -38,9 +38,9 @@ export interface center {
 }
 
 export interface presetFeatures {
-  battery_percentage_entity: string;
-  grid_sell_entity: string;
-  grid_buy_entity: string;
+  battery_percentage_entity?: string;
+  grid_sell_entity?: string;
+  grid_buy_entity?: string;
 }
 export interface BarSettings {
   bar_color?: string;
