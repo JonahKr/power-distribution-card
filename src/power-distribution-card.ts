@@ -472,7 +472,7 @@ export class PowerDistributionCard extends LitElement {
             value = production != 0 ? Math.min(Math.round((Math.abs(consumption) * 100) / production), 100) : 0;
           break;
       }
-      if (value < 0) value = this._val(element);
+      if (value < 0) value = parseInt(this._val(element).toFixed(0), 10);
       bars.push(html`
         <div
           class="bar-element"

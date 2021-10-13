@@ -347,6 +347,7 @@ entities:
 ## Preset features
 
 The Presets `battery` and `grid` have some additional features which allow some further customization.
+For the Battery the icon can display the state of charge and the grid preset can have a small display with power sold and bought from the grid.
 
 <img width="600px" src="https://user-images.githubusercontent.com/38377070/137152436-34753a15-86f9-44c4-ad47-87c35d94bd91.png"/>
 
