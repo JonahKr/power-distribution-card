@@ -211,12 +211,12 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       : [];
     return html`
       <div class="side-by-side">
-        <ha-icon-input
+        <ha-icon-picker
           .label="${localize('editor.settings.icon')}  (${localize('editor.optional')})"
           .value=${item.icon}
           .configValue=${'icon'}
           @value-changed=${this._itemEntityChanged}
-        ></ha-icon-input>
+        ></ha-icon-picker>
         <paper-input
           .label="${localize('editor.settings.name')} (${localize('editor.optional')})"
           .value=${item.name || undefined}
