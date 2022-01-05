@@ -162,7 +162,7 @@ export class PowerDistributionCard extends LitElement {
   }
 
   /**
-   * Retrieving the sensor value of hass for a Item
+   * Retrieving the sensor value of hass for a Item as a number
    * @param item a Settings object
    * @returns The current value from Homeassistant in Watts
    */
@@ -182,6 +182,10 @@ export class PowerDistributionCard extends LitElement {
     const threshold = (item as EntitySettings).threshold || null;
     num = threshold ? (Math.abs(num) < threshold ? 0 : num) : num;
     return num * modifier;
+  }
+
+  private _state(item: EntitySettings): unknown {
+    return item.entity ? this.hass.states[item.entity].state : null;
   }
 
   /**
@@ -326,14 +330,16 @@ export class PowerDistributionCard extends LitElement {
         <div class="buy-sell">
           ${item.grid_buy_entity
             ? html`<div class="grid-buy">
-                B: ${this._val({ entity: item.grid_buy_entity })}
-                ${this.hass.states[item.grid_buy_entity].attributes.unit_of_measurement || undefined}
+                B:
+                ${this._val({ entity: item.grid_buy_entity })}${this.hass.states[item.grid_buy_entity].attributes
+                  .unit_of_measurement || undefined}
               </div>`
             : undefined}
           ${item.grid_sell_entity
             ? html`<div class="grid-sell">
-                S: ${this._val({ entity: item.grid_sell_entity })}
-                ${this.hass.states[item.grid_sell_entity].attributes.unit_of_measurement || undefined}
+                S:
+                ${this._val({ entity: item.grid_sell_entity })}${this.hass.states[item.grid_sell_entity].attributes
+                  .unit_of_measurement || undefined}
               </div>`
             : undefined}
         </div>
@@ -365,16 +371,19 @@ export class PowerDistributionCard extends LitElement {
           <icon>
             <ha-icon icon="${icon}" style="${icon_color ? `color:${icon_color};` : ''}"></ha-icon>
             ${
-              item.secondary_info_attribute
+              item.secondary_info_attribute && item.secondary_info_entity
                 ? html`<p class="secondary">
-                    ${this._val({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute })}
+                    ${this._state({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute })}
                   </p>`
-                : item.secondary_info_entity
+                : null
+            }
+            ${
+              item.secondary_info_entity
                 ? html`<p class="secondary">
-                    ${this._val({ entity: item.secondary_info_entity })}
+                    ${this._state({ entity: item.secondary_info_entity })}
                     ${this.hass.states[item.secondary_info_entity].attributes.unit_of_measurement}
                   </p>`
-                : ''
+                : null
             }
           </icon>
           ${nameReplaceFlag ? grid_buy_sell : html`<p class="subtitle">${item.name}</p>`}
