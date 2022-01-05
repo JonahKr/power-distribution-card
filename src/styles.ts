@@ -79,7 +79,7 @@ export const styles = css`
     height: 28px;
     display: flex;
     flex-direction: column;
-    font-size: 10px;
+    font-size: 11px;
     line-height: 14px;
     text-align: center;
   }
