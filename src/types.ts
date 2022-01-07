@@ -10,8 +10,10 @@ export interface PDCConfig extends LovelaceCardConfig {
 
 export interface EntitySettings extends presetFeatures {
   attribute?: string;
+  arrow_color?: { bigger?: string; equal?: string; smaller?: string };
   calc_excluded?: boolean;
   consumer?: boolean;
+  color_threshold?: number;
   decimals?: number;
   display_abs?: boolean;
   double_tap_action?: ActionConfig;

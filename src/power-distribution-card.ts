@@ -346,12 +346,21 @@ export class PowerDistributionCard extends LitElement {
       `;
     }
 
-    //Icon color dependant on state
+    // COLOR CHANGE
+    const ct = item.color_threshold || 0;
+    // Icon color dependant on state
     let icon_color: string | undefined;
     if (item.icon_color) {
-      if (state > 0) icon_color = item.icon_color.bigger;
-      if (state < 0) icon_color = item.icon_color.smaller;
-      if (state == 0) icon_color = item.icon_color.equal;
+      if (state > ct) icon_color = item.icon_color.bigger;
+      if (state < ct) icon_color = item.icon_color.smaller;
+      if (state == ct) icon_color = item.icon_color.equal;
+    }
+    // Arrow color
+    let arrow_color: string | undefined;
+    if (item.arrow_color) {
+      if (state > ct) arrow_color = item.arrow_color.bigger;
+      if (state < ct) arrow_color = item.arrow_color.smaller;
+      if (state == ct) arrow_color = item.arrow_color.equal;
     }
 
     //NaNFlag for Offline Sensors for example
@@ -380,8 +389,8 @@ export class PowerDistributionCard extends LitElement {
             ${
               item.secondary_info_entity
                 ? html`<p class="secondary">
-                    ${this._state({ entity: item.secondary_info_entity })}
-                    ${this.hass.states[item.secondary_info_entity].attributes.unit_of_measurement}
+                    ${this._state({ entity: item.secondary_info_entity })}${this.hass.states[item.secondary_info_entity]
+                      .attributes.unit_of_measurement}
                   </p>`
                 : null
             }
@@ -404,6 +413,7 @@ export class PowerDistributionCard extends LitElement {
                     ? 'left'
                     : 'right',
                   index,
+                  arrow_color,
                 )
               : html``
           }
@@ -417,41 +427,32 @@ export class PowerDistributionCard extends LitElement {
    * @param direction One of three Options: none, right, left
    * @param index To detect which side the item is on and adapt the direction accordingly
    */
-  private _render_arrow(direction: ArrowStates, index: number): TemplateResult {
+  private _render_arrow(direction: ArrowStates, index: number, color?: string): TemplateResult {
     const a = this._config.animation;
+    const b = `${direction}-${index}`;
     if (direction == 'none') {
       return html` <div class="blank"></div> `;
     } else {
       return html`
         <svg width="57" height="18" class="arrow">
           <defs>
-            <polygon id="arrow-right" points="0 0, 0 16, 16 8" />
-            <polygon id="arrow-left" points="16 0, 16 16, 0 8" />
+            <polygon id="arrow-right-${index}" points="0 0, 0 16, 16 8" fill="${color}" />
+            <polygon id="arrow-left-${index}" points="16 0, 16 16, 0 8" fill="${color}" />
             <g id="slide-${index}" class="arrow-color">
-              <use href="#arrow-${direction}" x="-36" />
-              <use href="#arrow-${direction}" x="-12" />
-              <use href="#arrow-${direction}" x="12" />
-              <use href="#arrow-${direction}" x="36" />
+              <use href="#arrow-${b}" x="-36" />
+              <use href="#arrow-${b}" x="-12" />
+              <use href="#arrow-${b}" x="12" />
+              <use href="#arrow-${b}" x="36" />
             </g>
-            <g id="flash-${index}">
-              <use
-                href="#arrow-${direction}"
-                x="0"
-                style="animation-delay: ${direction == 'right' ? 0 : 2}s;"
-                id="a-flash"
-              />
-              <use href="#arrow-${direction}" x="20" style="animation-delay: 1s;" id="a-flash" />
-              <use
-                href="#arrow-${direction}"
-                x="40"
-                style="animation-delay: ${direction == 'right' ? 2 : 0}s;"
-                id="a-flash"
-              />
+            <g id="flash-${index}" fill="red">
+              <use href="#arrow-${b}" x="0" style="animation-delay: ${direction == 'right' ? 0 : 2}s;" id="a-flash" />
+              <use href="#arrow-${b}" x="20" style="animation-delay: 1s;" id="a-flash" />
+              <use href="#arrow-${b}" x="40" style="animation-delay: ${direction == 'right' ? 2 : 0}s;" id="a-flash" />
             </g>
             <g id="none-${index}" class="arrow-color">
-              <use href="#arrow-${direction}" x="0" />
-              <use href="#arrow-${direction}" x="20" />
-              <use href="#arrow-${direction}" x="40" />
+              <use href="#arrow-${b}" x="0" />
+              <use href="#arrow-${b}" x="20" />
+              <use href="#arrow-${b}" x="40" />
             </g>
           </defs>
           <use href="#${a}-${index}" id="a-${a}-${direction}" />
