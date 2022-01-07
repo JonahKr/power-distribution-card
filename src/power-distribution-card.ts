@@ -184,8 +184,17 @@ export class PowerDistributionCard extends LitElement {
     return num * modifier;
   }
 
+  /**
+   * Retrieving the raw state of an sensor/attribute
+   * @param item A Settings object
+   * @returns entitys/attributes state
+   */
   private _state(item: EntitySettings): unknown {
-    return item.entity ? this.hass.states[item.entity].state : null;
+    return item.entity
+      ? item.attribute
+        ? this.hass.states[item.entity].attributes[item.attribute]
+        : this.hass.states[item.entity].state
+      : null;
   }
 
   /**
@@ -380,18 +389,16 @@ export class PowerDistributionCard extends LitElement {
           <icon>
             <ha-icon icon="${icon}" style="${icon_color ? `color:${icon_color};` : ''}"></ha-icon>
             ${
-              item.secondary_info_attribute && item.secondary_info_entity
-                ? html`<p class="secondary">
-                    ${this._state({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute })}
-                  </p>`
-                : null
-            }
-            ${
               item.secondary_info_entity
-                ? html`<p class="secondary">
-                    ${this._state({ entity: item.secondary_info_entity })}${this.hass.states[item.secondary_info_entity]
-                      .attributes.unit_of_measurement}
-                  </p>`
+                ? item.secondary_info_attribute
+                  ? html`<p class="secondary">
+                      ${this._state({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute })}
+                    </p>`
+                  : html`<p class="secondary">
+                      ${this._state({ entity: item.secondary_info_entity })}${this.hass.states[
+                        item.secondary_info_entity
+                      ].attributes.unit_of_measurement}
+                    </p>`
                 : null
             }
           </icon>
