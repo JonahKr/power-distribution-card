@@ -40,6 +40,7 @@
       "name": "Name",
       "preset": "Vorlagen",
       "ratio": "Anteil",
+      "replace_name": "Namen ersetzen",
       "secondary-info": "Zusatzinformationen",
       "settings": "Einstellungen",
       "smaller": "Kleiner",

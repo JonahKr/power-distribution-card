@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "custom-card-helpers": "1.8.0",
-    "lit": "^2.1.0",
+    "lit": "2.1.1",
     "resize-observer-polyfill": "1.5.1",
     "sortablejs": "1.14.0"
   },

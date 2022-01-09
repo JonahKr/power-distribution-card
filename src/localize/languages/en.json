@@ -40,6 +40,7 @@
       "name": "Name",
       "preset": "Preset",
       "ratio": "ratio",
+      "replace_name": "Replace Name",
       "secondary-info": "Secondary Info",
       "settings": "settings",
       "smaller": "Smaller",
