@@ -394,6 +394,16 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           </paper-listbox>
         </paper-dropdown-menu>
       </div>
+      <div class="checkbox">
+        <input
+          type="checkbox"
+          id="hide-arrows"
+          .checked="${item.secondary_info_replace_name || false}"
+          .configValue=${'secondary_info_replace_name'}
+          @change=${this._itemEntityChanged}
+        />
+        <label for="invert-value"> ${localize('editor.settings.replace_name')}</label>
+      </div>
       <br />
       <h3>${localize('editor.settings.color-settings', true)}</h3>
       <paper-input

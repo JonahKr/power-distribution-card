@@ -315,6 +315,24 @@ export class PowerDistributionCard extends LitElement {
     //Format Number
     const formatValue = formatNumber(value, this.hass.locale);
 
+    // Secondary info
+    let secondary_info: string | undefined;
+    if (item.secondary_info_entity) {
+      if (item.secondary_info_attribute) {
+        secondary_info =
+          this._state({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute }) + '';
+      } else {
+        secondary_info = `${this._state({ entity: item.secondary_info_entity })}${
+          this.hass.states[item.secondary_info_entity].attributes.unit_of_measurement
+        }`;
+      }
+    }
+    // Secondary info replace name
+    if (item.secondary_info_replace_name) {
+      item.name = secondary_info;
+      secondary_info = undefined;
+    }
+
     //Preset Features
     // 1. Battery Icon
     let icon = item.icon;
@@ -388,19 +406,7 @@ export class PowerDistributionCard extends LitElement {
         <badge>
           <icon>
             <ha-icon icon="${icon}" style="${icon_color ? `color:${icon_color};` : ''}"></ha-icon>
-            ${
-              item.secondary_info_entity
-                ? item.secondary_info_attribute
-                  ? html`<p class="secondary">
-                      ${this._state({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute })}
-                    </p>`
-                  : html`<p class="secondary">
-                      ${this._state({ entity: item.secondary_info_entity })}${this.hass.states[
-                        item.secondary_info_entity
-                      ].attributes.unit_of_measurement}
-                    </p>`
-                : null
-            }
+            ${secondary_info ? html`<p class="secondary">${secondary_info}</p>` : null}
           </icon>
           ${nameReplaceFlag ? grid_buy_sell : html`<p class="subtitle">${item.name}</p>`}
         </badge>
