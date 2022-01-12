@@ -162,7 +162,7 @@ export class PowerDistributionCard extends LitElement {
   }
 
   /**
-   * Retrieving the sensor value of hass for a Item
+   * Retrieving the sensor value of hass for a Item as a number
    * @param item a Settings object
    * @returns The current value from Homeassistant in Watts
    */
@@ -182,6 +182,19 @@ export class PowerDistributionCard extends LitElement {
     const threshold = (item as EntitySettings).threshold || null;
     num = threshold ? (Math.abs(num) < threshold ? 0 : num) : num;
     return num * modifier;
+  }
+
+  /**
+   * Retrieving the raw state of an sensor/attribute
+   * @param item A Settings object
+   * @returns entitys/attributes state
+   */
+  private _state(item: EntitySettings): unknown {
+    return item.entity
+      ? item.attribute
+        ? this.hass.states[item.entity].attributes[item.attribute]
+        : this.hass.states[item.entity].state
+      : null;
   }
 
   /**
@@ -302,6 +315,24 @@ export class PowerDistributionCard extends LitElement {
     //Format Number
     const formatValue = formatNumber(value, this.hass.locale);
 
+    // Secondary info
+    let secondary_info: string | undefined;
+    if (item.secondary_info_entity) {
+      if (item.secondary_info_attribute) {
+        secondary_info =
+          this._state({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute }) + '';
+      } else {
+        secondary_info = `${this._state({ entity: item.secondary_info_entity })}${
+          this.hass.states[item.secondary_info_entity].attributes.unit_of_measurement
+        }`;
+      }
+    }
+    // Secondary info replace name
+    if (item.secondary_info_replace_name) {
+      item.name = secondary_info;
+      secondary_info = undefined;
+    }
+
     //Preset Features
     // 1. Battery Icon
     let icon = item.icon;
@@ -326,26 +357,37 @@ export class PowerDistributionCard extends LitElement {
         <div class="buy-sell">
           ${item.grid_buy_entity
             ? html`<div class="grid-buy">
-                B: ${this._val({ entity: item.grid_buy_entity })}
-                ${this.hass.states[item.grid_buy_entity].attributes.unit_of_measurement || undefined}
+                B:
+                ${this._val({ entity: item.grid_buy_entity })}${this.hass.states[item.grid_buy_entity].attributes
+                  .unit_of_measurement || undefined}
               </div>`
             : undefined}
           ${item.grid_sell_entity
             ? html`<div class="grid-sell">
-                S: ${this._val({ entity: item.grid_sell_entity })}
-                ${this.hass.states[item.grid_sell_entity].attributes.unit_of_measurement || undefined}
+                S:
+                ${this._val({ entity: item.grid_sell_entity })}${this.hass.states[item.grid_sell_entity].attributes
+                  .unit_of_measurement || undefined}
               </div>`
             : undefined}
         </div>
       `;
     }
 
-    //Icon color dependant on state
+    // COLOR CHANGE
+    const ct = item.color_threshold || 0;
+    // Icon color dependant on state
     let icon_color: string | undefined;
     if (item.icon_color) {
-      if (state > 0) icon_color = item.icon_color.bigger;
-      if (state < 0) icon_color = item.icon_color.smaller;
-      if (state == 0) icon_color = item.icon_color.equal;
+      if (state > ct) icon_color = item.icon_color.bigger;
+      if (state < ct) icon_color = item.icon_color.smaller;
+      if (state == ct) icon_color = item.icon_color.equal;
+    }
+    // Arrow color
+    let arrow_color: string | undefined;
+    if (item.arrow_color) {
+      if (state > ct) arrow_color = item.arrow_color.bigger;
+      if (state < ct) arrow_color = item.arrow_color.smaller;
+      if (state == ct) arrow_color = item.arrow_color.equal;
     }
 
     //NaNFlag for Offline Sensors for example
@@ -364,18 +406,7 @@ export class PowerDistributionCard extends LitElement {
         <badge>
           <icon>
             <ha-icon icon="${icon}" style="${icon_color ? `color:${icon_color};` : ''}"></ha-icon>
-            ${
-              item.secondary_info_attribute
-                ? html`<p class="secondary">
-                    ${this._val({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute })}
-                  </p>`
-                : item.secondary_info_entity
-                ? html`<p class="secondary">
-                    ${this._val({ entity: item.secondary_info_entity })}
-                    ${this.hass.states[item.secondary_info_entity].attributes.unit_of_measurement}
-                  </p>`
-                : ''
-            }
+            ${secondary_info ? html`<p class="secondary">${secondary_info}</p>` : null}
           </icon>
           ${nameReplaceFlag ? grid_buy_sell : html`<p class="subtitle">${item.name}</p>`}
         </badge>
@@ -395,6 +426,7 @@ export class PowerDistributionCard extends LitElement {
                     ? 'left'
                     : 'right',
                   index,
+                  arrow_color,
                 )
               : html``
           }
@@ -408,41 +440,32 @@ export class PowerDistributionCard extends LitElement {
    * @param direction One of three Options: none, right, left
    * @param index To detect which side the item is on and adapt the direction accordingly
    */
-  private _render_arrow(direction: ArrowStates, index: number): TemplateResult {
+  private _render_arrow(direction: ArrowStates, index: number, color?: string): TemplateResult {
     const a = this._config.animation;
+    const b = `${direction}-${index}`;
     if (direction == 'none') {
       return html` <div class="blank"></div> `;
     } else {
       return html`
         <svg width="57" height="18" class="arrow">
           <defs>
-            <polygon id="arrow-right" points="0 0, 0 16, 16 8" />
-            <polygon id="arrow-left" points="16 0, 16 16, 0 8" />
+            <polygon id="arrow-right-${index}" points="0 0, 0 16, 16 8" fill="${color}" />
+            <polygon id="arrow-left-${index}" points="16 0, 16 16, 0 8" fill="${color}" />
             <g id="slide-${index}" class="arrow-color">
-              <use href="#arrow-${direction}" x="-36" />
-              <use href="#arrow-${direction}" x="-12" />
-              <use href="#arrow-${direction}" x="12" />
-              <use href="#arrow-${direction}" x="36" />
+              <use href="#arrow-${b}" x="-36" />
+              <use href="#arrow-${b}" x="-12" />
+              <use href="#arrow-${b}" x="12" />
+              <use href="#arrow-${b}" x="36" />
             </g>
-            <g id="flash-${index}">
-              <use
-                href="#arrow-${direction}"
-                x="0"
-                style="animation-delay: ${direction == 'right' ? 0 : 2}s;"
-                id="a-flash"
-              />
-              <use href="#arrow-${direction}" x="20" style="animation-delay: 1s;" id="a-flash" />
-              <use
-                href="#arrow-${direction}"
-                x="40"
-                style="animation-delay: ${direction == 'right' ? 2 : 0}s;"
-                id="a-flash"
-              />
+            <g id="flash-${index}" fill="red">
+              <use href="#arrow-${b}" x="0" style="animation-delay: ${direction == 'right' ? 0 : 2}s;" id="a-flash" />
+              <use href="#arrow-${b}" x="20" style="animation-delay: 1s;" id="a-flash" />
+              <use href="#arrow-${b}" x="40" style="animation-delay: ${direction == 'right' ? 2 : 0}s;" id="a-flash" />
             </g>
             <g id="none-${index}" class="arrow-color">
-              <use href="#arrow-${direction}" x="0" />
-              <use href="#arrow-${direction}" x="20" />
-              <use href="#arrow-${direction}" x="40" />
+              <use href="#arrow-${b}" x="0" />
+              <use href="#arrow-${b}" x="20" />
+              <use href="#arrow-${b}" x="40" />
             </g>
           </defs>
           <use href="#${a}-${index}" id="a-${a}-${direction}" />

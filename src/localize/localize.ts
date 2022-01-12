@@ -22,11 +22,11 @@ export function localize(string: string, capitalized = false, search = '', repla
   try {
     translated = string.split('.').reduce((o, i) => o[i], languages[lang]);
   } catch (e) {
-    translated = (string.split('.').reduce((o, i) => o[i], languages['en']) as unknown) as string;
+    translated = string.split('.').reduce((o, i) => o[i], languages['en']) as unknown as string;
   }
 
   if (translated === undefined)
-    translated = (string.split('.').reduce((o, i) => o[i], languages['en']) as unknown) as string;
+    translated = string.split('.').reduce((o, i) => o[i], languages['en']) as unknown as string;
 
   if (search !== '' && replace !== '') {
     translated = translated.replace(search, replace);

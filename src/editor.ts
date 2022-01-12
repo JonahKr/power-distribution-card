@@ -211,12 +211,12 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       : [];
     return html`
       <div class="side-by-side">
-        <ha-icon-input
+        <ha-icon-picker
           .label="${localize('editor.settings.icon')}  (${localize('editor.optional')})"
           .value=${item.icon}
           .configValue=${'icon'}
           @value-changed=${this._itemEntityChanged}
-        ></ha-icon-input>
+        ></ha-icon-picker>
         <paper-input
           .label="${localize('editor.settings.name')} (${localize('editor.optional')})"
           .value=${item.name || undefined}
@@ -394,14 +394,30 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           </paper-listbox>
         </paper-dropdown-menu>
       </div>
+      <div class="checkbox">
+        <input
+          type="checkbox"
+          id="hide-arrows"
+          .checked="${item.secondary_info_replace_name || false}"
+          .configValue=${'secondary_info_replace_name'}
+          @change=${this._itemEntityChanged}
+        />
+        <label for="invert-value"> ${localize('editor.settings.replace_name')}</label>
+      </div>
       <br />
       <h3>${localize('editor.settings.color-settings', true)}</h3>
+      <paper-input
+        .label="${localize('editor.settings.color_threshold')}"
+        .value=${item.color_threshold || 0}
+        .configValue=${'color_threshold'}
+        @value-changed=${this._itemEntityChanged}
+      ></paper-input>
       <table>
         <tr>
           <th>Element</th>
-          <th>&gt; 0</th>
-          <th>= 0</th>
-          <th>&lt; 0</th>
+          <th>&gt; ${item.color_threshold || 0}</th>
+          <th>= ${item.color_threshold || 0}</th>
+          <th>&lt; ${item.color_threshold || 0}</th>
         </tr>
         <tr>
           <th>icon</th>
@@ -426,6 +442,33 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
               .label="${localize('editor.settings.smaller')}"
               .value=${item.icon_color?.smaller || undefined}
               .configValue=${'icon_color.smaller'}
+              @value-changed=${this._itemEntityChanged}
+            ></paper-input>
+          </td>
+        </tr>
+        <tr>
+          <th>arrows</th>
+          <td>
+            <paper-input
+              .label="${localize('editor.settings.bigger')}"
+              .value=${item.arrow_color?.bigger || undefined}
+              .configValue=${'arrow_color.bigger'}
+              @value-changed=${this._itemEntityChanged}
+            ></paper-input>
+          </td>
+          <td>
+            <paper-input
+              .label="${localize('editor.settings.equal')}"
+              .value=${item.arrow_color?.equal || undefined}
+              .configValue=${'arrow_color.equal'}
+              @value-changed=${this._itemEntityChanged}
+            ></paper-input>
+          </td>
+          <td>
+            <paper-input
+              .label="${localize('editor.settings.smaller')}"
+              .value=${item.arrow_color?.smaller || undefined}
+              .configValue=${'arrow_color.smaller'}
               @value-changed=${this._itemEntityChanged}
             ></paper-input>
           </td>

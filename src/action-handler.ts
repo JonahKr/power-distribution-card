@@ -98,7 +98,7 @@ export const actionHandler = directive(
       actionHandlerBind(part.element as ActionHandlerElement, options);
       return noChange;
     }
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
     render(_options?: ActionHandlerOptions) {}
   },
 );

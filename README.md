@@ -300,7 +300,9 @@ There are alot of settings you can customize your sensors with:
 | Setting                    | type          | example                      | description  |
 | -------------------------- |:-------------:|:----------------------------:| :------------|
 | `attribute`                | string        | deferredWatts                | A Sensor can have multiple attributes. If one of them is your desired value to display, add it here. |
+| `arrow_color`              | object        | {smaller:'red'}              | You can Change the Color of the arrow dependant on the value. (Bigger, Equal and Smaller) |
 | `calc_excluded`            | boolean       | true                         | If the Item should be excluded from ratio/autarky calculations |
+| `color_threshold`          | number        | 0, -100, 420.69              | The value at which the coloring logic your switch on. (default: 0) |
 | `decimals`                 | number        | 0, 2                         | The Number of Decimals shown. (default: 2) |
 | `display_abs`              | boolean       | false                        | The displayed values are Absolute normally. You can change that here. |
 | `double_tap_action`        | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Double tap action for item. |
@@ -311,9 +313,10 @@ There are alot of settings you can customize your sensors with:
 | `invert_arrow`             | bool          | true                         | This will change the *arrows* direction to the oposite one. |
 | `invert_value`             | bool          | false                        | This will invert the value recieved from HASS. This affects calculations aswell! |
 | `name`                     | string        | dishwasher                   | Feel free to change the displayed name of the element. |
-| `secondary-info-attribute` | string        | min_temp                     | Requires Entity. Instead of Sensor, the Attribute Value gets displayed.  |
-| `secondary-info-entity`    | string        | sensor.e3dc_grid             | entity_id of the secondary info sensor |
-| `tap_action`        | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Single tap action for item. |
+| `secondary_info_attribute` | string        | min_temp                     | Requires Entity. Instead of Sensor, the Attribute Value gets displayed.  |
+| `secondary_info_entity`    | string        | sensor.e3dc_grid             | entity_id of the secondary info sensor |
+| `secondary_info_replace_name` | bool       | true                         | This will replace the name of the item with the secondary info. |
+| `tap_action`               | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Single tap action for item. |
 | `threshold`                | number        | 2                            | Ignoring all abolute values smaller than threshold. |
 | `unit_of_display`          | string        | *W* , *kW* , *adaptive*      | The Unit the value is displayed in (default: W). Adaptive will show kW for values >= 1kW |
 | `unit_of_measurement`      | string        | *W* , *kW*                   | The Unit the value is coming from the Sensor. **This should be detected automatically** |
