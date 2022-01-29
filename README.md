@@ -67,7 +67,8 @@
       type: module
   ```
   Or alternatively set it up via the UI: 
-  `Configuration -> Lovelace Dashboards -> Resources (TAB)` 
+  `Configuration -> Lovelace Dashboards -> Resources (TAB)`
+  For more guidance check out the [docs](https://developers.home-assistant.io/docs/frontend/custom-ui/registering-resources/).
 
 <br/>
 </div>
@@ -115,6 +116,9 @@ Every Sensor you want to add has to use one of the Presets. You can add as many 
   <td>
     <img height="60px" alt="mdi-wind-turbine" src="https://user-images.githubusercontent.com/38377070/95516203-2b9c5000-09bf-11eb-9fd0-a3a87447f30e.png"/>
   </td>
+  <td>
+    <img height="60px" alt="mdi-radiator" src="https://user-images.githubusercontent.com/38377070/151670027-67edf52c-1f7f-47a6-8f2a-1ee1a68b5906.png"/>
+  </td>
 </tr>
 <tr>
   <td>battery</td>
@@ -127,6 +131,7 @@ Every Sensor you want to add has to use one of the Presets. You can add as many 
   <td>producer</td>
   <td>solar</td>
   <td>wind</td>
+  <td>heating</td>
 </tr>
 <tr>
   <td>
@@ -158,6 +163,9 @@ Every Sensor you want to add has to use one of the Presets. You can add as many 
   </td>
   <td>
     Power coming from Wind
+  </td>
+  <td>
+    Radiators
   </td>
 </tr>
 </table>
@@ -371,10 +379,6 @@ If you prefer yaml, here are all extra options which can be set per item:
 <div id="faq">
 <h1> FAQs ❓</h1>
 
-### My old Configuration doesn't work anymore!
-If this is the case - Congratulations you're running the new Version. 
-To easily integrate the visual editor i had to make some sacrefices and apply many breaking changes.
-This will be the last time though. *I hope °-°*
 ### What the heck are these autarky and ratio calculating?
 So basically these bar-graphs are nice indicators to show you:
 1. the autarky of your home (Home Production like Solar / Home Consumption) 

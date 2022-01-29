@@ -13,6 +13,7 @@ export const PresetList = [
   'producer',
   'solar',
   'wind',
+  'heating',
 ] as const;
 
 export const PresetObject: { [key: string]: EntitySettings } = {
@@ -65,6 +66,11 @@ export const PresetObject: { [key: string]: EntitySettings } = {
     icon: 'mdi:wind-turbine',
     name: 'wind',
     producer: true,
+  },
+  heating: {
+    icon: 'mdi:radiator',
+    name: 'heating',
+    consumer: true,
   },
 };
 

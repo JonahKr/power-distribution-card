@@ -24,29 +24,29 @@ import { DefaultItem, DefaultConfig, PresetList, PresetObject, PresetType } from
 import { styles, narrow_styles } from './styles';
 import { localize } from './localize/localize';
 import ResizeObserver from 'resize-observer-polyfill';
-import { installResizeObserver } from './util';
+import { DEV_FLAG, installResizeObserver } from './util';
 import { actionHandler } from './action-handler';
 
 console.info(
-  `%c POWER-DISTRIBUTION-CARD %c ${version}`,
+  `%c POWER-DISTRIBUTION-CARD %c ${version}` + DEV_FLAG,
   `font-weight: 500; color: white; background: #03a9f4;`,
   `font-weight: 500; color: #03a9f4; background: white;`,
 );
 
 window.customCards.push({
-  type: 'power-distribution-card',
+  type: 'power-distribution-card' + DEV_FLAG,
   name: 'Power Distribution Card',
   description: localize('common.description'),
 });
 
-@customElement('power-distribution-card')
+@customElement('power-distribution-card' + DEV_FLAG)
 export class PowerDistributionCard extends LitElement {
   /**
    * Linking to the visual Editor Element
    * @returns Editor DOM Element
    */
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
-    return document.createElement('power-distribution-card-editor') as LovelaceCardEditor;
+    return document.createElement('power-distribution-card-editor' + DEV_FLAG) as LovelaceCardEditor;
   }
 
   /**
@@ -323,7 +323,7 @@ export class PowerDistributionCard extends LitElement {
           this._state({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute }) + '';
       } else {
         secondary_info = `${this._state({ entity: item.secondary_info_entity })}${
-          this.hass.states[item.secondary_info_entity].attributes.unit_of_measurement
+          this.hass.states[item.secondary_info_entity].attributes.unit_of_measurement || ''
         }`;
       }
     }
