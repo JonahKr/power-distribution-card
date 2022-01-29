@@ -9,4 +9,4 @@ export const installResizeObserver = async (): Promise<void> => {
   }
 };
 
-export const DEV_FLAG = '-dev';
+export const DEV_FLAG = '';
