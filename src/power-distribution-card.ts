@@ -323,7 +323,7 @@ export class PowerDistributionCard extends LitElement {
           this._state({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute }) + '';
       } else {
         secondary_info = `${this._state({ entity: item.secondary_info_entity })}${
-          this.hass.states[item.secondary_info_entity].attributes.unit_of_measurement
+          this.hass.states[item.secondary_info_entity].attributes.unit_of_measurement || ''
         }`;
       }
     }
