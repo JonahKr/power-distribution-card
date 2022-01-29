@@ -8,3 +8,5 @@ export const installResizeObserver = async (): Promise<void> => {
     window.ResizeObserver = (await import('resize-observer-polyfill')).default;
   }
 };
+
+export const DEV_FLAG = '-dev';

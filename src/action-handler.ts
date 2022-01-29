@@ -3,6 +3,7 @@ import { noChange } from 'lit';
 import { AttributePart, directive, Directive, DirectiveParameters } from 'lit/directive.js';
 
 import { deepEqual } from './deep-equal';
+import { DEV_FLAG } from './util';
 
 interface ActionHandler extends HTMLElement {
   holdTime: number;
@@ -70,15 +71,15 @@ class ActionHandler extends HTMLElement implements ActionHandler {
   }
 }
 
-customElements.define('action-handler-power-distribution-card', ActionHandler);
+customElements.define('action-handler-power-distribution-card' + DEV_FLAG, ActionHandler);
 
 const getActionHandler = (): ActionHandler => {
   const body = document.body;
-  if (body.querySelector('action-handler-power-distribution-card')) {
-    return body.querySelector('action-handler-power-distribution-card') as ActionHandler;
+  if (body.querySelector('action-handler-power-distribution-card' + DEV_FLAG)) {
+    return body.querySelector('action-handler-power-distribution-card' + DEV_FLAG) as ActionHandler;
   }
 
-  const actionhandler = document.createElement('action-handler-power-distribution-card');
+  const actionhandler = document.createElement('action-handler-power-distribution-card' + DEV_FLAG);
   body.appendChild(actionhandler);
 
   return actionhandler as ActionHandler;

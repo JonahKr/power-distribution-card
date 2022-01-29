@@ -17,6 +17,7 @@ import {
 import { localize } from './localize/localize';
 
 import { DefaultItem, PresetList, PresetObject } from './presets';
+import { DEV_FLAG } from './util';
 
 /**
  * Editor Settings
@@ -26,7 +27,7 @@ const center = ['none', 'card', 'bars'];
 const bar_presets = ['autarky', 'ratio', ''];
 const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'none'];
 
-@customElement('power-distribution-card-editor')
+@customElement('power-distribution-card-editor' + DEV_FLAG)
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
   @property({ attribute: false }) public hass?: HomeAssistant;
   @state() private _config!: PDCConfig;
