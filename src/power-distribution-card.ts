@@ -108,7 +108,7 @@ export class PowerDistributionCard extends LitElement {
     _config.entities.forEach((item, index) => {
       if (!item.entity) return;
       //unit-of-measurement Auto Configuration from hass element
-      const hass_uom = this.hass.states[item.entity].attributes.unit_of_measurement;
+      const hass_uom = this._state({ entity: item.entity, attribute: 'unit_of_measurement' }) as string;
       !item.unit_of_measurement ? (this._config.entities[index].unit_of_measurement = hass_uom || 'W') : undefined;
     });
 
@@ -173,11 +173,12 @@ export class PowerDistributionCard extends LitElement {
     //Checking if an attribute was defined to pull the value from
     const attr = (item as EntitySettings).attribute || null;
     // If an entity exists, check if the attribute setting is entered -> value from attribute else value from entity
-    let num = item.entity
-      ? attr
-        ? Number(this.hass.states[item.entity].attributes[attr])
-        : Number(this.hass.states[item.entity].state)
-      : NaN;
+    let num =
+      item.entity && this.hass.states[item.entity]
+        ? attr
+          ? Number(this.hass.states[item.entity].attributes[attr])
+          : Number(this.hass.states[item.entity].state)
+        : NaN;
     //Applying Threshold
     const threshold = (item as EntitySettings).threshold || null;
     num = threshold ? (Math.abs(num) < threshold ? 0 : num) : num;
@@ -190,7 +191,7 @@ export class PowerDistributionCard extends LitElement {
    * @returns entitys/attributes state
    */
   private _state(item: EntitySettings): unknown {
-    return item.entity
+    return item.entity && this.hass.states[item.entity]
       ? item.attribute
         ? this.hass.states[item.entity].attributes[item.attribute]
         : this.hass.states[item.entity].state
@@ -323,7 +324,7 @@ export class PowerDistributionCard extends LitElement {
           this._state({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute }) + '';
       } else {
         secondary_info = `${this._state({ entity: item.secondary_info_entity })}${
-          this.hass.states[item.secondary_info_entity].attributes.unit_of_measurement || ''
+          this._state({ entity: item.secondary_info_entity, attribute: 'unit_of_measurement' }) || ''
         }`;
       }
     }
@@ -358,15 +359,19 @@ export class PowerDistributionCard extends LitElement {
           ${item.grid_buy_entity
             ? html`<div class="grid-buy">
                 B:
-                ${this._val({ entity: item.grid_buy_entity })}${this.hass.states[item.grid_buy_entity].attributes
-                  .unit_of_measurement || undefined}
+                ${this._val({ entity: item.grid_buy_entity })}${this._state({
+                  entity: item.grid_buy_entity,
+                  attribute: 'unit_of_measurement',
+                }) || undefined}
               </div>`
             : undefined}
           ${item.grid_sell_entity
             ? html`<div class="grid-sell">
                 S:
-                ${this._val({ entity: item.grid_sell_entity })}${this.hass.states[item.grid_sell_entity].attributes
-                  .unit_of_measurement || undefined}
+                ${this._val({ entity: item.grid_sell_entity })}${this._state({
+                  entity: item.grid_sell_entity,
+                  attribute: 'unit_of_measurement',
+                }) || undefined}
               </div>`
             : undefined}
         </div>
