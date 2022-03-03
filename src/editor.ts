@@ -3,6 +3,8 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import { guard } from 'lit/directives/guard.js';
 
+import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
+
 import Sortable, { SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
 import { fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
@@ -16,6 +18,10 @@ import {
 } from './types';
 import { localize } from './localize/localize';
 
+import { formfieldDefinition } from './elements/formfield';
+import { selectDefinition } from './elements/select';
+import { textfieldDefinition } from './elements/textfield';
+
 import { DefaultItem, PresetList, PresetObject } from './presets';
 import { DEV_FLAG } from './util';
 
@@ -28,7 +34,7 @@ const bar_presets = ['autarky', 'ratio', ''];
 const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'none'];
 
 @customElement('power-distribution-card-editor' + DEV_FLAG)
-export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
+export class PowerDistributionCardEditor extends ScopedRegistryHost(LitElement) implements LovelaceCardEditor {
   @property({ attribute: false }) public hass?: HomeAssistant;
   @state() private _config!: PDCConfig;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,6 +43,12 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   public setConfig(config: PDCConfig): void {
     this._config = config;
   }
+
+  static elementDefinitions = {
+    ...textfieldDefinition,
+    ...selectDefinition,
+    ...formfieldDefinition,
+  };
 
   /**
    * This Preloads all standard hass components which are not natively avaiable
@@ -65,32 +77,34 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     if (this._subElementEditor) return this._renderSubElementEditor();
     return html`
       <div class="card-config">
-        <paper-input
-          .label="${localize('editor.settings.title')} (${localize('editor.optional')})"
+        <mwc-textfield
+          label="${localize('editor.settings.title')} (${localize('editor.optional')})"
           .value=${this._config?.title || ''}
           .configValue=${'title'}
-          @value-changed=${this._valueChanged}
-        ></paper-input>
-        <paper-dropdown-menu
+          @input=${this._valueChanged}
+        ></mwc-textfield>
+        <mwc-select
+          naturalMenuWidth
+          fixedMenuPosition
           label="${localize('editor.settings.animation')}"
           .configValue=${'animation'}
-          @value-changed=${this._valueChanged}
+          .value=${this._config?.animation || 'flash'}
+          @selected=${this._valueChanged}
+          @closed=${(ev) => ev.stopPropagation()}
         >
-          <paper-listbox slot="dropdown-content" .selected=${animation.indexOf(this._config?.animation || 'flash')}>
-            ${animation.map((val) => html`<paper-item>${val}</paper-item>`)}
-          </paper-listbox>
-        </paper-dropdown-menu>
+          ${animation.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
+        </mwc-select>
         <br />
         <div class="entity">
-          <paper-dropdown-menu
+          <mwc-select
             label="${localize('editor.settings.center')}"
             .configValue=${'type'}
-            @value-changed=${this._centerChanged}
+            @selected=${this._centerChanged}
+            @closed=${(ev) => ev.stopPropagation()}
+            .value=${this._config?.center?.type || 'none'}
           >
-            <paper-listbox slot="dropdown-content" .selected="${center.indexOf(this._config?.center?.type || 'none')}">
-              ${center.map((val) => html`<paper-item>${val}</paper-item>`)}
-            </paper-listbox>
-          </paper-dropdown-menu>
+            ${center.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
+          </mwc-select>
           ${this._config?.center?.type == 'bars' || this._config?.center?.type == 'card'
             ? html`<mwc-icon-button
                 aria-label=${localize('editor.actions.edit')}
@@ -921,8 +935,16 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         h3 {
           margin-bottom: 0.5em;
         }
-        paper-dropdown-menu {
-          width: 100%;
+        mwc-select,
+        mwc-textfield {
+          margin-bottom: 16px;
+          display: block;
+        }
+        mwc-formfield {
+          padding-bottom: 8px;
+        }
+        mwc-switch {
+          --mdc-theme-secondary: var(--switch-checked-color);
         }
         .side-by-side {
           display: flex;
