@@ -17,8 +17,6 @@ import {
 
 import { version } from '../package.json';
 
-import './editor';
-
 import { PDCConfig, EntitySettings, ArrowStates, BarSettings } from './types';
 import { DefaultItem, DefaultConfig, PresetList, PresetObject, PresetType } from './presets';
 import { styles, narrow_styles } from './styles';
@@ -46,6 +44,7 @@ export class PowerDistributionCard extends LitElement {
    * @returns Editor DOM Element
    */
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
+    await import('./editor');
     return document.createElement('power-distribution-card-editor' + DEV_FLAG) as LovelaceCardEditor;
   }
 
