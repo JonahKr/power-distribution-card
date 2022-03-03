@@ -28,6 +28,9 @@
     "rollup": "rollup -c"
   },
   "dependencies": {
+    "@lit-labs/scoped-registry-mixin": "^1.0.0",
+    "@material/mwc-formfield": "^0.25.3",
+    "@material/mwc-list": "^0.25.3",
     "@material/mwc-select": "^0.25.3",
     "@material/mwc-textfield": "^0.25.3",
     "custom-card-helpers": "1.9.0",
@@ -47,13 +50,13 @@
     "@typescript-eslint/parser": "5.13.0",
     "eslint": "8.10.0",
     "eslint-config-airbnb-base": "15.0.0",
-    "eslint-config-prettier": "8.4.0",
+    "eslint-config-prettier": "8.5.0",
     "eslint-plugin-import": "2.25.4",
     "eslint-plugin-prettier": "4.0.0",
     "prettier": "2.5.1",
-    "rollup": "2.68.0",
+    "rollup": "2.69.0",
     "rollup-plugin-terser": "7.0.2",
     "rollup-plugin-typescript2": "0.31.2",
-    "typescript": "4.5.5"
+    "typescript": "4.6.2"
   }
 }
