@@ -1,6 +1,6 @@
 {
   "name": "power-distribution-card",
-  "version": "2.6.0",
+  "version": "2.5.2",
   "license": "MIT",
   "author": "JonahKr",
   "description": "A Lovelace Card for visualizing power distributions.",
