@@ -4,9 +4,6 @@ import nodeResolve from '@rollup/plugin-node-resolve';
 import babel from '@rollup/plugin-babel';
 import { terser } from 'rollup-plugin-terser';
 import json from '@rollup/plugin-json';
-import ignore from './rollup-ignore-plugin.js';
-
-import { elementIgnoreFiles } from './src/elements/ignore';
 
 const plugins = [
   nodeResolve({}),
@@ -18,9 +15,6 @@ const plugins = [
     babelHelpers: 'bundled',
   }),
   terser(),
-  ignore({
-    files: elementIgnoreFiles.map((f) => require.resolve(f)),
-  }),
 ];
 
 export default [
