@@ -63,11 +63,11 @@ export interface CustomValueEvent {
   target?: {
     checked?: boolean;
     configValue?: string;
-    index?: number;
+    i?: number;
     value?: string | EntitySettings[] | BarSettings[] | { bigger: string; equal: string; smaller: string };
   };
   currentTarget?: {
-    index?: number;
+    i?: number;
     value?: string;
   };
   detail?: {
@@ -85,7 +85,7 @@ export interface HTMLElementValue extends HTMLElement {
 }
 declare global {
   interface Window {
-    loadCardHelpers: () => void;
+    loadCardHelpers: () => Promise<void>;
     customCards: { type?: string; name?: string; description?: string; preview?: boolean }[];
     ResizeObserver: { new (callback: ResizeObserverCallback): ResizeObserver; prototype: ResizeObserver };
   }

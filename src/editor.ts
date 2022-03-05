@@ -3,6 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import { guard } from 'lit/directives/guard.js';
 
+import { mdiClose, mdiPencil, mdiPlusCircleOutline } from '@mdi/js';
 import Sortable, { SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
 import { fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
@@ -46,12 +47,10 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     //Loading Card with ha-entities-picker, ha-icon-input,
     await this.loadCardHelpers();
     try {
-      await this._helpers.createCardElement({ type: 'calendar', entities: ['calendar.does_not_exist'] });
       await this._helpers.createCardElement({ type: 'button', entity: 'demo.demo' });
     } catch (e) {}
 
     if (customElements) {
-      await (customElements.get('hui-calendar-card') as HassCustomElement).getConfigElement();
       await (customElements.get('hui-button-card') as HassCustomElement).getConfigElement();
     }
   }
@@ -65,41 +64,41 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     if (this._subElementEditor) return this._renderSubElementEditor();
     return html`
       <div class="card-config">
-        <paper-input
-          .label="${localize('editor.settings.title')} (${localize('editor.optional')})"
+        <ha-textfield
+          label="${localize('editor.settings.title')} (${localize('editor.optional')})"
           .value=${this._config?.title || ''}
           .configValue=${'title'}
-          @value-changed=${this._valueChanged}
-        ></paper-input>
-        <paper-dropdown-menu
+          @input=${this._valueChanged}
+        ></ha-textfield>
+        <ha-select
+          naturalMenuWidth
+          fixedMenuPosition
           label="${localize('editor.settings.animation')}"
           .configValue=${'animation'}
-          @value-changed=${this._valueChanged}
+          .value=${this._config?.animation || 'flash'}
+          @selected=${this._valueChanged}
+          @closed=${(ev) => ev.stopPropagation()}
         >
-          <paper-listbox slot="dropdown-content" .selected=${animation.indexOf(this._config?.animation || 'flash')}>
-            ${animation.map((val) => html`<paper-item>${val}</paper-item>`)}
-          </paper-listbox>
-        </paper-dropdown-menu>
+          ${animation.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
+        </ha-select>
         <br />
-        <div class="entity">
-          <paper-dropdown-menu
+        <div class="entity row">
+          <ha-select
             label="${localize('editor.settings.center')}"
             .configValue=${'type'}
-            @value-changed=${this._centerChanged}
+            @selected=${this._centerChanged}
+            @closed=${(ev) => ev.stopPropagation()}
+            .value=${this._config?.center?.type || 'none'}
           >
-            <paper-listbox slot="dropdown-content" .selected="${center.indexOf(this._config?.center?.type || 'none')}">
-              ${center.map((val) => html`<paper-item>${val}</paper-item>`)}
-            </paper-listbox>
-          </paper-dropdown-menu>
+            ${center.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
+          </ha-select>
           ${this._config?.center?.type == 'bars' || this._config?.center?.type == 'card'
-            ? html`<mwc-icon-button
-                aria-label=${localize('editor.actions.edit')}
+            ? html`<ha-icon-button
                 class="edit-icon"
                 .value=${this._config?.center?.type}
+                .path=${mdiPencil}
                 @click="${this._editCenter}"
-              >
-                <ha-icon icon="mdi:pencil"></ha-icon>
-              </mwc-icon-button>`
+              ></ha-icon-button>`
             : ''}
         </div>
         <br />
@@ -187,11 +186,12 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     if (!target.configValue) return;
 
     // Extracting event Data
-    const index = target.index || this._subElementEditor?.index || 0;
+    const index = target.i || this._subElementEditor?.index || 0;
     const configValue = target.configValue.split('.');
-    const value = target.checked != undefined ? target.checked : ev.detail?.value;
+    const value = target.checked != undefined ? target.checked : target.value || ev.detail?.value;
 
     const configItem = this._config.entities[index][configValue[0]] || undefined;
+
     if ((configItem ? (configValue[1] ? configItem[configValue[1]] : configItem) : undefined) == value) {
       return;
     }
@@ -218,12 +218,12 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           .configValue=${'icon'}
           @value-changed=${this._itemEntityChanged}
         ></ha-icon-picker>
-        <paper-input
-          .label="${localize('editor.settings.name')} (${localize('editor.optional')})"
+        <ha-textfield
+          label="${localize('editor.settings.name')} (${localize('editor.optional')})"
           .value=${item.name || undefined}
           .configValue=${'name'}
-          @value-changed=${this._itemEntityChanged}
-        ></paper-input>
+          @input=${this._itemEntityChanged}
+        ></ha-textfield>
       </div>
       <div class="side-by-side">
         <ha-entity-picker
@@ -235,30 +235,27 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           .value=${item.entity}
           @value-changed=${this._itemEntityChanged}
         ></ha-entity-picker>
-        <paper-dropdown-menu
+        <ha-select
           label="${localize('editor.settings.attribute')} (${localize('editor.optional')})"
           .configValue=${'attribute'}
-          @value-changed=${this._itemEntityChanged}
+          .value=${item.attribute || ''}
+          @selected=${this._itemEntityChanged}
+          @closed=${(ev) => ev.stopPropagation()}
         >
-          <paper-listbox
-            slot="dropdown-content"
-            .selected=${attributes.indexOf(item.attribute || '') + (item.attribute ? 1 : 0)}
-          >
-            ${attributes.length > 0 ? html`<paper-item></paper-item>` : undefined}
-            ${attributes.map((val) => html`<paper-item>${val}</paper-item>`)}
-          </paper-listbox>
-        </paper-dropdown-menu>
+          ${attributes.length > 0 ? html`<mwc-list-item></mwc-list-item>` : ''}
+          ${attributes.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
+        </ha-select>
       </div>
       <div class="side-by-side">
-        <paper-dropdown-menu
+        <ha-select
           label="${localize('editor.settings.preset')}"
           .configValue=${'preset'}
-          @value-changed=${this._itemEntityChanged}
+          .value=${item.preset || PresetList[0]}
+          @selected=${this._itemEntityChanged}
+          @closed=${(ev) => ev.stopPropagation()}
         >
-          <paper-listbox slot="dropdown-content" .selected=${PresetList.indexOf(item.preset || PresetList[0])}>
-            ${PresetList.map((val) => html`<paper-item>${val}</paper-item>`)}
-          </paper-listbox>
-        </paper-dropdown-menu>
+          ${PresetList.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
+        </ha-select>
         <div class="checkbox">
           <input
             type="checkbox"
@@ -312,20 +309,20 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       <br /><br />
       <h3>${localize('editor.settings.value', true)} ${localize('editor.settings.settings', true)}</h3>
       <div class="side-by-side">
-        <paper-input
-          .label="${localize('editor.settings.unit_of_display')}"
-          .value=${item.unit_of_display || undefined}
+        <ha-textfield
+          label="${localize('editor.settings.unit_of_display')}"
+          .value=${item.unit_of_display || ''}
           .configValue=${'unit_of_display'}
-          @value-changed=${this._itemEntityChanged}
-        ></paper-input>
-        <paper-input
+          @input=${this._itemEntityChanged}
+        ></ha-textfield>
+        <ha-textfield
           auto-validate
           pattern="[0-9]"
-          .label="${localize('editor.settings.decimals')}"
-          .value=${item.decimals || undefined}
+          label="${localize('editor.settings.decimals')}"
+          .value=${item.decimals || ''}
           .configValue=${'decimals'}
-          @value-changed=${this._itemEntityChanged}
-        ></paper-input>
+          @input=${this._itemEntityChanged}
+        ></ha-textfield>
       </div>
       <div class="side-by-side">
         <div class="checkbox">
@@ -360,12 +357,12 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           />
           <label for="calc_excluded"> ${localize('editor.settings.calc_excluded')} </label>
         </div>
-        <paper-input
-          .label="${localize('editor.settings.threshold')}"
-          .value=${item.threshold || undefined}
+        <ha-textfield
+          label="${localize('editor.settings.threshold')}"
+          .value=${item.threshold || ''}
           .configValue=${'threshold'}
-          @value-changed=${this._itemEntityChanged}
-        ></paper-input>
+          @input=${this._itemEntityChanged}
+        ></ha-textfield>
       </div>
       <br />
       <h3>${localize('editor.settings.secondary-info', true)}</h3>
@@ -379,21 +376,17 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           .value=${item.secondary_info_entity}
           @value-changed=${this._itemEntityChanged}
         ></ha-entity-picker>
-        <paper-dropdown-menu
+        <ha-select
           allow-custom-entity
           label="${localize('editor.settings.attribute')} (${localize('editor.optional')})"
+          .value=${item.secondary_info_attribute || ''}
           .configValue=${'secondary_info_attribute'}
           @value-changed=${this._itemEntityChanged}
+          @closed=${(ev) => ev.stopPropagation()}
         >
-          <paper-listbox
-            slot="dropdown-content"
-            .selected=${secondary_info_attributes.indexOf(item.secondary_info_attribute || '') +
-            (item.secondary_info_attribute ? 1 : 0)}
-          >
-            ${secondary_info_attributes.length > 0 ? html`<paper-item></paper-item>` : undefined}
-            ${secondary_info_attributes.map((val) => html`<paper-item>${val}</paper-item>`)}
-          </paper-listbox>
-        </paper-dropdown-menu>
+          ${secondary_info_attributes.length > 0 ? html`<mwc-list-item></mwc-list-item>` : undefined}
+          ${secondary_info_attributes.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
+        </ha-select>
       </div>
       <div class="checkbox">
         <input
@@ -407,12 +400,12 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       </div>
       <br />
       <h3>${localize('editor.settings.color-settings', true)}</h3>
-      <paper-input
-        .label="${localize('editor.settings.color_threshold')}"
+      <ha-textfield
+        label="${localize('editor.settings.color_threshold')}"
         .value=${item.color_threshold || 0}
         .configValue=${'color_threshold'}
-        @value-changed=${this._itemEntityChanged}
-      ></paper-input>
+        @input=${this._itemEntityChanged}
+      ></ha-textfield>
       <table>
         <tr>
           <th>Element</th>
@@ -423,55 +416,55 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         <tr>
           <th>icon</th>
           <td>
-            <paper-input
-              .label="${localize('editor.settings.bigger')}"
-              .value=${item.icon_color?.bigger || undefined}
+            <ha-textfield
+              label="${localize('editor.settings.bigger')}"
+              .value=${item.icon_color?.bigger || ''}
               .configValue=${'icon_color.bigger'}
-              @value-changed=${this._itemEntityChanged}
-            ></paper-input>
+              @input=${this._itemEntityChanged}
+            ></ha-textfield>
           </td>
           <td>
-            <paper-input
-              .label="${localize('editor.settings.equal')}"
-              .value=${item.icon_color?.equal || undefined}
+            <ha-textfield
+              label="${localize('editor.settings.equal')}"
+              .value=${item.icon_color?.equal || ''}
               .configValue=${'icon_color.equal'}
-              @value-changed=${this._itemEntityChanged}
-            ></paper-input>
+              @input=${this._itemEntityChanged}
+            ></ha-textfield>
           </td>
           <td>
-            <paper-input
-              .label="${localize('editor.settings.smaller')}"
-              .value=${item.icon_color?.smaller || undefined}
+            <ha-textfield
+              label="${localize('editor.settings.smaller')}"
+              .value=${item.icon_color?.smaller || ''}
               .configValue=${'icon_color.smaller'}
-              @value-changed=${this._itemEntityChanged}
-            ></paper-input>
+              @input=${this._itemEntityChanged}
+            ></ha-textfield>
           </td>
         </tr>
         <tr>
           <th>arrows</th>
           <td>
-            <paper-input
-              .label="${localize('editor.settings.bigger')}"
-              .value=${item.arrow_color?.bigger || undefined}
+            <ha-textfield
+              label="${localize('editor.settings.bigger')}"
+              .value=${item.arrow_color?.bigger || ''}
               .configValue=${'arrow_color.bigger'}
-              @value-changed=${this._itemEntityChanged}
-            ></paper-input>
+              @input=${this._itemEntityChanged}
+            ></ha-textfield>
           </td>
           <td>
-            <paper-input
-              .label="${localize('editor.settings.equal')}"
-              .value=${item.arrow_color?.equal || undefined}
+            <ha-textfield
+              label="${localize('editor.settings.equal')}"
+              .value=${item.arrow_color?.equal || ''}
               .configValue=${'arrow_color.equal'}
-              @value-changed=${this._itemEntityChanged}
-            ></paper-input>
+              @input=${this._itemEntityChanged}
+            ></ha-textfield>
           </td>
           <td>
-            <paper-input
-              .label="${localize('editor.settings.smaller')}"
-              .value=${item.arrow_color?.smaller || undefined}
+            <ha-textfield
+              label="${localize('editor.settings.smaller')}"
+              .value=${item.arrow_color?.smaller || ''}
               .configValue=${'arrow_color.smaller'}
-              @value-changed=${this._itemEntityChanged}
-            ></paper-input>
+              @input=${this._itemEntityChanged}
+            ></ha-textfield>
           </td>
         </tr>
       </table>
@@ -513,10 +506,10 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       content = target.value as BarSettings[];
     } else {
       content = [...(this._config.center.content as BarSettings[])];
-      const index = target.index || this._subElementEditor?.index || 0;
+      const index = target.i || this._subElementEditor?.index || 0;
       content[index] = {
         ...content[index],
-        [target.configValue]: target.checked != undefined ? target.checked : ev.detail?.value,
+        [target.configValue]: target.checked != undefined ? target.checked : target.value,
       };
     }
 
@@ -525,7 +518,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   }
 
   private _removeBar(ev: CustomValueEvent): void {
-    const index = ev.currentTarget?.index || 0;
+    const index = ev.currentTarget?.i || 0;
     const newBars = [...(this._config.center.content as BarSettings[])];
     newBars.splice(index, 1);
 
@@ -542,27 +535,27 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   private _barEditor(): TemplateResult {
     const editor: TemplateResult[] = [];
     if (this._config.center.content) {
-      (this._config.center.content as BarSettings[]).forEach((e, index) =>
+      (this._config.center.content as BarSettings[]).forEach((e, i) =>
         editor.push(html`
         <div class="bar-editor">
-          <h3 style="margin-bottom:6px;">Bar ${index + 1}
-          <mwc-icon-button
-            aria-label=${localize('editor.actions.remove')}
+          <h3 style="margin-bottom:6px;">Bar ${i + 1}
+          <ha-icon-button
+            label=${localize('editor.actions.remove')}
             class="remove-icon"
-            .index=${index}
+            .i=${i}
+            .path=${mdiClose}
             @click=${this._removeBar}
             >
-            <ha-icon icon="mdi:close"></ha-icon>
-          </mwc-icon-button>
+          </ha-icon-button>
           </h4>
           <div class="side-by-side">
-            <paper-input
-              .label="${localize('editor.settings.name')} (${localize('editor.optional')})"
+            <ha-textfield
+              label="${localize('editor.settings.name')} (${localize('editor.optional')})"
               .value=${e.name || ''}
               .configValue=${'name'}
-              @value-changed=${this._barChanged}
-              .index=${index}
-            ></paper-input>
+              @input=${this._barChanged}
+              .i=${i}
+            ></ha-textfield>
             <ha-entity-picker
               label="${localize('editor.settings.entity')}"
               allow-custom-entity
@@ -571,7 +564,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
               .configValue=${'entity'}
               .value=${e.entity}
               @value-changed=${this._barChanged}
-              .index=${index}
+              .i=${i}
             ></ha-entity-picker>
           </div>
           <div class="side-by-side">
@@ -582,38 +575,38 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
                 .checked="${e.invert_value || false}"
                 .configValue=${'invert_value'}
                 @change=${this._barChanged}
-                .index=${index}
+                .i=${i}
               />
               <label for="invert-value"> ${localize('editor.settings.invert-value')}</label>
             </div>
             <div>
-            <paper-dropdown-menu
+            <ha-select
               label="${localize('editor.settings.preset')}"
               .configValue=${'preset'}
-              @value-changed=${this._barChanged}
-              .index=${index}
+              .value=${e.preset || ''}
+              @selected=${this._barChanged}
+              @closed=${(ev) => ev.stopPropagation()}
+              .i=${i}
             >
-              <paper-listbox slot="dropdown-content" .selected=${bar_presets.indexOf(e.preset || '')}>
-                ${bar_presets.map((val) => html`<paper-item>${val}</paper-item>`)}
-              </paper-listbox>
-            </paper-dropdown-menu>
+              ${bar_presets.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
+            </ha-select>
           </div>
           </div>
           <div class="side-by-side">
-            <paper-input
-              .label="${localize('editor.settings.color')}"
+            <ha-textfield
+              label="${localize('editor.settings.color')}"
               .value=${e.bar_color || ''}
               .configValue=${'bar_color'}
-              @value-changed=${this._barChanged}
-              .index=${index}
-            ></paper-input>
-            <paper-input
+              @input=${this._barChanged}
+              .i=${i}
+            ></ha-textfield>
+            <ha-textfield
               .label="${localize('editor.settings.background_color')}"
               .value=${e.bar_bg_color || ''}
               .configValue=${'bar_bg_color'}
-              @value-changed=${this._barChanged}
-              .index=${index}
-            ></paper-input>
+              @input=${this._barChanged}
+              .i=${i}
+            ></ha-textfield>
           </div>
           <h3>${localize('editor.settings.action_settings')}</h3>
       <div class="side-by-side">
@@ -623,7 +616,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           .actions=${actions}
           .configValue=${'tap_action'}
           @value-changed=${this._barChanged}
-          .index=${index}
+          .i=${i}
         >
         </hui-action-editor>
         <hui-action-editor
@@ -632,7 +625,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           .actions=${actions}
           .configValue=${'double_tap_action'}
           @value-changed=${this._barChanged}
-          .index=${index}
+          .i=${i}
         >
         </hui-action-editor>
       </div>
@@ -703,7 +696,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           ${guard([this._config.entities, this._renderEmptySortable], () =>
             this._renderEmptySortable
               ? ''
-              : this._config.entities.map((settings, index) => {
+              : this._config.entities.map((settings, i) => {
                   return html`
                     <div class="entity">
                       <ha-icon class="handle" icon="mdi:drag"></ha-icon>
@@ -715,53 +708,51 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
                         .hass=${this.hass}
                         .configValue=${'entity'}
                         .value=${settings.entity}
-                        .index=${index}
+                        .i=${i}
                         @value-changed=${this._itemEntityChanged}
                       ></ha-entity-picker>
 
-                      <mwc-icon-button
-                        aria-label=${localize('editor.actions.remove')}
+                      <ha-icon-button
+                        .label=${localize('editor.actions.remove')}
+                        .path=${mdiClose}
                         class="remove-icon"
-                        .index=${index}
+                        .i=${i}
                         @click=${this._removeRow}
-                      >
-                        <ha-icon icon="mdi:close"></ha-icon>
-                      </mwc-icon-button>
+                      ></ha-icon-button>
 
-                      <mwc-icon-button
-                        aria-label=${localize('editor.actions.edit')}
+                      <ha-icon-button
+                        .label=${localize('editor.actions.edit')}
+                        .path=${mdiPencil}
                         class="edit-icon"
-                        .index=${index}
+                        .i=${i}
                         @click="${this._editRow}"
-                      >
-                        <ha-icon icon="mdi:pencil"></ha-icon>
-                      </mwc-icon-button>
+                      ></ha-icon-button>
                     </div>
                   `;
                 }),
           )}
         </div>
       </div>
-      <div class="add-item">
-        <paper-dropdown-menu
+      <div class="add-item row">
+        <ha-select
           label="${localize('editor.settings.preset')}"
           name="preset"
           class="add-preset"
+          naturalMenuWidth
+          fixedMenuPosition
+          @closed=${(ev) => ev.stopPropagation()}
           >
-          <paper-listbox slot="dropdown-content" .selected=1>
-            ${PresetList.map((val) => html`<paper-item>${val}</paper-item>`)}
-          </paper-listbox>
-        </paper-dropdown-menu>
+            ${PresetList.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
+        </ha-select>
 
         <ha-entity-picker .hass=${this.hass} name="entity" class="add-entity"></ha-entity-picker>
 
-        <mwc-icon-button
-          aria-label=${localize('editor.actions.add')}
+        <ha-icon-button
+          .label=${localize('editor.actions.add')}
+          .path=${mdiPlusCircleOutline}
           class="add-icon"
           @click="${this._addEntity}"
-          >
-          <ha-icon icon="mdi:plus-circle-outline"></ha-icon>
-        </mwc-icon-button>
+          ></ha-icon-button>
       </div>
     `;
   }
@@ -879,7 +870,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    * @param ev Event containing a Target to remove
    */
   private _removeRow(ev: CustomValueEvent): void {
-    const index = ev.currentTarget?.index || 0;
+    const index = ev.currentTarget?.i || 0;
     const newEntities = [...this._config.entities];
     newEntities.splice(index, 1);
 
@@ -890,7 +881,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    * @param ev Event containing a Target to remove
    */
   private _editRow(ev: CustomValueEvent): void {
-    const index = ev.currentTarget?.index || 0;
+    const index = ev.currentTarget?.i || 0;
 
     this._subElementEditor = {
       type: 'entity',
@@ -921,8 +912,10 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         h3 {
           margin-bottom: 0.5em;
         }
-        paper-dropdown-menu {
-          width: 100%;
+        .row {
+          margin-bottom: 12px;
+          margin-top: 12px;
+          display: block;
         }
         .side-by-side {
           display: flex;
