@@ -63,11 +63,11 @@ export interface CustomValueEvent {
   target?: {
     checked?: boolean;
     configValue?: string;
-    index?: number;
+    i?: number;
     value?: string | EntitySettings[] | BarSettings[] | { bigger: string; equal: string; smaller: string };
   };
   currentTarget?: {
-    index?: number;
+    i?: number;
     value?: string;
   };
   detail?: {
