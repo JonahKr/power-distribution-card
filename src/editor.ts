@@ -3,8 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import { guard } from 'lit/directives/guard.js';
 
-import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
-
+import { mdiClose, mdiPencil, mdiPlusCircleOutline } from '@mdi/js';
 import Sortable, { SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
 import { fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
@@ -18,10 +17,6 @@ import {
 } from './types';
 import { localize } from './localize/localize';
 
-import { formfieldDefinition } from './elements/formfield';
-import { selectDefinition } from './elements/select';
-import { textfieldDefinition } from './elements/textfield';
-
 import { DefaultItem, PresetList, PresetObject } from './presets';
 import { DEV_FLAG } from './util';
 
@@ -34,7 +29,7 @@ const bar_presets = ['autarky', 'ratio', ''];
 const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'none'];
 
 @customElement('power-distribution-card-editor' + DEV_FLAG)
-export class PowerDistributionCardEditor extends ScopedRegistryHost(LitElement) implements LovelaceCardEditor {
+export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
   @property({ attribute: false }) public hass?: HomeAssistant;
   @state() private _config!: PDCConfig;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,12 +39,6 @@ export class PowerDistributionCardEditor extends ScopedRegistryHost(LitElement) 
     this._config = config;
   }
 
-  static elementDefinitions = {
-    ...textfieldDefinition,
-    ...selectDefinition,
-    ...formfieldDefinition,
-  };
-
   /**
    * This Preloads all standard hass components which are not natively avaiable
    * https://discord.com/channels/330944238910963714/351047592588869643/783477690036125747 for more info
@@ -58,12 +47,10 @@ export class PowerDistributionCardEditor extends ScopedRegistryHost(LitElement) 
     //Loading Card with ha-entities-picker, ha-icon-input,
     await this.loadCardHelpers();
     try {
-      await this._helpers.createCardElement({ type: 'calendar', entities: ['calendar.does_not_exist'] });
       await this._helpers.createCardElement({ type: 'button', entity: 'demo.demo' });
     } catch (e) {}
 
     if (customElements) {
-      await (customElements.get('hui-calendar-card') as HassCustomElement).getConfigElement();
       await (customElements.get('hui-button-card') as HassCustomElement).getConfigElement();
     }
   }
@@ -77,13 +64,13 @@ export class PowerDistributionCardEditor extends ScopedRegistryHost(LitElement) 
     if (this._subElementEditor) return this._renderSubElementEditor();
     return html`
       <div class="card-config">
-        <mwc-textfield
+        <ha-textfield
           label="${localize('editor.settings.title')} (${localize('editor.optional')})"
           .value=${this._config?.title || ''}
           .configValue=${'title'}
           @input=${this._valueChanged}
-        ></mwc-textfield>
-        <mwc-select
+        ></ha-textfield>
+        <ha-select
           naturalMenuWidth
           fixedMenuPosition
           label="${localize('editor.settings.animation')}"
@@ -93,10 +80,10 @@ export class PowerDistributionCardEditor extends ScopedRegistryHost(LitElement) 
           @closed=${(ev) => ev.stopPropagation()}
         >
           ${animation.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
-        </mwc-select>
+        </ha-select>
         <br />
-        <div class="entity">
-          <mwc-select
+        <div class="entity row">
+          <ha-select
             label="${localize('editor.settings.center')}"
             .configValue=${'type'}
             @selected=${this._centerChanged}
@@ -104,16 +91,9 @@ export class PowerDistributionCardEditor extends ScopedRegistryHost(LitElement) 
             .value=${this._config?.center?.type || 'none'}
           >
             ${center.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
-          </mwc-select>
+          </ha-select>
           ${this._config?.center?.type == 'bars' || this._config?.center?.type == 'card'
-            ? html`<mwc-icon-button
-                aria-label=${localize('editor.actions.edit')}
-                class="edit-icon"
-                .value=${this._config?.center?.type}
-                @click="${this._editCenter}"
-              >
-                <ha-icon icon="mdi:pencil"></ha-icon>
-              </mwc-icon-button>`
+            ? html`<ha-icon-button class="edit-icon" .path=${mdiPencil} @click="${this._editCenter}"></ha-icon-button>`
             : ''}
         </div>
         <br />
@@ -232,12 +212,12 @@ export class PowerDistributionCardEditor extends ScopedRegistryHost(LitElement) 
           .configValue=${'icon'}
           @value-changed=${this._itemEntityChanged}
         ></ha-icon-picker>
-        <paper-input
-          .label="${localize('editor.settings.name')} (${localize('editor.optional')})"
+        <ha-textfield
+          label="${localize('editor.settings.name')} (${localize('editor.optional')})"
           .value=${item.name || undefined}
           .configValue=${'name'}
-          @value-changed=${this._itemEntityChanged}
-        ></paper-input>
+          @input=${this._itemEntityChanged}
+        ></ha-textfield>
       </div>
       <div class="side-by-side">
         <ha-entity-picker
@@ -249,30 +229,27 @@ export class PowerDistributionCardEditor extends ScopedRegistryHost(LitElement) 
           .value=${item.entity}
           @value-changed=${this._itemEntityChanged}
         ></ha-entity-picker>
-        <paper-dropdown-menu
+        <ha-select
           label="${localize('editor.settings.attribute')} (${localize('editor.optional')})"
           .configValue=${'attribute'}
-          @value-changed=${this._itemEntityChanged}
+          .value=${attributes.indexOf(item.attribute || '') + (item.attribute ? 1 : 0)}
+          @selected=${this._itemEntityChanged}
+          @closed=${(ev) => ev.stopPropagation()}
         >
-          <paper-listbox
-            slot="dropdown-content"
-            .selected=${attributes.indexOf(item.attribute || '') + (item.attribute ? 1 : 0)}
-          >
-            ${attributes.length > 0 ? html`<paper-item></paper-item>` : undefined}
-            ${attributes.map((val) => html`<paper-item>${val}</paper-item>`)}
-          </paper-listbox>
-        </paper-dropdown-menu>
+          ${attributes.length > 0 ? html`<mwc-list-item></mwc-list-item>` : undefined}
+          ${attributes.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
+        </ha-select>
       </div>
       <div class="side-by-side">
-        <paper-dropdown-menu
+        <ha-select
           label="${localize('editor.settings.preset')}"
           .configValue=${'preset'}
-          @value-changed=${this._itemEntityChanged}
+          .value=${PresetList.indexOf(item.preset || PresetList[0])}
+          @selected=${this._itemEntityChanged}
+          @closed=${(ev) => ev.stopPropagation()}
         >
-          <paper-listbox slot="dropdown-content" .selected=${PresetList.indexOf(item.preset || PresetList[0])}>
-            ${PresetList.map((val) => html`<paper-item>${val}</paper-item>`)}
-          </paper-listbox>
-        </paper-dropdown-menu>
+          ${PresetList.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
+        </ha-select>
         <div class="checkbox">
           <input
             type="checkbox"
@@ -326,20 +303,20 @@ export class PowerDistributionCardEditor extends ScopedRegistryHost(LitElement) 
       <br /><br />
       <h3>${localize('editor.settings.value', true)} ${localize('editor.settings.settings', true)}</h3>
       <div class="side-by-side">
-        <paper-input
-          .label="${localize('editor.settings.unit_of_display')}"
+        <ha-textfield
+          label="${localize('editor.settings.unit_of_display')}"
           .value=${item.unit_of_display || undefined}
           .configValue=${'unit_of_display'}
-          @value-changed=${this._itemEntityChanged}
-        ></paper-input>
-        <paper-input
+          @input=${this._itemEntityChanged}
+        ></ha-textfield>
+        <ha-textfield
           auto-validate
           pattern="[0-9]"
-          .label="${localize('editor.settings.decimals')}"
+          label="${localize('editor.settings.decimals')}"
           .value=${item.decimals || undefined}
           .configValue=${'decimals'}
-          @value-changed=${this._itemEntityChanged}
-        ></paper-input>
+          @input=${this._itemEntityChanged}
+        ></ha-textfield>
       </div>
       <div class="side-by-side">
         <div class="checkbox">
@@ -374,12 +351,12 @@ export class PowerDistributionCardEditor extends ScopedRegistryHost(LitElement) 
           />
           <label for="calc_excluded"> ${localize('editor.settings.calc_excluded')} </label>
         </div>
-        <paper-input
-          .label="${localize('editor.settings.threshold')}"
-          .value=${item.threshold || undefined}
+        <ha-textfield
+          label="${localize('editor.settings.threshold')}"
+          .value=${item.threshold || ''}
           .configValue=${'threshold'}
-          @value-changed=${this._itemEntityChanged}
-        ></paper-input>
+          @input=${this._itemEntityChanged}
+        ></ha-textfield>
       </div>
       <br />
       <h3>${localize('editor.settings.secondary-info', true)}</h3>
@@ -393,21 +370,18 @@ export class PowerDistributionCardEditor extends ScopedRegistryHost(LitElement) 
           .value=${item.secondary_info_entity}
           @value-changed=${this._itemEntityChanged}
         ></ha-entity-picker>
-        <paper-dropdown-menu
+        <ha-select
           allow-custom-entity
           label="${localize('editor.settings.attribute')} (${localize('editor.optional')})"
+          .value=${secondary_info_attributes.indexOf(item.secondary_info_attribute || '') +
+          (item.secondary_info_attribute ? 1 : 0)}
           .configValue=${'secondary_info_attribute'}
           @value-changed=${this._itemEntityChanged}
+          @closed=${(ev) => ev.stopPropagation()}
         >
-          <paper-listbox
-            slot="dropdown-content"
-            .selected=${secondary_info_attributes.indexOf(item.secondary_info_attribute || '') +
-            (item.secondary_info_attribute ? 1 : 0)}
-          >
-            ${secondary_info_attributes.length > 0 ? html`<paper-item></paper-item>` : undefined}
-            ${secondary_info_attributes.map((val) => html`<paper-item>${val}</paper-item>`)}
-          </paper-listbox>
-        </paper-dropdown-menu>
+          ${secondary_info_attributes.length > 0 ? html`<mwc-list-item></mwc-list-item>` : undefined}
+          ${secondary_info_attributes.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
+        </ha-select>
       </div>
       <div class="checkbox">
         <input
@@ -421,12 +395,12 @@ export class PowerDistributionCardEditor extends ScopedRegistryHost(LitElement) 
       </div>
       <br />
       <h3>${localize('editor.settings.color-settings', true)}</h3>
-      <paper-input
-        .label="${localize('editor.settings.color_threshold')}"
+      <ha-textfield
+        label="${localize('editor.settings.color_threshold')}"
         .value=${item.color_threshold || 0}
         .configValue=${'color_threshold'}
-        @value-changed=${this._itemEntityChanged}
-      ></paper-input>
+        @input=${this._itemEntityChanged}
+      ></ha-textfield>
       <table>
         <tr>
           <th>Element</th>
@@ -437,55 +411,55 @@ export class PowerDistributionCardEditor extends ScopedRegistryHost(LitElement) 
         <tr>
           <th>icon</th>
           <td>
-            <paper-input
-              .label="${localize('editor.settings.bigger')}"
+            <ha-textfield
+              label="${localize('editor.settings.bigger')}"
               .value=${item.icon_color?.bigger || undefined}
               .configValue=${'icon_color.bigger'}
-              @value-changed=${this._itemEntityChanged}
-            ></paper-input>
+              @input=${this._itemEntityChanged}
+            ></ha-textfield>
           </td>
           <td>
-            <paper-input
-              .label="${localize('editor.settings.equal')}"
+            <ha-textfield
+              label="${localize('editor.settings.equal')}"
               .value=${item.icon_color?.equal || undefined}
               .configValue=${'icon_color.equal'}
-              @value-changed=${this._itemEntityChanged}
-            ></paper-input>
+              @input=${this._itemEntityChanged}
+            ></ha-textfield>
           </td>
           <td>
-            <paper-input
-              .label="${localize('editor.settings.smaller')}"
+            <ha-textfield
+              label="${localize('editor.settings.smaller')}"
               .value=${item.icon_color?.smaller || undefined}
               .configValue=${'icon_color.smaller'}
-              @value-changed=${this._itemEntityChanged}
-            ></paper-input>
+              @input=${this._itemEntityChanged}
+            ></ha-textfield>
           </td>
         </tr>
         <tr>
           <th>arrows</th>
           <td>
-            <paper-input
-              .label="${localize('editor.settings.bigger')}"
+            <ha-textfield
+              label="${localize('editor.settings.bigger')}"
               .value=${item.arrow_color?.bigger || undefined}
               .configValue=${'arrow_color.bigger'}
-              @value-changed=${this._itemEntityChanged}
-            ></paper-input>
+              @input=${this._itemEntityChanged}
+            ></ha-textfield>
           </td>
           <td>
-            <paper-input
-              .label="${localize('editor.settings.equal')}"
+            <ha-textfield
+              label="${localize('editor.settings.equal')}"
               .value=${item.arrow_color?.equal || undefined}
               .configValue=${'arrow_color.equal'}
-              @value-changed=${this._itemEntityChanged}
-            ></paper-input>
+              @input=${this._itemEntityChanged}
+            ></ha-textfield>
           </td>
           <td>
-            <paper-input
-              .label="${localize('editor.settings.smaller')}"
+            <ha-textfield
+              label="${localize('editor.settings.smaller')}"
               .value=${item.arrow_color?.smaller || undefined}
               .configValue=${'arrow_color.smaller'}
-              @value-changed=${this._itemEntityChanged}
-            ></paper-input>
+              @input=${this._itemEntityChanged}
+            ></ha-textfield>
           </td>
         </tr>
       </table>
@@ -570,13 +544,13 @@ export class PowerDistributionCardEditor extends ScopedRegistryHost(LitElement) 
           </mwc-icon-button>
           </h4>
           <div class="side-by-side">
-            <paper-input
-              .label="${localize('editor.settings.name')} (${localize('editor.optional')})"
+            <ha-textfield
+              label="${localize('editor.settings.name')} (${localize('editor.optional')})"
               .value=${e.name || ''}
               .configValue=${'name'}
-              @value-changed=${this._barChanged}
+              @input=${this._barChanged}
               .index=${index}
-            ></paper-input>
+            ></ha-textfield>
             <ha-entity-picker
               label="${localize('editor.settings.entity')}"
               allow-custom-entity
@@ -614,20 +588,20 @@ export class PowerDistributionCardEditor extends ScopedRegistryHost(LitElement) 
           </div>
           </div>
           <div class="side-by-side">
-            <paper-input
-              .label="${localize('editor.settings.color')}"
+            <ha-textfield
+              label="${localize('editor.settings.color')}"
               .value=${e.bar_color || ''}
               .configValue=${'bar_color'}
-              @value-changed=${this._barChanged}
+              @input=${this._barChanged}
               .index=${index}
-            ></paper-input>
-            <paper-input
+            ></ha-textfield>
+            <ha-textfield
               .label="${localize('editor.settings.background_color')}"
               .value=${e.bar_bg_color || ''}
               .configValue=${'bar_bg_color'}
-              @value-changed=${this._barChanged}
+              @input=${this._barChanged}
               .index=${index}
-            ></paper-input>
+            ></ha-textfield>
           </div>
           <h3>${localize('editor.settings.action_settings')}</h3>
       <div class="side-by-side">
@@ -733,49 +707,44 @@ export class PowerDistributionCardEditor extends ScopedRegistryHost(LitElement) 
                         @value-changed=${this._itemEntityChanged}
                       ></ha-entity-picker>
 
-                      <mwc-icon-button
-                        aria-label=${localize('editor.actions.remove')}
+                      <ha-icon-button
+                        .label=${localize('editor.actions.remove')}
+                        .path=${mdiClose}
                         class="remove-icon"
                         .index=${index}
                         @click=${this._removeRow}
-                      >
-                        <ha-icon icon="mdi:close"></ha-icon>
-                      </mwc-icon-button>
+                      ></ha-icon-button>
 
-                      <mwc-icon-button
-                        aria-label=${localize('editor.actions.edit')}
+                      <ha-icon-button
+                        .label=${localize('editor.actions.edit')}
+                        .path=${mdiPencil}
                         class="edit-icon"
                         .index=${index}
                         @click="${this._editRow}"
-                      >
-                        <ha-icon icon="mdi:pencil"></ha-icon>
-                      </mwc-icon-button>
+                      ></ha-icon-button>
                     </div>
                   `;
                 }),
           )}
         </div>
       </div>
-      <div class="add-item">
-        <paper-dropdown-menu
+      <div class="add-item row">
+        <ha-select
           label="${localize('editor.settings.preset')}"
           name="preset"
           class="add-preset"
           >
-          <paper-listbox slot="dropdown-content" .selected=1>
-            ${PresetList.map((val) => html`<paper-item>${val}</paper-item>`)}
-          </paper-listbox>
-        </paper-dropdown-menu>
+            ${PresetList.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
+        </ha-select>
 
         <ha-entity-picker .hass=${this.hass} name="entity" class="add-entity"></ha-entity-picker>
 
-        <mwc-icon-button
-          aria-label=${localize('editor.actions.add')}
+        <ha-icon-button
+          .label=${localize('editor.actions.add')}
+          .path=${mdiPlusCircleOutline}
           class="add-icon"
           @click="${this._addEntity}"
-          >
-          <ha-icon icon="mdi:plus-circle-outline"></ha-icon>
-        </mwc-icon-button>
+          ></ha-icon-button>
       </div>
     `;
   }
@@ -935,16 +904,10 @@ export class PowerDistributionCardEditor extends ScopedRegistryHost(LitElement) 
         h3 {
           margin-bottom: 0.5em;
         }
-        mwc-select,
-        mwc-textfield {
-          margin-bottom: 16px;
+        .row {
+          margin-bottom: 12px;
+          margin-top: 12px;
           display: block;
-        }
-        mwc-formfield {
-          padding-bottom: 8px;
-        }
-        mwc-switch {
-          --mdc-theme-secondary: var(--switch-checked-color);
         }
         .side-by-side {
           display: flex;

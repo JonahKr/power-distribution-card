@@ -85,7 +85,7 @@ export interface HTMLElementValue extends HTMLElement {
 }
 declare global {
   interface Window {
-    loadCardHelpers: () => void;
+    loadCardHelpers: () => Promise<void>;
     customCards: { type?: string; name?: string; description?: string; preview?: boolean }[];
     ResizeObserver: { new (callback: ResizeObserverCallback): ResizeObserver; prototype: ResizeObserver };
   }
