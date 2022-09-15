@@ -14,6 +14,7 @@ export const PresetList = [
   'solar',
   'wind',
   'heating',
+  'placeholder',
 ] as const;
 
 export const PresetObject: { [key: string]: EntitySettings } = {
@@ -71,6 +72,9 @@ export const PresetObject: { [key: string]: EntitySettings } = {
     icon: 'mdi:radiator',
     name: 'heating',
     consumer: true,
+  },
+  placeholder: {
+    name: 'placeholder',
   },
 };
 

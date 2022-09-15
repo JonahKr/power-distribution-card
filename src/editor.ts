@@ -200,7 +200,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
 
   private _entityEditor(): TemplateResult {
     const item = this._config.entities[this._subElementEditor?.index || 0];
-    const attributes = Object.keys({ ...this.hass?.states[item.entity || 0].attributes }) || [];
+    const attributes = item.entity ? Object.keys({ ...this.hass?.states[item.entity || 0].attributes }) || [] : [];
     const secondary_info_attributes = item.secondary_info_entity
       ? Object.keys({ ...this.hass?.states[item.secondary_info_entity || 0].attributes })
       : [];
@@ -819,10 +819,13 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    */
   private async _addEntity(): Promise<void> {
     // Fetching states from inpout fields
-    const preset = (this.shadowRoot?.querySelector('.add-preset') as HTMLElementValue).value || null;
-    const entity_id = (this.shadowRoot?.querySelector('.add-entity') as HTMLElementValue).value;
-    if (!preset || !entity_id) return;
-
+    let preset = (this.shadowRoot?.querySelector('.add-preset') as HTMLElementValue).value || null;
+    let entity_id = (this.shadowRoot?.querySelector('.add-entity') as HTMLElementValue).value;
+    // Adding an empty palceholder
+    if (!preset || !entity_id) {
+      preset = 'placeholder';
+      entity_id = '';
+    }
     const item = Object.assign({}, DefaultItem, PresetObject[preset], { entity: entity_id, preset: preset });
     const newEntities = this._config.entities.concat(item);
     //This basically fakes a event object
