@@ -104,13 +104,32 @@ export class PowerDistributionCard extends LitElement {
 
   public firstUpdated(): void {
     const _config = this._config;
-
+    //unit-of-measurement Auto Configuration from hass element
     _config.entities.forEach((item, index) => {
       if (!item.entity) return;
-      //unit-of-measurement Auto Configuration from hass element
       const hass_uom = this._state({ entity: item.entity, attribute: 'unit_of_measurement' }) as string;
       !item.unit_of_measurement ? (this._config.entities[index].unit_of_measurement = hass_uom || 'W') : undefined;
     });
+    // Applying the same to bars
+    if (_config.center.type == 'bars') {
+      const content = (_config.center.content as BarSettings[]).map((item) => {
+        let hass_uom = '%';
+        if (item.entity) {
+          hass_uom = this._state({ entity: item.entity, attribute: 'unit_of_measurement' }) as string;
+        }
+        return {
+          ...item,
+          unit_of_measurement: item.unit_of_measurement || hass_uom,
+        };
+      });
+      this._config = {
+        ...this._config,
+        center: {
+          ...this._config.center,
+          content: content,
+        },
+      };
+    }
 
     //Resize Observer
     this._adjustWidth();
@@ -170,15 +189,8 @@ export class PowerDistributionCard extends LitElement {
     let modifier = item.invert_value ? -1 : 1;
     //Proper K Scaling e.g. 1kW = 1000W
     if (item.unit_of_measurement?.charAt(0) == 'k') modifier *= 1000;
-    //Checking if an attribute was defined to pull the value from
-    const attr = (item as EntitySettings).attribute || null;
     // If an entity exists, check if the attribute setting is entered -> value from attribute else value from entity
-    let num =
-      item.entity && this.hass.states[item.entity]
-        ? attr
-          ? Number(this.hass.states[item.entity].attributes[attr])
-          : Number(this.hass.states[item.entity].state)
-        : NaN;
+    let num = this._state(item as EntitySettings) as number;
     //Applying Threshold
     const threshold = (item as EntitySettings).threshold || null;
     num = threshold ? (Math.abs(num) < threshold ? 0 : num) : num;
@@ -224,14 +236,8 @@ export class PowerDistributionCard extends LitElement {
 
       const _item = this._render_item(value, item, index);
       //Sorting the Items to either side
-      switch (index % 2) {
-        case 0: //Even
-          left_panel.push(_item);
-          break;
-        case 1: //Odd
-          right_panel.push(_item);
-          break;
-      }
+      if (index % 2 == 0) left_panel.push(_item);
+      else right_panel.push(_item);
     });
 
     //Populating the Center Panel
@@ -430,7 +436,6 @@ export class PowerDistributionCard extends LitElement {
                     : state > 0
                     ? 'left'
                     : 'right',
-                  index,
                   arrow_color,
                 )
               : html``
@@ -445,36 +450,18 @@ export class PowerDistributionCard extends LitElement {
    * @param direction One of three Options: none, right, left
    * @param index To detect which side the item is on and adapt the direction accordingly
    */
-  private _render_arrow(direction: ArrowStates, index: number, color?: string): TemplateResult {
+  private _render_arrow(direction: ArrowStates, color?: string): TemplateResult {
     const a = this._config.animation;
-    const b = `${direction}-${index}`;
     if (direction == 'none') {
       return html` <div class="blank"></div> `;
     } else {
       return html`
-        <svg width="57" height="18" class="arrow">
-          <defs>
-            <polygon id="arrow-right-${index}" points="0 0, 0 16, 16 8" fill="${color}" />
-            <polygon id="arrow-left-${index}" points="16 0, 16 16, 0 8" fill="${color}" />
-            <g id="slide-${index}" class="arrow-color">
-              <use href="#arrow-${b}" x="-36" />
-              <use href="#arrow-${b}" x="-12" />
-              <use href="#arrow-${b}" x="12" />
-              <use href="#arrow-${b}" x="36" />
-            </g>
-            <g id="flash-${index}" fill="red">
-              <use href="#arrow-${b}" x="0" style="animation-delay: ${direction == 'right' ? 0 : 2}s;" id="a-flash" />
-              <use href="#arrow-${b}" x="20" style="animation-delay: 1s;" id="a-flash" />
-              <use href="#arrow-${b}" x="40" style="animation-delay: ${direction == 'right' ? 2 : 0}s;" id="a-flash" />
-            </g>
-            <g id="none-${index}" class="arrow-color">
-              <use href="#arrow-${b}" x="0" />
-              <use href="#arrow-${b}" x="20" />
-              <use href="#arrow-${b}" x="40" />
-            </g>
-          </defs>
-          <use href="#${a}-${index}" id="a-${a}-${direction}" />
-        </svg>
+        <div class="arrow-container ${direction}">
+          <div class="arrow ${a} " style="border-left-color: ${color};"></div>
+          <div class="arrow ${a} ${a == 'flash' ? 'delay-1' : ''}" style="border-left-color: ${color};"></div>
+          <div class="arrow ${a} ${a == 'flash' ? 'delay-2' : ''}" style="border-left-color: ${color};"></div>
+          <div class="arrow ${a}" style="border-left-color: ${color};"></div>
+        </div>
       `;
     }
   }
@@ -513,7 +500,7 @@ export class PowerDistributionCard extends LitElement {
           })}
           style="${element.tap_action || element.double_tap_action ? 'cursor: pointer;' : ''}"
         >
-          <p class="bar-percentage">${value}%</p>
+          <p class="bar-percentage">${value}${element.unit_of_measurement || '%'}</p>
           <div class="bar-wrapper" style="${element.bar_bg_color ? `background-color:${element.bar_bg_color};` : ''}">
             <bar style="height:${value}%; background-color:${element.bar_color};" />
           </div>
