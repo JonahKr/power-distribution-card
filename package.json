@@ -1,6 +1,6 @@
 {
   "name": "power-distribution-card",
-  "version": "2.5.3",
+  "version": "2.5.5",
   "license": "MIT",
   "author": "JonahKr",
   "description": "A Lovelace Card for visualizing power distributions.",
@@ -28,31 +28,31 @@
     "rollup": "rollup -c"
   },
   "dependencies": {
-    "@mdi/js": "^6.6.96",
+    "@mdi/js": "^7.0.96",
     "custom-card-helpers": "1.9.0",
-    "lit": "2.2.3",
+    "lit": "2.3.1",
     "resize-observer-polyfill": "1.5.1",
     "sortablejs": "1.15.0"
   },
   "devDependencies": {
-    "@babel/core": "7.17.10",
-    "@babel/plugin-proposal-class-properties": "7.16.7",
-    "@babel/plugin-proposal-decorators": "7.17.9",
+    "@babel/core": "7.19.1",
+    "@babel/plugin-proposal-class-properties": "7.18.6",
+    "@babel/plugin-proposal-decorators": "7.19.1",
     "@rollup/plugin-babel": "5.3.1",
-    "@rollup/plugin-commonjs": "22.0.0",
+    "@rollup/plugin-commonjs": "22.0.2",
     "@rollup/plugin-json": "4.1.0",
-    "@rollup/plugin-node-resolve": "13.2.1",
-    "@typescript-eslint/eslint-plugin": "5.21.0",
-    "@typescript-eslint/parser": "5.21.0",
-    "eslint": "8.14.0",
+    "@rollup/plugin-node-resolve": "14.1.0",
+    "@typescript-eslint/eslint-plugin": "5.37.0",
+    "@typescript-eslint/parser": "5.37.0",
+    "eslint": "8.23.1",
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-import": "2.26.0",
-    "eslint-plugin-prettier": "4.0.0",
-    "prettier": "2.6.2",
-    "rollup": "2.71.1",
+    "eslint-plugin-prettier": "4.2.1",
+    "prettier": "2.7.1",
+    "rollup": "2.79.0",
     "rollup-plugin-terser": "7.0.2",
-    "rollup-plugin-typescript2": "0.31.2",
-    "typescript": "4.6.4"
+    "rollup-plugin-typescript2": "0.34.0",
+    "typescript": "4.8.3"
   }
 }

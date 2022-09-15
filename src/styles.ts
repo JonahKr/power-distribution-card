@@ -157,53 +157,62 @@ export const styles = css`
     background-color: var(--secondary-text-color);
   }
 
-  .arrow-color {
-    fill: var(--secondary-text-color);
-    fill-opacity: 0.8;
+  .arrow-container {
+    display: flex;
+    width: 57px;
+    height: 16px;
+    overflow: hidden;
+    margin: 2 0;
   }
 
-  #a-flash {
+  .left {
+    transform: rotate(180deg);
+  }
+
+  .arrow {
+    width: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 16px solid var(--secondary-text-color);
+    margin: 0 1.5px;
+  }
+
+  .flash {
     animation: flash 3s infinite steps(1);
-    fill: var(--secondary-text-color);
-    fill-opacity: 0.2;
+    opacity: 0.2;
   }
 
   @keyframes flash {
     0%,
     66% {
-      fill-opacity: 0.2;
-      fill: var(--secondary-text-color);
+      opacity: 0.2;
     }
     33% {
-      fill-opacity: 0.8;
-      fill: var(--secondary-text-color);
+      opacity: 0.8;
     }
   }
 
-  #a-slide-right {
-    animation: slide-right 3s linear infinite both;
+  .delay-1 {
+    animation-delay: 1s;
   }
-  @keyframes slide-right {
+  .delay-2 {
+    animation-delay: 2s;
+  }
+
+  .slide {
+    animation: slide 1.5s linear infinite both;
+    position: relative;
+    left: -19px;
+  }
+
+  @keyframes slide {
     0% {
       -webkit-transform: translateX(0);
       transform: translateX(0);
     }
     100% {
-      -webkit-transform: translateX(48px);
-      transform: translateX(48px);
-    }
-  }
-  #a-slide-left {
-    animation: slide-left 3s linear infinite both;
-  }
-  @keyframes slide-left {
-    0% {
-      -webkit-transform: translateX(48px);
-      transform: translateX(48px);
-    }
-    100% {
-      -webkit-transform: translateX(0px);
-      transform: translateX(0px);
+      -webkit-transform: translateX(19px);
+      transform: translateX(19px);
     }
   }
 `;

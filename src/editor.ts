@@ -32,8 +32,6 @@ const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'none
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
   @property({ attribute: false }) public hass?: HomeAssistant;
   @state() private _config!: PDCConfig;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private _helpers: any;
 
   public setConfig(config: PDCConfig): void {
     this._config = config;
@@ -45,18 +43,15 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    */
   protected async firstUpdated(): Promise<void> {
     //Loading Card with ha-entities-picker, ha-icon-input,
-    await this.loadCardHelpers();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const helper: any = await window.loadCardHelpers();
     try {
-      await this._helpers.createCardElement({ type: 'button', entity: 'demo.demo' });
+      await helper.createCardElement({ type: 'button', entity: 'demo.demo' });
     } catch (e) {}
 
     if (customElements) {
       await (customElements.get('hui-button-card') as HassCustomElement).getConfigElement();
     }
-  }
-
-  private async loadCardHelpers(): Promise<void> {
-    this._helpers = await window.loadCardHelpers();
   }
 
   protected render(): TemplateResult | void {
@@ -77,7 +72,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           .configValue=${'animation'}
           .value=${this._config?.animation || 'flash'}
           @selected=${this._valueChanged}
-          @closed=${(ev) => ev.stopPropagation()}
+          @closed=${(ev: Event) => ev.stopPropagation()}
         >
           ${animation.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
         </ha-select>
@@ -131,9 +126,8 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
 
   private _editCenter(ev: CustomValueEvent): void {
     if (ev.currentTarget) {
-      const target = ev.currentTarget;
       this._subElementEditor = {
-        type: <'card' | 'bars'>target.value,
+        type: <'card' | 'bars'>ev.currentTarget.value,
       };
     }
   }
@@ -170,7 +164,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
 
   private _goBack(): void {
     this._subElementEditor = undefined;
-
+    // Resetting the entities sortable list
     this._sortable?.destroy();
     this._sortable = undefined;
     this._sortable = this._createSortable();
@@ -178,7 +172,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
 
   /**
    * This enables support for changing the entity_ids using the ha-entity pickers in each row directly as well as the entity Editor itsself
-   * @param ev Value Event containing the index and value of the cahnged element
+   * @param ev Value Event containing the index and value of the changed element
    */
   private _itemEntityChanged(ev: CustomValueEvent): void {
     if (!ev.target) return;
@@ -206,7 +200,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
 
   private _entityEditor(): TemplateResult {
     const item = this._config.entities[this._subElementEditor?.index || 0];
-    const attributes = Object.keys({ ...this.hass?.states[item.entity || 0].attributes }) || [];
+    const attributes = item.entity ? Object.keys({ ...this.hass?.states[item.entity || 0].attributes }) || [] : [];
     const secondary_info_attributes = item.secondary_info_entity
       ? Object.keys({ ...this.hass?.states[item.secondary_info_entity || 0].attributes })
       : [];
@@ -527,7 +521,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
 
   private async _addBar(): Promise<void> {
     const item = Object.assign({}, { name: 'Name', preset: 'custom' });
-    const newBars = [...(<BarSettings[]>this._config.center.content || []), <BarSettings>item];
+    const newBars = [...((this._config.center.content as BarSettings[]) || []), <BarSettings>item];
     //This basically fakes a event object
     this._barChanged({ target: { configValue: 'content', value: newBars } });
   }
@@ -680,8 +674,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   @state() private _renderEmptySortable = false;
   private _sortable?: Sortable;
 
-  @state() private _attached = false;
-
   /**
    * Generator for all entities in the config.entities list
    * The Guard Function prevents unnecessary rendering
@@ -757,32 +749,15 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     `;
   }
 
-  public connectedCallback(): void {
-    super.connectedCallback();
-    this._attached = true;
-  }
-
-  public disconnectedCallback(): void {
-    super.disconnectedCallback();
-    this._attached = false;
-  }
-
   /**
    * This is for Checking if something relevant has changed and updating variables accordingly
    * @param changedProps The Changed Property Values
    */
   protected updated(changedProps: PropertyValues): void {
     super.updated(changedProps);
-    const attachedChanged = changedProps.has('_attached');
-    const entitiesChanged = changedProps.has('_config');
-    if (!entitiesChanged && !attachedChanged) {
-      return;
-    }
 
-    if (attachedChanged && !this._attached) {
-      // Tear down sortable, if available
-      this._sortable?.destroy();
-      this._sortable = undefined;
+    const entitiesChanged = changedProps.has('_config');
+    if (!entitiesChanged) {
       return;
     }
 
@@ -843,10 +818,14 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    * In this particular Case the Entity Generation is a bit more complicated and involves Presets
    */
   private async _addEntity(): Promise<void> {
-    const preset = (this.shadowRoot?.querySelector('.add-preset') as HTMLElementValue).value || null;
-    const entity_id = (this.shadowRoot?.querySelector('.add-entity') as HTMLElementValue).value;
-    if (!preset || !entity_id) return;
-
+    // Fetching states from inpout fields
+    let preset = (this.shadowRoot?.querySelector('.add-preset') as HTMLElementValue).value || null;
+    let entity_id = (this.shadowRoot?.querySelector('.add-entity') as HTMLElementValue).value;
+    // Adding an empty palceholder
+    if (!preset || !entity_id) {
+      preset = 'placeholder';
+      entity_id = '';
+    }
     const item = Object.assign({}, DefaultItem, PresetObject[preset], { entity: entity_id, preset: preset });
     const newEntities = this._config.entities.concat(item);
     //This basically fakes a event object
