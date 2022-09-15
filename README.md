@@ -11,7 +11,7 @@
 <img height="40px" alt="e3dc-logo" href="https://www.e3dc.com/en/#Intro" src="https://user-images.githubusercontent.com/38377070/95522835-7de46d80-09cd-11eb-9aae-55657aa3caae.png"/>
 </div>
 <br/>
-<h1 align="center">A Lovelace Card for visualizing power distributions.</h1>
+<h1 align="center">The Lovelace Card for visualizing power distributions.</h1>
 <p align="center">
 <img src="https://user-images.githubusercontent.com/38377070/103143008-389f2480-470e-11eb-945a-68115febef8a.gif"/>
 </p>
@@ -199,7 +199,7 @@ The easiest way to get your Card up and running, is by defining the entities for
 
 
 ### Placeholder
-By submitting an empty entity_id, you will generate a plain transparent placeholder item which can be used to further customize your layout.
+By submitting an empty entity_id and preset, you will generate a plain transparent placeholder item which can be used to further customize your layout.
 <p align="center">
 <img src="https://user-images.githubusercontent.com/38377070/124113882-3676a380-da6c-11eb-8f3e-db00466fd601.png"/>
 </p>
@@ -264,16 +264,17 @@ the *void*
 ### Bars 📊
 
 Bars have the following Settings:
-| Setting             | type          | example           | description  |
-| ------------------- |:-------------:|:-----------------:| :------------|
-| `bar_color`         | string        | red, #C1C1C1      |You can pass any string that CSS will accept as a color. |
-| `bar_bg_color`      | string        | red, #C1C1C1      |The Background Color of the Bar. You can pass any string that CSS will accept as a color. |
-| `entity`            | string        | sensor.ln_autarky | You can specify the entity_id here aswell. |
-| `invert_value`      | bool          | false             | This will invert the value recieved from HASS. This affects calculations aswell! |
-| `name`              | string        | Eigenstrom        | Feel free to change the displayed name of the element. |
-| `preset`            | 'ratio' 'autarky' 'custom'        | all in type        | Option to autocalc ratio/autarky. |
-| `tap_action`        | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Single tap action for item. |
-| `double_tap_action` | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Double tap action for item. |
+| Setting               | type          | example           | description  |
+| --------------------- |:-------------:|:-----------------:| :------------|
+| `bar_color`           | string        | red, #C1C1C1      |You can pass any string that CSS will accept as a color. |
+| `bar_bg_color`        | string        | red, #C1C1C1      |The Background Color of the Bar. You can pass any string that CSS will accept as a color. |
+| `entity`              | string        | sensor.ln_autarky | You can specify the entity_id here aswell. |
+| `invert_value`        | bool          | false             | This will invert the value recieved from HASS. This affects calculations aswell! |
+| `name`                | string        | Eigenstrom        | Feel free to change the displayed name of the element. |
+| `preset`              | 'ratio' 'autarky' 'custom'        | all in type        | Option to autocalc ratio/autarky. |
+| `tap_action`          | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Single tap action for item. |
+| `double_tap_action`   | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Double tap action for item. |
+| `unit_of_measurement` | string        | *W* , *kW*        | Default: %; The Unit of the sensor value. **Should be detected automatically!** |
 
 <br/>
 
@@ -327,7 +328,7 @@ There are alot of settings you can customize your sensors with:
 | `tap_action`               | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Single tap action for item. |
 | `threshold`                | number        | 2                            | Ignoring all abolute values smaller than threshold. |
 | `unit_of_display`          | string        | *W* , *kW* , *adaptive*      | The Unit the value is displayed in (default: W). Adaptive will show kW for values >= 1kW |
-| `unit_of_measurement`      | string        | *W* , *kW*                   | The Unit the value is coming from the Sensor. **This should be detected automatically** |
+| `unit_of_measurement`      | string        | *W* , *kW*                   | The Unit of the sensor value. **Should be detected automatically!** |
 <p> 
 
 This could look something like:
