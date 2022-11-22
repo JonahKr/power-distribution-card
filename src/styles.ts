@@ -135,6 +135,7 @@ export const styles = css`
 
   value {
     float: right;
+    width: 54px;
   }
 
   value > p {

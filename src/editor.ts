@@ -44,11 +44,11 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    */
   protected async firstUpdated(): Promise<void> {
     if (!customElements.get('ha-form') || !customElements.get('hui-action-editor')) {
-      (customElements.get('hui-button-card') as any)?.getConfigElement();
+      (customElements.get('hui-button-card') as HassCustomElement)?.getConfigElement();
     }
 
     if (!customElements.get('ha-entity-picker')) {
-      (customElements.get('hui-entities-card') as any)?.getConfigElement();
+      (customElements.get('hui-entities-card') as HassCustomElement)?.getConfigElement();
     }
   }
 
@@ -256,7 +256,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
             .configValue=${'hide_arrows'}
             @change=${this._itemEntityChanged}
           />
-          <label for="invert-value"> ${localize('editor.settings.hide-arrows')}</label>
+          <label for="hide-arrows"> ${localize('editor.settings.hide-arrows')}</label>
         </div>
       </div>
       <div class="side-by-side">
@@ -383,12 +383,12 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       <div class="checkbox">
         <input
           type="checkbox"
-          id="hide-arrows"
+          id="secondary_info_replace_name"
           .checked="${item.secondary_info_replace_name || false}"
           .configValue=${'secondary_info_replace_name'}
           @change=${this._itemEntityChanged}
         />
-        <label for="invert-value"> ${localize('editor.settings.replace_name')}</label>
+        <label for="secondary_info_replace_name"> ${localize('editor.settings.replace_name')}</label>
       </div>
       <br />
       <h3>${localize('editor.settings.color-settings', true)}</h3>
