@@ -28,7 +28,7 @@ import { actionHandler } from './action-handler';
 import './editor';
 
 console.info(
-  `%c POWER-DISTRIBUTION-CARD %c ${version}` + DEV_FLAG,
+  `%c POWER-DISTRIBUTION-CARD %c ${version + DEV_FLAG} `,
   `font-weight: 500; color: white; background: #03a9f4;`,
   `font-weight: 500; color: #03a9f4; background: white;`,
 );
