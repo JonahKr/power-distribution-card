@@ -182,7 +182,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     // Extracting event Data
     const index = target.i || this._subElementEditor?.index || 0;
     const configValue = target.configValue.split('.');
-    const value = target.checked != undefined ? target.checked : target.value || ev.detail?.value;
+    const value = target.checked != undefined ? target.checked : ev.detail?.value || target.value;
 
     const configItem = this._config.entities[index][configValue[0]] || undefined;
 
@@ -220,15 +220,16 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         ></ha-textfield>
       </div>
       <div class="side-by-side">
-        <ha-entity-picker
+        <ha-selector
           label="${localize('editor.settings.entity')} (${localize('editor.required')})"
           allow-custom-entity
           hideClearIcon
           .hass=${this.hass}
+          .selector=${{ entity: {} }}
           .configValue=${'entity'}
           .value=${item.entity}
           @value-changed=${this._itemEntityChanged}
-        ></ha-entity-picker>
+        ></ha-selector>
         <ha-select
           label="${localize('editor.settings.attribute')} (${localize('editor.optional')})"
           .configValue=${'attribute'}
