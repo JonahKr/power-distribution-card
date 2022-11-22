@@ -40,17 +40,15 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   /**
    * This Preloads all standard hass components which are not natively avaiable
    * https://discord.com/channels/330944238910963714/351047592588869643/783477690036125747 for more info
+   * Update 2022-11-22 : Visual editors in homeassistant have primarily changed to use the ha-form component!
    */
   protected async firstUpdated(): Promise<void> {
-    //Loading Card with ha-entities-picker, ha-icon-input,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const helper: any = await window.loadCardHelpers();
-    try {
-      await helper.createCardElement({ type: 'button', entity: 'demo.demo' });
-    } catch (e) {}
+    if (!customElements.get('ha-form') || !customElements.get('hui-action-editor')) {
+      (customElements.get('hui-button-card') as any)?.getConfigElement();
+    }
 
-    if (customElements) {
-      await (customElements.get('hui-button-card') as HassCustomElement).getConfigElement();
+    if (!customElements.get('ha-entity-picker')) {
+      (customElements.get('hui-entities-card') as any)?.getConfigElement();
     }
   }
 
@@ -220,16 +218,15 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         ></ha-textfield>
       </div>
       <div class="side-by-side">
-        <ha-selector
+        <ha-entity-picker
           label="${localize('editor.settings.entity')} (${localize('editor.required')})"
           allow-custom-entity
           hideClearIcon
           .hass=${this.hass}
-          .selector=${{ entity: {} }}
           .configValue=${'entity'}
           .value=${item.entity}
           @value-changed=${this._itemEntityChanged}
-        ></ha-selector>
+        ></ha-entity-picker>
         <ha-select
           label="${localize('editor.settings.attribute')} (${localize('editor.optional')})"
           .configValue=${'attribute'}
