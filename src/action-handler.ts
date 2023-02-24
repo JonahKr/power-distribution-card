@@ -5,6 +5,8 @@ import { AttributePart, directive, Directive, DirectiveParameters } from 'lit/di
 import { deepEqual } from './deep-equal';
 import { DEV_FLAG } from './util';
 
+export const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'none'] as const;
+
 interface ActionHandler extends HTMLElement {
   holdTime: number;
   bind(element: Element, options?: ActionHandlerOptions): void;

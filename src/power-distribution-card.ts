@@ -25,7 +25,7 @@ import ResizeObserver from 'resize-observer-polyfill';
 import { DEV_FLAG, installResizeObserver } from './util';
 import { actionHandler } from './action-handler';
 
-import './editor';
+import './editor/editor';
 
 console.info(
   `%c POWER-DISTRIBUTION-CARD %c ${version + DEV_FLAG} `,
@@ -46,6 +46,7 @@ export class PowerDistributionCard extends LitElement {
    * @returns Editor DOM Element
    */
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
+    await import('./editor/editor');
     return document.createElement('power-distribution-card-editor' + DEV_FLAG) as LovelaceCardEditor;
   }
 

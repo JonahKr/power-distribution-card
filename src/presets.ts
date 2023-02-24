@@ -1,6 +1,6 @@
 import { EntitySettings, PDCConfig } from './types';
 
-export type PresetType = typeof PresetList[number];
+export type PresetType = (typeof PresetList)[number];
 
 export const PresetList = [
   'battery',
