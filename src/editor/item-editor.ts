@@ -1,7 +1,7 @@
 import { LitElement, TemplateResult, html, property } from 'lit-element';
 import { customElement, state } from 'lit/decorators.js';
 
-import { HomeAssistant } from 'custom-card-helpers';
+import { fireEvent, HomeAssistant } from 'custom-card-helpers';
 
 
 import { EditorTarget, EntitySettings } from '../types';
@@ -18,14 +18,10 @@ export class ItemEditor extends LitElement {
     @property({ attribute: false }) hass?: HomeAssistant;
 
     protected render(): TemplateResult {
-        console.log("Rendering")
-        console.log(this.config)
-        console.log(this.hass)
         // If its a placeholder, don't render anything
         if (!this.hass || !this.config || this.config.preset == 'placeholder') {
             return html``;
         }
-        console.log("Rendering 2")
         const item = this.config;
 
         // Attributes for the selection drop down panel
@@ -343,7 +339,13 @@ export class ItemEditor extends LitElement {
                 ? target.checked
                 : target.value || ev.detail.config || ev.detail.value;
         
-        console.log("YABADABADOO", value)
+        const configValue = target.configValue;
+        // Skip if no configValue or value is the same
+        if (!configValue || this.config[configValue] === value) {
+            return;
+        }
+
+        fireEvent(this, 'config-changed', { config: { ...this.config, [configValue]: value }});
     }
     
     static get styles(): CSSResult {
