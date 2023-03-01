@@ -1,15 +1,12 @@
-import { LitElement, TemplateResult, html, PropertyValues, css, CSSResultGroup } from 'lit';
+import { LitElement, TemplateResult, html, css, CSSResultGroup } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { guard } from 'lit/directives/guard.js';
 
 import { mdiClose, mdiPencil, mdiPlusCircleOutline } from '@mdi/js';
-import Sortable, { SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
 import { fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
 import {
   PDCConfig,
-  HTMLElementValue,
   CustomValueEvent,
   SubElementConfig,
   BarSettings,

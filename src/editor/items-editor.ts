@@ -1,10 +1,11 @@
-import { LitElement, html, customElement, property, state } from 'lit-element';
+import { LitElement, html } from 'lit';
 
 import { fireEvent, HomeAssistant } from 'custom-card-helpers';
 import { EditorTarget, EntitySettings, HTMLElementValue } from '../types';
 import { localize } from '../localize/localize';
+import { customElement, property} from "lit/decorators.js"
 import { repeat } from "lit/directives/repeat.js";
-import { css, CSSResult, PropertyValues, TemplateResult, nothing } from 'lit';
+import { css, CSSResult, nothing } from 'lit';
 import { mdiClose, mdiPencil, mdiPlusCircleOutline } from '@mdi/js';
 import { DefaultItem, PresetList, PresetObject } from '../presets';
 
