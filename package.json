@@ -44,6 +44,7 @@
     "@rollup/plugin-node-resolve": "15.0.1",
     "@rollup/plugin-terser": "^0.4.0",
     "@rollup/plugin-typescript": "^11.0.0",
+    "@types/sortablejs": "^1.15.0",
     "@typescript-eslint/eslint-plugin": "5.53.0",
     "@typescript-eslint/parser": "5.53.0",
     "eslint": "8.34.0",

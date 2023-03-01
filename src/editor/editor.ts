@@ -20,6 +20,7 @@ import { localize } from '../localize/localize';
 import { DefaultItem, PresetList, PresetObject } from '../presets';
 import { DEV_FLAG } from '../util';
 import './item-editor';
+import './items-editor';
 
 /**
  * Editor Settings
@@ -36,7 +37,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
 
   public async setConfig(config: PDCConfig): Promise<void> {
     this._config = config;
-    await import('./item-editor')
   }
 
   /**
@@ -99,12 +99,19 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         <br />
         <power-distribution-card-items-editor
           .hass=${this.hass}
-          .config=${this._config.entities}
+          .entities=${this._config.entities}
           @config-changed=${this._entitiesChanged}
         >
         </power-distribution-card-items-editor>
       </div>
     `;
+  }
+
+  private _entitiesChanged(ev): void {
+    if (!this._config || !this.hass) {
+      return;
+    }
+    //fireEvent(this, 'config-changed', { config: this._config });
   }
   /**
    * TODO: Get rid of duplicated Updating functions
