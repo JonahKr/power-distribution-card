@@ -1,13 +1,14 @@
 import { LitElement, html } from 'lit';
 
-import { fireEvent, HomeAssistant } from 'custom-card-helpers';
-import { EditorTarget, EntitySettings, HTMLElementValue } from '../types';
+import { HomeAssistant } from 'custom-card-helpers';
+import { EditorTarget, EntitySettings, HTMLElementValue, CustomValueEvent } from '../types';
 import { localize } from '../localize/localize';
 import { customElement, property} from "lit/decorators.js"
 import { repeat } from "lit/directives/repeat.js";
 import { css, CSSResult, nothing } from 'lit';
 import { mdiClose, mdiPencil, mdiPlusCircleOutline } from '@mdi/js';
 import { DefaultItem, PresetList, PresetObject } from '../presets';
+import { fireEvent } from '../util';
 
 import Sortable from "sortablejs";
 import SortableCore, {
@@ -25,8 +26,6 @@ export class ItemsEditor extends LitElement {
   @property({ attribute: false }) entities?: EntitySettings[];
 
   @property({ attribute: false }) hass?: HomeAssistant;
-  // Optional Callback called when the edit button is pressed
-  @property({ attribute: false }) edit_callback?: (index: number) => void;
 
   private _sortable?: Sortable;
 
@@ -154,10 +153,10 @@ export class ItemsEditor extends LitElement {
   }
 
   private _valueChanged(ev: CustomEvent): void {
+    console.log("value row")
     if (!this.entities || !this.hass) {
       return;
     }
-
     const value = ev.detail.value;
     const index = (ev.target as any).index;
     const newConfigEntities = this.entities!.concat();
@@ -173,26 +172,27 @@ export class ItemsEditor extends LitElement {
     fireEvent(this, 'config-changed', { config: newConfigEntities });
   }
 
-  private _removeRow(ev: CustomEvent): void {
+  private _removeRow(ev: Event): void {
     ev.stopPropagation();
-    const index = (ev.currentTarget as any).index;
-    const newConfigEntities = this.entities!.concat();
-    newConfigEntities.splice(index, 1);
-    if (index) {
-      fireEvent(this, 'config-changed', { config: newConfigEntities });
+    const index = (ev.currentTarget as EditorTarget).index;
+    if (index != undefined) {
+      const entities = this.entities!.concat();
+      entities.splice(index, 1);
+      fireEvent<EntitySettings[]>(this, 'config-changed', entities);
     }
   }
 
-  private _editRow(ev: CustomEvent): void {
+  private _editRow(ev: Event): void {
     ev.stopPropagation();
 
     const index = (ev.target as EditorTarget).index;
-    if (index && this.edit_callback) {
-      this.edit_callback(index);
+    if (index != undefined) {
+      fireEvent<number>(this, 'edit-item', index);
     }
   }
 
-  private _addRow(ev: CustomEvent): void {
+  private _addRow(ev: Event): void {
+    console.log("add row")
     ev.stopPropagation();
     if (!this.entities || !this.hass) {
       return;
@@ -208,7 +208,7 @@ export class ItemsEditor extends LitElement {
       { entity: entity_id, preset: entity_id == '' ? 'placeholder' : preset }
     );
 
-    fireEvent(this, 'config-changed', { config: [...this.entities, item] });
+    fireEvent<EntitySettings[]>(this, 'config-changed', [...this.entities, item] );
   }
 
   private _rowMoved(ev: SortableEvent): void {
@@ -217,7 +217,8 @@ export class ItemsEditor extends LitElement {
 
     const newEntities = this.entities.concat();
     newEntities.splice(ev.newIndex!, 0, newEntities.splice(ev.oldIndex!, 1)[0]);
-    fireEvent(this, 'config-changed', { config: newEntities });
+
+    fireEvent<EntitySettings[]>(this, 'config-changed', newEntities);
   }
 
   static get styles(): CSSResult {

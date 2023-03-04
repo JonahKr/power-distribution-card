@@ -7,7 +7,6 @@ export const styles = css`
 
   p {
     margin: 4px 0 4px 0;
-
     text-align: center;
   }
 
@@ -69,9 +68,7 @@ export const styles = css`
   item {
     display: block;
     overflow: hidden;
-
     margin-bottom: 10px;
-
     cursor: pointer;
   }
 

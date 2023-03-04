@@ -11,6 +11,7 @@ import {
   SubElementConfig,
   BarSettings,
   HassCustomElement,
+  EntitySettings,
 } from '../types';
 import { localize } from '../localize/localize';
 
@@ -33,6 +34,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   @state() private _config!: PDCConfig;
 
   public async setConfig(config: PDCConfig): Promise<void> {
+    console.log("Editor: setConfig", config)
     this._config = config;
   }
 
@@ -97,6 +99,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         <power-distribution-card-items-editor
           .hass=${this.hass}
           .entities=${this._config.entities}
+          @edit-item=${this._edit_item}
           @config-changed=${this._entitiesChanged}
         >
         </power-distribution-card-items-editor>
@@ -104,41 +107,25 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     `;
   }
 
-  private _entitiesChanged(ev): void {
+  private _entitiesChanged(ev: CustomEvent<EntitySettings[]>): void {
+    ev.stopPropagation();
     if (!this._config || !this.hass) {
       return;
     }
-    //fireEvent(this, 'config-changed', { config: this._config });
-  }
-  /**
-   * TODO: Get rid of duplicated Updating functions
-   * Custom handeling for Center panel
-   */
-  private _centerChanged(ev: CustomValueEvent): void {
-    if (!this._config || !this.hass) {
-      return;
-    }
-    if (ev.target) {
-      const target = ev.target;
-      if (target.configValue) {
-        this._config = {
-          ...this._config,
-          center: {
-            ...this._config.center,
-            [target.configValue]: target.checked !== undefined ? target.checked : target.value,
-          },
-        };
-      }
-    }
-    fireEvent(this, 'config-changed', { config: this._config });
+    fireEvent(this, 'config-changed', { config: { ...this._config, entities: ev.detail } as PDCConfig });
   }
 
-  private _editCenter(ev: CustomValueEvent): void {
-    if (ev.currentTarget) {
-      this._subElementEditor = {
-        type: <'card' | 'bars'>ev.currentTarget.value,
-      };
+  private _edit_item(ev: CustomEvent<number>): void {
+    ev.stopPropagation();
+    if (!this._config || !this.hass) {
+      return;
     }
+    const index = ev.detail;
+
+    this._subElementEditor = {
+      type: 'entity',
+      index: index,
+    };
   }
 
   /**
@@ -165,7 +152,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           <power-distribution-card-item-editor
             .hass=${this.hass}
             .config=${ this._config.entities[this._subElementEditor?.index || 0]}
-            @config-changed=${(ev: CustomEvent) => {console.log(ev)}}
+            @config-changed=${this._itemChanged}
           >
           </power-distribution-card-item-editor>
           `);
@@ -188,13 +175,58 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     // this._sortable = this._createSortable();
   }
 
+  private _itemChanged(ev: CustomEvent<EntitySettings>) {
+    ev.stopPropagation();
+    if (!this._config || !this.hass) {
+      return;
+    }
+    const index = this._subElementEditor?.index;
+    if (index != undefined) {
+      const entities = [...this._config.entities];
+      entities[index] = ev.detail;
+      fireEvent(this, 'config-changed', { config : { ...this._config, entities: entities }});
+    }
+  }
+
+  /**
+   * TODO: Get rid of duplicated Updating functions
+   * Custom handeling for Center panel
+   */
+  private _centerChanged(ev: any): void {
+    if (!this._config || !this.hass) {
+      return;
+    }
+    if (ev.target) {
+      const target = ev.target;
+      if (target.configValue) {
+        this._config = {
+          ...this._config,
+          center: {
+            ...this._config.center,
+            [target.configValue]: target.checked !== undefined ? target.checked : target.value,
+          },
+        };
+      }
+    }
+    fireEvent(this, 'config-changed', { config: this._config });
+  }
+
+  private _editCenter(ev: any): void {
+    if (ev.currentTarget) {
+      this._subElementEditor = {
+        type: <'card' | 'bars'>ev.currentTarget.value,
+      };
+    }
+  }
+
+
   /**
    * Bar Editor
    * -------------------
    * This Bar Editor allows the user to easily add and remove new bars.
    */
 
-  private _barChanged(ev: CustomValueEvent): void {
+  private _barChanged(ev: any): void {
     if (!ev.target) return;
     const target = ev.target;
     if (!target.configValue) return;
@@ -214,7 +246,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     fireEvent(this, 'config-changed', { config: this._config });
   }
 
-  private _removeBar(ev: CustomValueEvent): void {
+  private _removeBar(ev: any): void {
     const index = ev.currentTarget?.i || 0;
     const newBars = [...(this._config.center.content as BarSettings[])];
     newBars.splice(index, 1);
@@ -368,7 +400,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   }
 
 
-  private _valueChanged(ev: CustomValueEvent): void {
+  private _valueChanged(ev: any): void {
     if (!this._config || !this.hass) {
       return;
     }

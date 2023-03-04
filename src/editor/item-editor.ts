@@ -1,9 +1,9 @@
 import { LitElement, TemplateResult, html } from "lit";
 import { customElement, property } from 'lit/decorators.js';
 
-import { fireEvent, HomeAssistant } from 'custom-card-helpers';
+import { HomeAssistant } from 'custom-card-helpers';
 
-
+import { fireEvent } from '../util';
 import { EditorTarget, EntitySettings } from '../types';
 import { localize } from '../localize/localize';
 import { PresetList, PresetType } from '../presets';
@@ -345,7 +345,7 @@ export class ItemEditor extends LitElement {
             return;
         }
 
-        fireEvent(this, 'config-changed', { config: { ...this.config, [configValue]: value }});
+        fireEvent<EntitySettings>(this, 'config-changed', { ...this.config, [configValue]: value });
     }
     
     static get styles(): CSSResult {

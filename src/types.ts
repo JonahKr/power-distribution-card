@@ -59,19 +59,21 @@ export interface BarSettings {
 
 export type ArrowStates = 'right' | 'left' | 'none';
 
-export interface CustomValueEvent {
-  target?: {
-    checked?: boolean;
-    configValue?: string;
-    i?: number;
-    value?: string | EntitySettings[] | BarSettings[] | { bigger: string; equal: string; smaller: string };
-  };
-  currentTarget?: {
-    i?: number;
-    value?: string;
-  };
+export interface Target extends EventTarget {
+  checked?: boolean;
+  configValue?: string;
+  i?: number;
+  value?: string | EntitySettings[] | BarSettings[] | { bigger: string; equal: string; smaller: string };
+}
+
+export interface CustomValueEvent<T> extends Event {
+  target: Target;
+  // currentTarget?: {
+  //   i?: number;
+  //   value?: string;
+  // };
   detail?: {
-    value?: string;
+    value?: T;
   };
 }
 
