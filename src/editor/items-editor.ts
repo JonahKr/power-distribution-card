@@ -1,7 +1,7 @@
 import { LitElement, html } from 'lit';
 
 import { HomeAssistant } from 'custom-card-helpers';
-import { EditorTarget, EntitySettings, HTMLElementValue, CustomValueEvent } from '../types';
+import { EditorTarget, EntitySettings, HTMLElementValue } from '../types';
 import { localize } from '../localize/localize';
 import { customElement, property} from "lit/decorators.js"
 import { repeat } from "lit/directives/repeat.js";
@@ -192,7 +192,6 @@ export class ItemsEditor extends LitElement {
   }
 
   private _addRow(ev: Event): void {
-    console.log("add row")
     ev.stopPropagation();
     if (!this.entities || !this.hass) {
       return;
@@ -332,6 +331,9 @@ export class ItemsEditor extends LitElement {
         .entity ha-entity-picker,
         .add-item ha-entity-picker {
           flex-grow: 1;
+        }
+        .entities {
+          margin-bottom: 8px;
         }
         .add-preset {
           padding-right: 8px;

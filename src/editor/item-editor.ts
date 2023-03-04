@@ -6,7 +6,7 @@ import { HomeAssistant } from 'custom-card-helpers';
 import { fireEvent } from '../util';
 import { EditorTarget, EntitySettings } from '../types';
 import { localize } from '../localize/localize';
-import { PresetList, PresetType } from '../presets';
+import { PresetList } from '../presets';
 import { actions } from '../action-handler';
 import { css, CSSResult } from 'lit';
 
@@ -350,19 +350,19 @@ export class ItemEditor extends LitElement {
     
     static get styles(): CSSResult {
         return css`
-        .checkbox {
-          display: flex;
-          align-items: center;
-          padding: 8px 0;
-        }
-        .checkbox input {
-          height: 20px;
-          width: 20px;
-          margin-left: 0;
-          margin-right: 8px;
-        }
-        h3 {
-            margin-bottom: 0.5em;
+          .checkbox {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+          }
+          .checkbox input {
+            height: 20px;
+            width: 20px;
+            margin-left: 0;
+            margin-right: 8px;
+          }
+          h3 {
+              margin-bottom: 0.5em;
           }
           .row {
             margin-bottom: 12px;
@@ -375,33 +375,6 @@ export class ItemEditor extends LitElement {
           .side-by-side > * {
             flex: 1 1 0%;
             padding-right: 4px;
-          }
-          .entity,
-          .add-item {
-            display: flex;
-            align-items: center;
-          }
-          .entity .handle {
-            padding-right: 8px;
-            cursor: move;
-          }
-          .entity ha-entity-picker,
-          .add-item ha-entity-picker {
-            flex-grow: 1;
-          }
-          .add-preset {
-            padding-right: 8px;
-            max-width: 130px;
-          }
-          .remove-icon,
-          .edit-icon,
-          .add-icon {
-            --mdc-icon-button-size: 36px;
-            color: var(--secondary-text-color);
-          }
-          .secondary {
-            font-size: 12px;
-            color: var(--secondary-text-color);
           }
       `;
     }

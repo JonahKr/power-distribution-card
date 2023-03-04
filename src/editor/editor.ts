@@ -2,12 +2,11 @@ import { LitElement, TemplateResult, html, css, CSSResultGroup } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 
-import { mdiClose, mdiPencil, mdiPlusCircleOutline } from '@mdi/js';
+import { mdiClose, mdiPencil } from '@mdi/js';
 
 import { fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
 import {
   PDCConfig,
-  CustomValueEvent,
   SubElementConfig,
   BarSettings,
   HassCustomElement,
@@ -15,7 +14,6 @@ import {
 } from '../types';
 import { localize } from '../localize/localize';
 
-import { DefaultItem, PresetList, PresetObject } from '../presets';
 import { DEV_FLAG } from '../util';
 import './item-editor';
 import './items-editor';
