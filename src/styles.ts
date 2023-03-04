@@ -132,7 +132,8 @@ export const styles = css`
 
   value {
     float: right;
-    width: 54px;
+    width: 50%;
+    min-width: 54px;
   }
 
   value > p {
@@ -148,7 +149,7 @@ export const styles = css`
   **************/
 
   .blank {
-    width: 54px;
+    width: 55px;
     height: 4px;
     margin: 8px auto 8px auto;
     opacity: 0.2;
@@ -157,10 +158,10 @@ export const styles = css`
 
   .arrow-container {
     display: flex;
-    width: 57px;
+    width: 55px;
     height: 16px;
     overflow: hidden;
-    margin: 2 0;
+    margin: auto;
   }
 
   .left {
