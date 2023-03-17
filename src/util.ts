@@ -14,4 +14,4 @@ export function fireEvent<T>(node: HTMLElement | Window, type: string, detail: T
   node.dispatchEvent(event);
 }
 
-export const DEV_FLAG = '-dev';
+export const DEV_FLAG = '';

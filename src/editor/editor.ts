@@ -32,7 +32,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   @state() private _config!: PDCConfig;
 
   public async setConfig(config: PDCConfig): Promise<void> {
-    console.log("Editor: setConfig", config)
     this._config = config;
   }
 

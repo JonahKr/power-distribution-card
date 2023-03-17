@@ -22,6 +22,7 @@ export const styles = css`
     justify-content: center;
     grid-column: 2;
     flex-wrap: wrap;
+    min-width: 100px;
   }
 
   #center-panel > div {

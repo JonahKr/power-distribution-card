@@ -153,7 +153,6 @@ export class ItemsEditor extends LitElement {
   }
 
   private _valueChanged(ev: CustomEvent): void {
-    console.log("value row")
     if (!this.entities || !this.hass) {
       return;
     }
