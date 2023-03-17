@@ -263,22 +263,24 @@ export class ItemEditor extends LitElement {
       <br />
       <h3>${localize('editor.settings.action_settings')}</h3>
       <div class="side-by-side">
-        <hui-action-editor
+        <ha-selector
+          label="${localize('editor.settings.tap_action')}"
           .hass=${this.hass}
-          .config=${item.tap_action || { action: 'more-info' }}
-          .actions=${actions}
+          .selector=${{ "ui-action" : { actions: actions }}}
+          .value=${item.tap_action || { action: 'more-info' }}
           .configValue=${'tap_action'}
           @value-changed=${this._valueChanged}
         >
-        </hui-action-editor>
-        <hui-action-editor
+        </ha-selector>
+        <ha-selector
+          label="${localize('editor.settings.double_tap_action')}"
           .hass=${this.hass}
-          .config=${item.double_tap_action}
-          .actions=${actions}
+          .selector=${{ "ui-action" : { actions: actions }}}
+          .value=${item.double_tap_action}
           .configValue=${'double_tap_action'}
           @value-changed=${this._valueChanged}
         >
-        </hui-action-editor>
+        </ha-selector>
       </div>
         `;
     }
@@ -337,8 +339,7 @@ export class ItemEditor extends LitElement {
         const value = 
             target.checked !== undefined
                 ? target.checked
-                : target.value || ev.detail.config || ev.detail.value;
-        
+                : ev.detail.value || target.value || ev.detail.config;
         const configValue = target.configValue;
         // Skip if no configValue or value is the same
         if (!configValue || this.config[configValue] === value) {
