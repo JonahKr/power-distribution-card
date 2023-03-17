@@ -25,7 +25,7 @@ import ResizeObserver from 'resize-observer-polyfill';
 import { DEV_FLAG, installResizeObserver } from './util';
 import { actionHandler } from './action-handler';
 
-import './editor';
+import './editor/editor';
 
 console.info(
   `%c POWER-DISTRIBUTION-CARD %c ${version + DEV_FLAG} `,
@@ -46,6 +46,7 @@ export class PowerDistributionCard extends LitElement {
    * @returns Editor DOM Element
    */
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
+    await import('./editor/editor');
     return document.createElement('power-distribution-card-editor' + DEV_FLAG) as LovelaceCardEditor;
   }
 
@@ -293,7 +294,6 @@ export class PowerDistributionCard extends LitElement {
     if (!item.entity) {
       return html`<item class="placeholder"></item>`;
     }
-    const state = item.invert_arrow ? value * -1 : value;
     //Toggle Absolute Values
     value = item.display_abs ? Math.abs(value) : value;
     //Unit-Of-Display and Unit_of_measurement
@@ -385,6 +385,7 @@ export class PowerDistributionCard extends LitElement {
     }
 
     // COLOR CHANGE
+    const state = item.invert_arrow ? value * -1 : value;
     const ct = item.color_threshold || 0;
     // Icon color dependant on state
     let icon_color: string | undefined;
@@ -453,7 +454,7 @@ export class PowerDistributionCard extends LitElement {
   private _render_arrow(direction: ArrowStates, color?: string): TemplateResult {
     const a = this._config.animation;
     if (direction == 'none') {
-      return html` <div class="blank"></div> `;
+      return html` <div class="blank" style="color: ${color}"></div> `;
     } else {
       return html`
         <div class="arrow-container ${direction}">

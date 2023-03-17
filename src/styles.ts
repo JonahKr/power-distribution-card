@@ -7,37 +7,29 @@ export const styles = css`
 
   p {
     margin: 4px 0 4px 0;
-
     text-align: center;
   }
 
   .card-content {
     display: grid;
-    overflow: auto;
-
     grid-template-columns: 1.5fr 1fr 1.5fr;
     column-gap: 10px;
   }
 
   #center-panel {
     display: flex;
-
-    height: 100%;
-
     align-items: center;
     justify-content: center;
     grid-column: 2;
     flex-wrap: wrap;
+    min-width: 100px;
   }
 
   #center-panel > div {
     display: flex;
-    overflow: hidden;
-
     width: 100%;
-    height: 100%;
+    min-height: 150px;
     max-height: 200px;
-
     flex-basis: 50%;
     flex-flow: column;
   }
@@ -69,9 +61,7 @@ export const styles = css`
   item {
     display: block;
     overflow: hidden;
-
     margin-bottom: 10px;
-
     cursor: pointer;
   }
 
@@ -135,7 +125,8 @@ export const styles = css`
 
   value {
     float: right;
-    width: 54px;
+    width: 50%;
+    min-width: 54px;
   }
 
   value > p {
@@ -151,7 +142,7 @@ export const styles = css`
   **************/
 
   .blank {
-    width: 54px;
+    width: 55px;
     height: 4px;
     margin: 8px auto 8px auto;
     opacity: 0.2;
@@ -160,10 +151,10 @@ export const styles = css`
 
   .arrow-container {
     display: flex;
-    width: 57px;
+    width: 55px;
     height: 16px;
     overflow: hidden;
-    margin: 2 0;
+    margin: auto;
   }
 
   .left {
