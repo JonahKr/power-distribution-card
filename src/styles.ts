@@ -12,17 +12,12 @@ export const styles = css`
 
   .card-content {
     display: grid;
-    overflow: auto;
-
     grid-template-columns: 1.5fr 1fr 1.5fr;
     column-gap: 10px;
   }
 
   #center-panel {
     display: flex;
-
-    height: 100%;
-
     align-items: center;
     justify-content: center;
     grid-column: 2;
@@ -31,12 +26,9 @@ export const styles = css`
 
   #center-panel > div {
     display: flex;
-    overflow: hidden;
-
     width: 100%;
-    height: 100%;
+    min-height: 150px;
     max-height: 200px;
-
     flex-basis: 50%;
     flex-flow: column;
   }
