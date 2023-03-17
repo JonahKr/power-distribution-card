@@ -294,13 +294,12 @@ export class PowerDistributionCard extends LitElement {
     if (!item.entity) {
       return html`<item class="placeholder"></item>`;
     }
-    //Toggle Absolute Values
-    value = item.display_abs ? Math.abs(value) : value;
+    let math_value = value;
     //Unit-Of-Display and Unit_of_measurement
     let unit_of_display = item.unit_of_display || 'W';
     const uod_split = unit_of_display.charAt(0);
     if (uod_split[0] == 'k') {
-      value /= 1000;
+      math_value /= 1000;
     } else if (item.unit_of_display == 'adaptive') {
       //Using the uom suffix enables to adapt the initial unit to the automatic scaling naming
       let uom_suffix = 'W';
@@ -308,8 +307,8 @@ export class PowerDistributionCard extends LitElement {
         uom_suffix =
           item.unit_of_measurement[0] == 'k' ? item.unit_of_measurement.substring(1) : item.unit_of_measurement;
       }
-      if (Math.abs(value) > 999) {
-        value = value / 1000;
+      if (Math.abs(math_value) > 999) {
+        math_value /= 1000;
         unit_of_display = 'k' + uom_suffix;
       } else {
         unit_of_display = uom_suffix;
@@ -318,9 +317,13 @@ export class PowerDistributionCard extends LitElement {
 
     //Decimal Precision
     const decFakTen = 10 ** (item.decimals || item.decimals == 0 ? item.decimals : 2);
-    value = Math.round(value * decFakTen) / decFakTen;
+    math_value = Math.round(math_value * decFakTen) / decFakTen;
+    // Arrow directions
+    const state = item.invert_arrow ? math_value * -1 : math_value;
+    //Toggle Absolute Values
+    math_value = item.display_abs ? Math.abs(math_value) : math_value;
     //Format Number
-    const formatValue = formatNumber(value, this.hass.locale);
+    const formatValue = formatNumber(math_value, this.hass.locale);
 
     // Secondary info
     let secondary_info: string | undefined;
@@ -385,7 +388,6 @@ export class PowerDistributionCard extends LitElement {
     }
 
     // COLOR CHANGE
-    const state = item.invert_arrow ? value * -1 : value;
     const ct = item.color_threshold || 0;
     // Icon color dependant on state
     let icon_color: string | undefined;
@@ -403,7 +405,7 @@ export class PowerDistributionCard extends LitElement {
     }
 
     //NaNFlag for Offline Sensors for example
-    const NanFlag = isNaN(value);
+    const NanFlag = isNaN(math_value);
 
     return html`
       <item
@@ -454,7 +456,7 @@ export class PowerDistributionCard extends LitElement {
   private _render_arrow(direction: ArrowStates, color?: string): TemplateResult {
     const a = this._config.animation;
     if (direction == 'none') {
-      return html` <div class="blank" style="color: ${color}"></div> `;
+      return html` <div class="blank" style="${color ? `background-color:${color};` : ''}"></div> `;
     } else {
       return html`
         <div class="arrow-container ${direction}">

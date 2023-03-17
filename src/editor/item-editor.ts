@@ -212,7 +212,7 @@ export class ItemEditor extends LitElement {
               label="${localize('editor.settings.bigger')}"
               .value=${item.icon_color?.bigger || ''}
               .configValue=${'icon_color.bigger'}
-              @input=${this._valueChanged}
+              @input=${this._colorChanged}
             ></ha-textfield>
           </td>
           <td>
@@ -220,7 +220,7 @@ export class ItemEditor extends LitElement {
               label="${localize('editor.settings.equal')}"
               .value=${item.icon_color?.equal || ''}
               .configValue=${'icon_color.equal'}
-              @input=${this._valueChanged}
+              @input=${this._colorChanged}
             ></ha-textfield>
           </td>
           <td>
@@ -228,7 +228,7 @@ export class ItemEditor extends LitElement {
               label="${localize('editor.settings.smaller')}"
               .value=${item.icon_color?.smaller || ''}
               .configValue=${'icon_color.smaller'}
-              @input=${this._valueChanged}
+              @input=${this._colorChanged}
             ></ha-textfield>
           </td>
         </tr>
@@ -239,7 +239,7 @@ export class ItemEditor extends LitElement {
               label="${localize('editor.settings.bigger')}"
               .value=${item.arrow_color?.bigger || ''}
               .configValue=${'arrow_color.bigger'}
-              @input=${this._valueChanged}
+              @input=${this._colorChanged}
             ></ha-textfield>
           </td>
           <td>
@@ -247,7 +247,7 @@ export class ItemEditor extends LitElement {
               label="${localize('editor.settings.equal')}"
               .value=${item.arrow_color?.equal || ''}
               .configValue=${'arrow_color.equal'}
-              @input=${this._valueChanged}
+              @input=${this._colorChanged}
             ></ha-textfield>
           </td>
           <td>
@@ -255,7 +255,7 @@ export class ItemEditor extends LitElement {
               label="${localize('editor.settings.smaller')}"
               .value=${item.arrow_color?.smaller || ''}
               .configValue=${'arrow_color.smaller'}
-              @input=${this._valueChanged}
+              @input=${this._colorChanged}
             ></ha-textfield>
           </td>
         </tr>
@@ -269,7 +269,7 @@ export class ItemEditor extends LitElement {
           .selector=${{ "ui-action" : { actions: actions }}}
           .value=${item.tap_action || { action: 'more-info' }}
           .configValue=${'tap_action'}
-          @value-changed=${this._valueChanged}
+          @value-changed=${this._colorChanged}
         >
         </ha-selector>
         <ha-selector
@@ -278,7 +278,7 @@ export class ItemEditor extends LitElement {
           .selector=${{ "ui-action" : { actions: actions }}}
           .value=${item.double_tap_action}
           .configValue=${'double_tap_action'}
-          @value-changed=${this._valueChanged}
+          @value-changed=${this._colorChanged}
         >
         </ha-selector>
       </div>
@@ -347,6 +347,31 @@ export class ItemEditor extends LitElement {
         }
 
         fireEvent<EntitySettings>(this, 'config-changed', { ...this.config, [configValue]: value });
+    }
+
+    private _colorChanged(ev: CustomEvent): void {
+      ev.stopPropagation();
+      if (!this.config || !this.hass) {
+          return;
+      }
+
+      const target = ev.target! as EditorTarget;
+
+      const value = target.value;
+      const configValue = target.configValue;
+      if (!configValue) return;
+      // Split configvalue
+      const [thing, step] = configValue.split('.');
+
+      const color_set = {...this.config[thing]} || {};
+      color_set[step] = value;
+
+      // Skip if no configValue or value is the same
+      if (!configValue || this.config[thing] === color_set) return;
+
+      fireEvent<EntitySettings>(this, 'config-changed', { ...this.config, [thing]: color_set });
+
+
     }
     
     static get styles(): CSSResult {
