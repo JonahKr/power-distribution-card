@@ -7,7 +7,7 @@ import { DEV_FLAG } from './util';
 
 export const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'none'] as const;
 
-interface ActionHandler extends HTMLElement {
+interface ActionHandlerMock extends HTMLElement {
   holdTime: number;
   bind(element: Element, options?: ActionHandlerOptions): void;
 }
@@ -26,12 +26,12 @@ export interface ActionHandlerOptions {
   disabled?: boolean;
 }
 
-class ActionHandler extends HTMLElement implements ActionHandler {
+class ActionHandler extends HTMLElement implements ActionHandlerMock {
   public holdTime = 500;
   protected timer?: number;
   private dblClickTimeout?: number;
 
-  public bind(element: ActionHandlerElement, options: ActionHandlerOptions) {
+  public bind(element: ActionHandlerElement, options: ActionHandlerOptions = {}) {
     if (element.actionHandler && deepEqual(options, element.actionHandler.options)) {
       return;
     }
