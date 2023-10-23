@@ -1,0 +1,55 @@
+{
+  "common": {
+    "version": "Verzia",
+    "description": "A Lovelace Card for visualizing power distributions.",
+    "invalid_configuration": "Chybná konfigurácia",
+    "show_warning": "Zobraziť upozornenia"
+  },
+  "editor": {
+    "actions": {
+      "add": "Pridať",
+      "edit": "Editovať",
+      "remove": "Odobrať",
+      "save": "Uložiť"
+    },
+    "optional": "Voliteľné",
+    "required": "Požadované",
+    "settings": {
+      "action_settings": "Nastavenia akcie",
+      "animation": "Animácia",
+      "autarky": "sebestačnosť",
+      "attribute": "Atribút",
+      "background_color": "Farba pozadia",
+      "battery_percentage": "Nabitie batérie %",
+      "bigger": "Väčšie",
+      "calc_excluded": "Vylúčené z výpočtov",
+      "center": "Centrum",
+      "color": "Farba",
+      "color-settings": "Nastavenia farby",
+      "color_threshold": "Prah farby",
+      "decimals": "Desatinné čísla",
+      "display-abs": "Zobraziť absolútnu hodnotu",
+      "double_tap_action": "Akcia dvojitého klepnutia",
+      "entities": "Entity",
+      "entity": "Entita",
+      "equal": "Rovné",
+      "grid-buy": "Sieť nákup",
+      "grid-sell": "Sieť predaj",
+      "hide-arrows": "Skryť šípky",
+      "icon": "Ikona",
+      "invert-value": "Invertovať hodnotu",
+      "name": "Názov",
+      "preset": "Predvoľba",
+      "ratio": "pomer",
+      "replace_name": "Nahradiť názov",
+      "secondary-info": "Sekundárne informácie",
+      "settings": "nastavenia",
+      "smaller": "Menšie",
+      "tap_action": "Akcia klepnutia",
+      "threshold": "Prah",
+      "title": "Titul",
+      "unit_of_display": "Jednotka zobrazenia",
+      "value": "hodnota"
+    }
+  }
+}
