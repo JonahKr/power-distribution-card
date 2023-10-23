@@ -264,7 +264,7 @@ export class ItemEditor extends LitElement {
           .selector=${{ 'ui-action': { actions: actions } }}
           .value=${item.tap_action || { action: 'more-info' }}
           .configValue=${'tap_action'}
-          @value-changed=${this._colorChanged}
+          @value-changed=${this._valueChanged}
         >
         </ha-selector>
         <ha-selector
@@ -273,7 +273,7 @@ export class ItemEditor extends LitElement {
           .selector=${{ 'ui-action': { actions: actions } }}
           .value=${item.double_tap_action}
           .configValue=${'double_tap_action'}
-          @value-changed=${this._colorChanged}
+          @value-changed=${this._valueChanged}
         >
         </ha-selector>
       </div>
