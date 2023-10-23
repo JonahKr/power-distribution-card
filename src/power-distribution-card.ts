@@ -22,24 +22,24 @@ import { DefaultItem, DefaultConfig, PresetList, PresetObject, PresetType } from
 import { styles, narrow_styles } from './styles';
 import { localize } from './localize/localize';
 import ResizeObserver from 'resize-observer-polyfill';
-import { DEV_FLAG, installResizeObserver } from './util';
+import { installResizeObserver } from './util';
 import { actionHandler } from './action-handler';
 
 import './editor/editor';
 
 console.info(
-  `%c POWER-DISTRIBUTION-CARD %c ${version + DEV_FLAG} `,
+  `%c POWER-DISTRIBUTION-CARD %c ${version} `,
   `font-weight: 500; color: white; background: #03a9f4;`,
   `font-weight: 500; color: #03a9f4; background: white;`,
 );
 
 window.customCards.push({
-  type: 'power-distribution-card' + DEV_FLAG,
+  type: 'power-distribution-card',
   name: 'Power Distribution Card',
   description: localize('common.description'),
 });
 
-@customElement('power-distribution-card' + DEV_FLAG)
+@customElement('power-distribution-card')
 export class PowerDistributionCard extends LitElement {
   /**
    * Linking to the visual Editor Element
@@ -47,7 +47,7 @@ export class PowerDistributionCard extends LitElement {
    */
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
     await import('./editor/editor');
-    return document.createElement('power-distribution-card-editor' + DEV_FLAG) as LovelaceCardEditor;
+    return document.createElement('power-distribution-card-editor') as LovelaceCardEditor;
   }
 
   /**
