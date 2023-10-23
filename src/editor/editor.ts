@@ -23,7 +23,7 @@ import './items-editor';
 const animation = ['none', 'flash', 'slide'];
 const center = ['none', 'card', 'bars'];
 const bar_presets = ['autarky', 'ratio', ''];
-const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'none'];
+const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'assist', 'none'];
 
 @customElement('power-distribution-card-editor')
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
@@ -47,6 +47,8 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     if (!customElements.get('ha-entity-picker')) {
       (customElements.get('hui-entities-card') as HassCustomElement)?.getConfigElement();
     }
+
+    console.log(this.hass);
   }
 
   protected render(): TemplateResult | void {
