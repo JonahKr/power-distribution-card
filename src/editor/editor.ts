@@ -14,7 +14,6 @@ import {
 } from '../types';
 import { localize } from '../localize/localize';
 
-import { DEV_FLAG } from '../util';
 import './item-editor';
 import './items-editor';
 
@@ -26,7 +25,7 @@ const center = ['none', 'card', 'bars'];
 const bar_presets = ['autarky', 'ratio', ''];
 const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'none'];
 
-@customElement('power-distribution-card-editor' + DEV_FLAG)
+@customElement('power-distribution-card-editor')
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
   @property({ attribute: false }) public hass?: HomeAssistant;
   @state() private _config!: PDCConfig;
@@ -48,6 +47,8 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     if (!customElements.get('ha-entity-picker')) {
       (customElements.get('hui-entities-card') as HassCustomElement)?.getConfigElement();
     }
+
+    console.log(this.hass);
   }
 
   protected render(): TemplateResult | void {

@@ -1,4 +1,4 @@
-import { LitElement, TemplateResult, html } from "lit";
+import { LitElement, TemplateResult, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { HomeAssistant } from 'custom-card-helpers';
@@ -12,32 +12,31 @@ import { css, CSSResult } from 'lit';
 
 @customElement('power-distribution-card-item-editor')
 export class ItemEditor extends LitElement {
+  @property({ attribute: false }) config?: EntitySettings;
 
-    @property({ attribute: false }) config?: EntitySettings;
+  @property({ attribute: false }) hass?: HomeAssistant;
 
-    @property({ attribute: false }) hass?: HomeAssistant;
+  protected render(): TemplateResult {
+    // If its a placeholder, don't render anything
+    if (!this.hass || !this.config || this.config.preset == 'placeholder') {
+      return html``;
+    }
+    const item = this.config;
 
-    protected render(): TemplateResult {
-        // If its a placeholder, don't render anything
-        if (!this.hass || !this.config || this.config.preset == 'placeholder') {
-            return html``;
-        }
-        const item = this.config;
+    // Attributes for the selection drop down panel
+    // TODO!: Why destructure the object
+    let attributes: string[] = [];
+    if (item.entity) {
+      attributes = Object.keys({ ...this.hass?.states[item.entity || 0].attributes }) || [];
+    }
 
-        // Attributes for the selection drop down panel
-        // TODO!: Why destructure the object
-        let attributes: string[] = [];
-        if (item.entity) {
-            attributes = Object.keys({ ...this.hass?.states[item.entity || 0].attributes }) || [];
-        }
+    let secondary_info_attributes: string[] = [];
+    if (item.secondary_info_entity) {
+      secondary_info_attributes = Object.keys({ ...this.hass?.states[item.secondary_info_entity].attributes }) || [];
+    }
 
-        let secondary_info_attributes: string[] = [];
-        if (item.secondary_info_entity) {
-            secondary_info_attributes = Object.keys({ ...this.hass?.states[item.secondary_info_entity].attributes }) || [];
-        }
-        
-        return html`
-        <div class="side-by-side">
+    return html`
+      <div class="side-by-side">
         <ha-icon-picker
           .label="${localize('editor.settings.icon')}  (${localize('editor.optional')})"
           .value=${item.icon}
@@ -93,11 +92,7 @@ export class ItemEditor extends LitElement {
           <label for="hide-arrows"> ${localize('editor.settings.hide-arrows')}</label>
         </div>
       </div>
-      <div class="side-by-side">
-        ${
-            this._renderPresetFeatures()
-        }
-      </div>
+      <div class="side-by-side">${this._renderPresetFeatures()}</div>
       <br /><br />
       <h3>${localize('editor.settings.value', true)} ${localize('editor.settings.settings', true)}</h3>
       <div class="side-by-side">
@@ -266,142 +261,137 @@ export class ItemEditor extends LitElement {
         <ha-selector
           label="${localize('editor.settings.tap_action')}"
           .hass=${this.hass}
-          .selector=${{ "ui-action" : { actions: actions }}}
+          .selector=${{ 'ui-action': { actions: actions } }}
           .value=${item.tap_action || { action: 'more-info' }}
           .configValue=${'tap_action'}
-          @value-changed=${this._colorChanged}
+          @value-changed=${this._valueChanged}
         >
         </ha-selector>
         <ha-selector
           label="${localize('editor.settings.double_tap_action')}"
           .hass=${this.hass}
-          .selector=${{ "ui-action" : { actions: actions }}}
+          .selector=${{ 'ui-action': { actions: actions } }}
           .value=${item.double_tap_action}
           .configValue=${'double_tap_action'}
-          @value-changed=${this._colorChanged}
+          @value-changed=${this._valueChanged}
         >
         </ha-selector>
       </div>
+    `;
+  }
+
+  private _renderPresetFeatures(): TemplateResult {
+    if (!this.config || !this.hass) return html``;
+
+    const preset = this.config.preset;
+    switch (preset) {
+      case 'battery':
+        return html`
+          <ha-entity-picker
+            label="${localize('editor.settings.battery_percentage')} (${localize('editor.optional')})"
+            allow-custom-entity
+            hideClearIcon
+            .hass=${this.hass}
+            .configValue=${'battery_percentage_entity'}
+            .value=${this.config.battery_percentage_entity || ''}
+            @value-changed=${this._valueChanged}
+          ></ha-entity-picker>
         `;
+      case 'grid':
+        return html`
+          <ha-entity-picker
+            label="${localize('editor.settings.grid-buy')} (${localize('editor.optional')})"
+            allow-custom-entity
+            hideClearIcon
+            .hass=${this.hass}
+            .configValue=${'grid_buy_entity'}
+            .value=${this.config.grid_buy_entity || ''}
+            @value-changed=${this._valueChanged}
+          ></ha-entity-picker>
+          <ha-entity-picker
+            label="${localize('editor.settings.grid-sell')} (${localize('editor.optional')})"
+            allow-custom-entity
+            hideClearIcon
+            .hass=${this.hass}
+            .configValue=${'grid_sell_entity'}
+            .value=${this.config.grid_sell_entity || ''}
+            @value-changed=${this._valueChanged}
+          ></ha-entity-picker>
+        `;
+      default:
+        return html``;
+    }
+  }
+
+  private _valueChanged(ev: CustomEvent): void {
+    ev.stopPropagation();
+    if (!this.config || !this.hass) {
+      return;
     }
 
-    private _renderPresetFeatures(): TemplateResult {
-        if (!this.config || !this.hass) return html``;
+    const target = ev.target! as EditorTarget;
 
-        const preset = this.config.preset;
-        switch (preset) {
-            case 'battery':
-                return html`
-                <ha-entity-picker
-                  label="${localize('editor.settings.battery_percentage')} (${localize('editor.optional')})"
-                  allow-custom-entity
-                  hideClearIcon
-                  .hass=${this.hass}
-                  .configValue=${'battery_percentage_entity'}
-                  .value=${this.config.battery_percentage_entity || ''}
-                  @value-changed=${this._valueChanged}
-                ></ha-entity-picker>
-              `;
-            case 'grid':
-                return html`
-                <ha-entity-picker
-                  label="${localize('editor.settings.grid-buy')} (${localize('editor.optional')})"
-                  allow-custom-entity
-                  hideClearIcon
-                  .hass=${this.hass}
-                  .configValue=${'grid_buy_entity'}
-                  .value=${this.config.grid_buy_entity || ''}
-                  @value-changed=${this._valueChanged}
-                ></ha-entity-picker>
-                <ha-entity-picker
-                  label="${localize('editor.settings.grid-sell')} (${localize('editor.optional')})"
-                  allow-custom-entity
-                  hideClearIcon
-                  .hass=${this.hass}
-                  .configValue=${'grid_sell_entity'}
-                  .value=${this.config.grid_sell_entity || ''}
-                  @value-changed=${this._valueChanged}
-                ></ha-entity-picker>
-              `;
-            default:
-                return html``;
-        }
+    const value = target.checked !== undefined ? target.checked : ev.detail.value || target.value || ev.detail.config;
+    const configValue = target.configValue;
+    // Skip if no configValue or value is the same
+    if (!configValue || this.config[configValue] === value) {
+      return;
     }
 
-    private _valueChanged(ev: CustomEvent): void {
-        ev.stopPropagation();
-        if (!this.config || !this.hass) {
-            return;
-        }
+    fireEvent<EntitySettings>(this, 'config-changed', { ...this.config, [configValue]: value });
+  }
 
-        const target = ev.target! as EditorTarget;
-
-        const value = 
-            target.checked !== undefined
-                ? target.checked
-                : ev.detail.value || target.value || ev.detail.config;
-        const configValue = target.configValue;
-        // Skip if no configValue or value is the same
-        if (!configValue || this.config[configValue] === value) {
-            return;
-        }
-
-        fireEvent<EntitySettings>(this, 'config-changed', { ...this.config, [configValue]: value });
+  private _colorChanged(ev: CustomEvent): void {
+    ev.stopPropagation();
+    if (!this.config || !this.hass) {
+      return;
     }
 
-    private _colorChanged(ev: CustomEvent): void {
-      ev.stopPropagation();
-      if (!this.config || !this.hass) {
-          return;
+    const target = ev.target! as EditorTarget;
+
+    const value = target.value;
+    const configValue = target.configValue;
+    if (!configValue) return;
+    // Split configvalue
+    const [thing, step] = configValue.split('.');
+
+    const color_set = { ...this.config[thing] } || {};
+    color_set[step] = value;
+
+    // Skip if no configValue or value is the same
+    if (!configValue || this.config[thing] === color_set) return;
+
+    fireEvent<EntitySettings>(this, 'config-changed', { ...this.config, [thing]: color_set });
+  }
+
+  static get styles(): CSSResult {
+    return css`
+      .checkbox {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
       }
-
-      const target = ev.target! as EditorTarget;
-
-      const value = target.value;
-      const configValue = target.configValue;
-      if (!configValue) return;
-      // Split configvalue
-      const [thing, step] = configValue.split('.');
-
-      const color_set = {...this.config[thing]} || {};
-      color_set[step] = value;
-
-      // Skip if no configValue or value is the same
-      if (!configValue || this.config[thing] === color_set) return;
-
-      fireEvent<EntitySettings>(this, 'config-changed', { ...this.config, [thing]: color_set });
-
-
-    }
-    
-    static get styles(): CSSResult {
-        return css`
-          .checkbox {
-            display: flex;
-            align-items: center;
-            padding: 8px 0;
-          }
-          .checkbox input {
-            height: 20px;
-            width: 20px;
-            margin-left: 0;
-            margin-right: 8px;
-          }
-          h3 {
-              margin-bottom: 0.5em;
-          }
-          .row {
-            margin-bottom: 12px;
-            margin-top: 12px;
-            display: block;
-          }
-          .side-by-side {
-            display: flex;
-          }
-          .side-by-side > * {
-            flex: 1 1 0%;
-            padding-right: 4px;
-          }
-      `;
-    }
+      .checkbox input {
+        height: 20px;
+        width: 20px;
+        margin-left: 0;
+        margin-right: 8px;
+      }
+      h3 {
+        margin-bottom: 0.5em;
+      }
+      .row {
+        margin-bottom: 12px;
+        margin-top: 12px;
+        display: block;
+      }
+      .side-by-side {
+        display: flex;
+      }
+      .side-by-side > * {
+        flex: 1 1 0%;
+        padding-right: 4px;
+      }
+    `;
+  }
 }

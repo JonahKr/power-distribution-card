@@ -13,5 +13,3 @@ export function fireEvent<T>(node: HTMLElement | Window, type: string, detail: T
   const event = new CustomEvent(type, { bubbles: false, composed: false, detail: detail });
   node.dispatchEvent(event);
 }
-
-export const DEV_FLAG = '';
