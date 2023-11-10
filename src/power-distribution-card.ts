@@ -480,6 +480,7 @@ export class PowerDistributionCard extends LitElement {
     if (!this._config.center.content || (this._config.center.content as BarSettings[]).length == 0) return html``;
     (this._config.center.content as BarSettings[]).forEach((element) => {
       let value = -1;
+
       switch (element.preset) {
         case 'autarky': //Autarky in Percent = Home Production(Solar, Battery)*100 / Home Consumption
           if (!element.entity)
@@ -490,7 +491,7 @@ export class PowerDistributionCard extends LitElement {
             value = production != 0 ? Math.min(Math.round((Math.abs(consumption) * 100) / production), 100) : 0;
           break;
       }
-      if (value < 0) value = parseInt(this._val(element).toFixed(0), 10);
+      if (value < 0) value = Math.min(parseInt(this._val(element).toFixed(0), 10), 100);
       bars.push(html`
         <div
           class="bar-element"

@@ -180,7 +180,7 @@ export class ItemsEditor extends LitElement {
       return;
     }
 
-    const preset = (this.shadowRoot!.querySelector('.add-preset') as HTMLElementValue).value;
+    const preset = (this.shadowRoot!.querySelector('.add-preset') as HTMLElementValue).value || 'placeholder';
     const entity_id = (this.shadowRoot!.querySelector('.add-entity') as HTMLElementValue).value;
 
     const item = Object.assign({}, DefaultItem, PresetObject[preset], {
