@@ -1,6 +1,6 @@
 # power-distribution-card
 [![GitHub package.json version](https://img.shields.io/github/package-json/v/JonahKr/power-distribution-card)](https://github.com/JonahKr/power-distribution-card/blob/master/package.json)
-[![Actions Status](https://github.com/JonahKr/power-distribution-card/workflows/Tests/badge.svg)](https://github.com/Jonah/power-distribution-card/actions)
+[![Actions Status](https://github.com/JonahKr/power-distribution-card/workflows/Build/badge.svg)](https://github.com/JonahKr/power-distribution-card/actions)
 [![GitHub license](https://img.shields.io/github/license/JonahKr/power-distribution-card)](https://img.shields.io/github/license/JonahKr/power-distribution-card/blob/master/LICENSE) 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 <a href="https://www.buymeacoffee.com/JonahKr" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" height="20px" width="83px" ></a>
@@ -200,6 +200,7 @@ The easiest way to get your Card up and running, is by defining the entities for
 
 ### Placeholder
 By submitting an empty entity_id and preset, you will generate a plain transparent placeholder item which can be used to further customize your layout.
+Alternatively you can use the provided `placeholder` preset.
 <p align="center">
 <img src="https://user-images.githubusercontent.com/38377070/124113882-3676a380-da6c-11eb-8f3e-db00466fd601.png"/>
 </p>
@@ -313,11 +314,11 @@ There are alot of settings you can customize your sensors with:
 | `calc_excluded`            | boolean       | true                         | If the Item should be excluded from ratio/autarky calculations |
 | `color_threshold`          | number        | 0, -100, 420.69              | The value at which the coloring logic your switch on. (default: 0) |
 | `decimals`                 | number        | 0, 2                         | The Number of Decimals shown. (default: 2) |
-| `display_abs`              | boolean       | false                        | The displayed values are Absolute normally. You can change that here. |
+| `display_abs`              | boolean       | false                        | Values are displayed absolute per default. |
 | `double_tap_action`        | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Double tap action for item. |
 | `entity`                   | string        | sensor.e3dc_grid             | You can specify the entity_id here aswell. |
 | `hide_arrows`              | bool          | true                         | Toggeling the visibility od the *arrows*. |
-| `icon`                     | string        | mdi:dishwasher               | Why not change the displayed Icon to any [MDI](https://cdn.materialdesignicons.com/5.4.55/) one? |
+| `icon`                     | string        | mdi:dishwasher               | Why not change the displayed Icon to any [MDI](https://pictogrammers.com/library/mdi/) one? |
 | `icon_color`               | object        | {smaller:'red'}              | You can Change the Color of the icon dependant on the value. (Bigger, Equal and Smaller) |
 | `invert_arrow`             | bool          | true                         | This will change the *arrows* direction to the oposite one. |
 | `invert_value`             | bool          | false                        | This will invert the value recieved from HASS. This affects calculations aswell! |
