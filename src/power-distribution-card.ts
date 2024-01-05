@@ -433,12 +433,12 @@ export class PowerDistributionCard extends LitElement {
                   value == 0 || NanFlag
                     ? 'none'
                     : index % 2 == 0
-                    ? state > 0
-                      ? 'right'
-                      : 'left'
-                    : state > 0
-                    ? 'left'
-                    : 'right',
+                      ? state > 0
+                        ? 'right'
+                        : 'left'
+                      : state > 0
+                        ? 'left'
+                        : 'right',
                   arrow_color,
                 )
               : html``
