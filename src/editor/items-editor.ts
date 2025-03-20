@@ -13,6 +13,7 @@ import { fireEvent } from '../util';
 import Sortable from 'sortablejs';
 import SortableCore, { OnSpill, AutoScroll, SortableEvent } from 'sortablejs/modular/sortable.core.esm';
 
+
 SortableCore.mount(OnSpill, new AutoScroll());
 
 @customElement('power-distribution-card-items-editor')
