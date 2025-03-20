@@ -43,7 +43,7 @@ window.customCards.push({
 export class PowerDistributionCard extends LitElement {
   /**
    * Linking to the visual Editor Element
-   * @returns Editor DOM Element
+   * @returns Editor DOM Element)
    */
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
     await import('./editor/editor');
@@ -105,12 +105,16 @@ export class PowerDistributionCard extends LitElement {
 
   public firstUpdated(): void {
     const _config = this._config;
+
     //unit-of-measurement Auto Configuration from hass element
     _config.entities.forEach((item, index) => {
       if (!item.entity) return;
       const hass_uom = this._state({ entity: item.entity, attribute: 'unit_of_measurement' }) as string;
-      !item.unit_of_measurement ? (this._config.entities[index].unit_of_measurement = hass_uom || 'W') : undefined;
+      if (!item.unit_of_measurement) {
+        this._config.entities[index].unit_of_measurement = hass_uom || 'W';
+      }
     });
+
     // Applying the same to bars
     if (_config.center.type == 'bars') {
       const content = (_config.center.content as BarSettings[]).map((item) => {
@@ -247,7 +251,11 @@ export class PowerDistributionCard extends LitElement {
       case 'none':
         break;
       case 'card':
-        this._card ? center_panel.push(this._card) : console.warn('NO CARD');
+        if (this._card) {
+          center_panel.push(this._card);
+        } else {
+          console.warn('NO CARD');
+        }
         break;
       case 'bars':
         center_panel.push(this._render_bars(consumption, production));
@@ -536,6 +544,8 @@ export class PowerDistributionCard extends LitElement {
     if (cardElToReplace.parentElement) {
       cardElToReplace.parentElement.replaceChild(newCardEl, cardElToReplace);
     }
-    this._card === cardElToReplace ? (this._card = newCardEl) : undefined;
+    if (this._card === cardElToReplace) {
+      this._card = newCardEl;
+    }
   }
 }
