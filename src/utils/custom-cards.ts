@@ -1,5 +1,3 @@
-
-
 import { repository } from "../../package.json";
 
 export function registerCustomCard(type: string, name: string, description: string): void {
