@@ -3,12 +3,12 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import { HomeAssistant } from 'custom-card-helpers';
 
-import { fireEvent } from '../util';
 import { BarSettings } from '../types';
 import { computeLabel } from '../localize/localize';
 import { mdiDelete, mdiPlus } from '@mdi/js';
 import { HaFormSchema } from './ha-form';
 import { deepEqual } from '../deep-equal';
+import { fireCustomEvent } from '../utils';
 
 const BAR_PRESETS = ['autarky', 'ratio', ''];
 
@@ -137,7 +137,7 @@ export class ItemEditor extends LitElement {
         this.config = this.config!.map((item, index) =>
             index === this._selectedCard ? ev.detail.value : item);
 
-        fireEvent(this, "config-changed", this.config)
+        fireCustomEvent(this, "config-changed", this.config)
     }
 
     protected _addBar() {
@@ -147,7 +147,7 @@ export class ItemEditor extends LitElement {
             this.config = [...this.config, {}];
         }
         this._selectedCard = this.config.length - 1;
-        fireEvent(this, "config-changed", this.config);
+        fireCustomEvent(this, "config-changed", this.config);
     }
 
     protected _selectBar(ev: CustomEvent<{ selected: string }>) {
@@ -163,7 +163,7 @@ export class ItemEditor extends LitElement {
         this.config = newConfig;
 
         this._selectedCard++;
-        fireEvent(this, "config-changed", this.config);
+        fireCustomEvent(this, "config-changed", this.config);
     }
 
     protected _moveLeft() {
@@ -175,7 +175,7 @@ export class ItemEditor extends LitElement {
         this.config = newConfig;
 
         this._selectedCard--;
-        fireEvent(this, "config-changed", this.config);
+        fireCustomEvent(this, "config-changed", this.config);
     }
 
     protected _delete() {
@@ -185,7 +185,7 @@ export class ItemEditor extends LitElement {
         newConfig.splice(this._selectedCard, 1);
         this.config = newConfig;
 
-        fireEvent(this, "config-changed", this.config);
+        fireCustomEvent(this, "config-changed", this.config);
     }
 
 

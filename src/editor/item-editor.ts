@@ -1,23 +1,24 @@
 import { LitElement, TemplateResult, html, css, CSSResult, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { HomeAssistant } from 'custom-card-helpers';
-
-import { fireEvent } from '../util';
 import { EditorTarget, EntitySettings } from '../types';
 import { computeLabel, localize } from '../localize/localize';
 import { PresetList } from '../presets';
 import { actions } from '../action-handler';
 import { HaFormSchema } from './ha-form';
+import { HomeAssistant } from '../utils';
 
 const  SCHEMA: HaFormSchema[] = [
+  {
+    name: "entity",
+    selector: { entity: { domain: "sensor"} }
+  },
   {
     type: "grid",
     name: "",
     schema: [
         { name: "name", selector: { text: {} } },
         { name: "icon", selector: { icon: {} } },
-        { name: "entity", selector: { entity: { domain: "sensor"} } },
         { name: "attribute", selector: { attribute: {}}, context: { filter_entity: "entity" } },
         { name: "preset", selector: { select: { options: PresetList as any as string[], mode: 'dropdown' } } },
     ]

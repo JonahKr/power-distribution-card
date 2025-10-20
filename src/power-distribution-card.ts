@@ -4,29 +4,23 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import {
   debounce,
-  HomeAssistant,
   formatNumber,
   LovelaceCardEditor,
-  LovelaceCard,
-  LovelaceCardConfig,
-  createThing,
-  hasAction,
-  ActionHandlerEvent,
-  handleAction,
 } from 'custom-card-helpers';
 
 import { version } from '../package.json';
 
 import { PDCConfig, EntitySettings, ArrowStates, BarSettings } from './types';
-import { DefaultItem, DefaultConfig, PresetList, PresetObject, PresetType } from './presets';
+import { DefaultItem, DefaultConfig, PresetList, PresetObject } from './presets';
 import { styles, narrow_styles } from './styles';
 import { localize } from './localize/localize';
-import ResizeObserver from 'resize-observer-polyfill';
-import { fireEvent, installResizeObserver } from './util';
 import { actionHandler } from './action-handler';
 
 import './editor/editor';
-import { registerCustomCard } from './utils/custom-cards';
+
+
+import { ActionHandlerEvent, handleAction, hasAction, HomeAssistant, LovelaceCard, LovelaceCardConfig, registerCustomCard } from './utils';
+
 
 console.info(
   `%c POWER-DISTRIBUTION-CARD %c ${version} `,
@@ -160,7 +154,6 @@ export class PowerDistributionCard extends LitElement {
 
   private async _attachObserver(): Promise<void> {
     if (!this._resizeObserver) {
-      await installResizeObserver();
       this._resizeObserver = new ResizeObserver(debounce(() => this._adjustWidth(), 250, false));
     }
     const card = this.shadowRoot?.querySelector('ha-card');
@@ -330,7 +323,7 @@ export class PowerDistributionCard extends LitElement {
         secondary_info =
           this._state({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute }) + '';
       } else {
-        secondary_info = `${this._state({ entity: item.secondary_info_entity })}${this._state({ entity: item.secondary_info_entity, attribute: 'unit_of_measurement' }) || ''
+        secondary_info = `${formatNumber(this._state({ entity: item.secondary_info_entity }) as number)}${this._state({ entity: item.secondary_info_entity, attribute: 'unit_of_measurement' }) || ''
           }`;
       }
     }

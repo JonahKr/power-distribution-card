@@ -1,5 +1,11 @@
-import { ActionConfig, LovelaceCardConfig } from 'custom-card-helpers';
 import { PresetType } from './presets';
+import { ActionConfig, LovelaceCardConfig } from './utils';
+
+declare global {
+  interface HASSDomEvents {
+    
+  }
+}
 
 export interface PDCConfig extends LovelaceCardConfig {
   title?: string;

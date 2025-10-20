@@ -8,10 +8,10 @@ import { repeat } from 'lit/directives/repeat.js';
 import { css, CSSResult, nothing } from 'lit';
 import { mdiClose, mdiPencil, mdiPlusCircleOutline } from '@mdi/js';
 import { DefaultItem, PresetList, PresetObject } from '../presets';
-import { fireEvent } from '../util';
 
 import Sortable from 'sortablejs';
 import SortableCore, { OnSpill, AutoScroll, SortableEvent } from 'sortablejs/modular/sortable.core.esm';
+import { fireCustomEvent, fireEvent } from '../utils';
 
 
 SortableCore.mount(OnSpill, new AutoScroll());
@@ -153,7 +153,7 @@ export class ItemsEditor extends LitElement {
       entity: value || '',
     };
 
-    fireEvent(this, 'config-changed', newConfigEntities);
+    fireCustomEvent<EntitySettings[]>(this, 'config-changed', newConfigEntities);
   }
 
   private _removeRow(ev: Event): void {
@@ -162,7 +162,7 @@ export class ItemsEditor extends LitElement {
     if (index != undefined) {
       const entities = this.entities!.concat();
       entities.splice(index, 1);
-      fireEvent<EntitySettings[]>(this, 'config-changed', entities);
+      fireCustomEvent<EntitySettings[]>(this, 'config-changed', entities);
     }
   }
 
@@ -171,7 +171,7 @@ export class ItemsEditor extends LitElement {
 
     const index = (ev.target as EditorTarget).index;
     if (index != undefined) {
-      fireEvent<number>(this, 'edit-item', index);
+      fireCustomEvent<number>(this, 'edit-item', index);
     }
   }
 
@@ -189,7 +189,7 @@ export class ItemsEditor extends LitElement {
       preset: entity_id == '' ? 'placeholder' : preset,
     });
 
-    fireEvent<EntitySettings[]>(this, 'config-changed', [...this.entities, item]);
+    fireCustomEvent<EntitySettings[]>(this, 'config-changed', [...this.entities, item]);
   }
 
   private _rowMoved(ev: SortableEvent): void {
@@ -199,7 +199,7 @@ export class ItemsEditor extends LitElement {
     const newEntities = this.entities.concat();
     newEntities.splice(ev.newIndex!, 0, newEntities.splice(ev.oldIndex!, 1)[0]);
 
-    fireEvent<EntitySettings[]>(this, 'config-changed', newEntities);
+    fireCustomEvent<EntitySettings[]>(this, 'config-changed', newEntities);
   }
 
   static get styles(): CSSResult {
