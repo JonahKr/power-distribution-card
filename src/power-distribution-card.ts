@@ -4,46 +4,38 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import {
   debounce,
-  HomeAssistant,
   formatNumber,
   LovelaceCardEditor,
-  LovelaceCard,
-  LovelaceCardConfig,
-  createThing,
-  hasAction,
-  ActionHandlerEvent,
-  handleAction,
 } from 'custom-card-helpers';
 
 import { version } from '../package.json';
 
 import { PDCConfig, EntitySettings, ArrowStates, BarSettings } from './types';
-import { DefaultItem, DefaultConfig, PresetList, PresetObject, PresetType } from './presets';
+import { DefaultItem, DefaultConfig, PresetList, PresetObject } from './presets';
 import { styles, narrow_styles } from './styles';
 import { localize } from './localize/localize';
-import ResizeObserver from 'resize-observer-polyfill';
-import { installResizeObserver } from './util';
 import { actionHandler } from './action-handler';
 
 import './editor/editor';
 
+
+import { ActionHandlerEvent, handleAction, hasAction, HomeAssistant, LovelaceCard, LovelaceCardConfig, registerCustomCard } from './utils';
+
+
 console.info(
   `%c POWER-DISTRIBUTION-CARD %c ${version} `,
-  `font-weight: 500; color: white; background: #03a9f4;`,
-  `font-weight: 500; color: #03a9f4; background: white;`,
+  `font-weight: 500; color: black; background:#f6aa1c;`,
+  `font-weight: 500; color: #f6aa1c; background: #220901;`,
 );
 
-window.customCards.push({
-  type: 'power-distribution-card',
-  name: 'Power Distribution Card',
-  description: localize('common.description'),
-});
+const CARD_NAME = 'power-distribution-card';
 
-@customElement('power-distribution-card')
+registerCustomCard(CARD_NAME, 'Power Distribution Card', localize('common.description'));
+
+@customElement(CARD_NAME)
 export class PowerDistributionCard extends LitElement {
   /**
-   * Linking to the visual Editor Element
-   * @returns Editor DOM Element
+   * Function for creating the editor for the power-distribution-card
    */
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
     await import('./editor/editor');
@@ -51,8 +43,7 @@ export class PowerDistributionCard extends LitElement {
   }
 
   /**
-   * Function for creating the standard power-distribution-card
-   * @returns Example Config for this Card
+   * Returns a mock config for preview in the card picker
    */
   public static getStubConfig(): Record<string, unknown> {
     return {
@@ -68,7 +59,7 @@ export class PowerDistributionCard extends LitElement {
     };
   }
 
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
 
   @state() private _config!: PDCConfig;
 
@@ -83,53 +74,50 @@ export class PowerDistributionCard extends LitElement {
    */
   public async setConfig(config: PDCConfig): Promise<void> {
     //The Addition of the last object is needed to override the entities array for the preset settings
-    const _config = Object.assign({}, DefaultConfig, config, { entities: [] });
+    const _config = Object.assign({}, DefaultConfig, config);
 
-    //Entities Preset Object Stacking
-    if (!config.entities) throw new Error('You need to define Entities!');
-    config.entities.forEach((item) => {
-      if (item.preset && PresetList.includes(<PresetType>item.preset)) {
-        const _item: EntitySettings = Object.assign({}, DefaultItem, PresetObject[item.preset], <EntitySettings>item);
-        _config.entities.push(_item);
+    // Applying Defaults depending on preset
+    _config.entities = config.entities.map((item) => {
+      if (item.preset && PresetList.includes(item.preset)) {
+        return Object.assign({}, DefaultItem, PresetObject[item.preset], item);
       } else {
-        throw new Error('The preset `' + item.preset + '` is not a valid entry. Please choose a Preset from the List.');
+        return item;
       }
     });
-    this._config = _config;
 
-    //Setting up card if needed
-    if (this._config.center.type == 'card') {
-      this._card = this._createCardElement(this._config.center.content as LovelaceCardConfig);
-    }
+    this._config = _config;
   }
 
   public firstUpdated(): void {
     const _config = this._config;
+    console.log("firstUpdated");
+
     //unit-of-measurement Auto Configuration from hass element
     _config.entities.forEach((item, index) => {
-      if (!item.entity) return;
-      const hass_uom = this._state({ entity: item.entity, attribute: 'unit_of_measurement' }) as string;
-      if (!item.unit_of_measurement) this._config.entities[index].unit_of_measurement = hass_uom || 'W';
+      if (item.entity && item.unit_of_measurement) {
+        const hass_uom = this._state({ entity: item.entity, attribute: 'unit_of_measurement' }) as string;
+        this._config.entities[index].unit_of_measurement = hass_uom || 'W';
+      }
     });
+
     // Applying the same to bars
     if (_config.center.type == 'bars') {
       const content = (_config.center.content as BarSettings[]).map((item) => {
+        if (item.unit_of_measurement) return item;
+        
         let hass_uom = '%';
         if (item.entity) {
           hass_uom = this._state({ entity: item.entity, attribute: 'unit_of_measurement' }) as string;
         }
-        return {
-          ...item,
-          unit_of_measurement: item.unit_of_measurement || hass_uom,
-        };
+        return Object.assign({}, item, { unit_of_measurement: item.unit_of_measurement || hass_uom });
       });
-      this._config = {
-        ...this._config,
-        center: {
+
+      this._config.center = {
           ...this._config.center,
           content: content,
-        },
       };
+    } else if (this._config.center.type == 'card') {
+      this._card = this._createCardElement(this._config.center.content as LovelaceCardConfig);
     }
 
     //Resize Observer
@@ -166,7 +154,6 @@ export class PowerDistributionCard extends LitElement {
 
   private async _attachObserver(): Promise<void> {
     if (!this._resizeObserver) {
-      await installResizeObserver();
       this._resizeObserver = new ResizeObserver(debounce(() => this._adjustWidth(), 250, false));
     }
     const card = this.shadowRoot?.querySelector('ha-card');
@@ -247,8 +234,11 @@ export class PowerDistributionCard extends LitElement {
       case 'none':
         break;
       case 'card':
-        if (this._card) center_panel.push(this._card);
-        else console.warn('NO CARD');
+        if (this._card) {
+          center_panel.push(this._card);
+        } else {
+          console.warn('NO CARD');
+        }
         break;
       case 'bars':
         center_panel.push(this._render_bars(consumption, production));
@@ -333,9 +323,8 @@ export class PowerDistributionCard extends LitElement {
         secondary_info =
           this._state({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute }) + '';
       } else {
-        secondary_info = `${this._state({ entity: item.secondary_info_entity })}${
-          this._state({ entity: item.secondary_info_entity, attribute: 'unit_of_measurement' }) || ''
-        }`;
+        secondary_info = `${formatNumber(this._state({ entity: item.secondary_info_entity }) as number)}${this._state({ entity: item.secondary_info_entity, attribute: 'unit_of_measurement' }) || ''
+          }`;
       }
     }
     // Secondary info replace name
@@ -367,23 +356,23 @@ export class PowerDistributionCard extends LitElement {
       grid_buy_sell = html`
         <div class="buy-sell">
           ${item.grid_buy_entity
-            ? html`<div class="grid-buy">
+          ? html`<div class="grid-buy">
                 B:
                 ${this._val({ entity: item.grid_buy_entity })}${this._state({
-                  entity: item.grid_buy_entity,
-                  attribute: 'unit_of_measurement',
-                }) || undefined}
+            entity: item.grid_buy_entity,
+            attribute: 'unit_of_measurement',
+          }) || undefined}
               </div>`
-            : undefined}
+          : undefined}
           ${item.grid_sell_entity
-            ? html`<div class="grid-sell">
+          ? html`<div class="grid-sell">
                 S:
                 ${this._val({ entity: item.grid_sell_entity })}${this._state({
-                  entity: item.grid_sell_entity,
-                  attribute: 'unit_of_measurement',
-                }) || undefined}
+            entity: item.grid_sell_entity,
+            attribute: 'unit_of_measurement',
+          }) || undefined}
               </div>`
-            : undefined}
+          : undefined}
         </div>
       `;
     }
@@ -415,8 +404,8 @@ export class PowerDistributionCard extends LitElement {
         .double_tap_action=${item.double_tap_action}
         @action=${this._handleAction}
         .actionHandler=${actionHandler({
-          hasDoubleClick: hasAction(item.double_tap_action),
-        })}
+      hasDoubleClick: hasAction(item.double_tap_action),
+    })}
     ">
         <badge>
           <icon>
@@ -427,23 +416,22 @@ export class PowerDistributionCard extends LitElement {
         </badge>
         <value>
           <p>${NanFlag ? `` : formatValue} ${NanFlag ? `` : unit_of_display}</p>
-          ${
-            !item.hide_arrows
-              ? this._render_arrow(
-                  //This takes the side the item is on (index even = left) into account for the arrows
-                  value == 0 || NanFlag
-                    ? 'none'
-                    : index % 2 == 0
-                      ? state > 0
-                        ? 'right'
-                        : 'left'
-                      : state > 0
-                        ? 'left'
-                        : 'right',
-                  arrow_color,
-                )
-              : html``
-          }
+          ${!item.hide_arrows
+        ? this._render_arrow(
+          //This takes the side the item is on (index even = left) into account for the arrows
+          value == 0 || NanFlag
+            ? 'none'
+            : index % 2 == 0
+              ? state > 0
+                ? 'right'
+                : 'left'
+              : state > 0
+                ? 'left'
+                : 'right',
+          arrow_color,
+        )
+        : html``
+      }
         <value
       </item>
     `;
@@ -501,8 +489,8 @@ export class PowerDistributionCard extends LitElement {
           .double_tap_action=${element.double_tap_action}
           @action=${this._handleAction}
           .actionHandler=${actionHandler({
-            hasDoubleClick: hasAction(element.double_tap_action),
-          })}
+        hasDoubleClick: hasAction(element.double_tap_action),
+      })}
           style="${element.tap_action || element.double_tap_action ? 'cursor: pointer;' : ''}"
         >
           <p class="bar-percentage">${value}${element.unit_of_measurement || '%'}</p>
@@ -537,6 +525,8 @@ export class PowerDistributionCard extends LitElement {
     if (cardElToReplace.parentElement) {
       cardElToReplace.parentElement.replaceChild(newCardEl, cardElToReplace);
     }
-    if (this._card === cardElToReplace) this._card = newCardEl;
+    if (this._card === cardElToReplace) {
+      this._card = newCardEl;
+    }
   }
 }

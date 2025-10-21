@@ -8,10 +8,11 @@ import { repeat } from 'lit/directives/repeat.js';
 import { css, CSSResult, nothing } from 'lit';
 import { mdiClose, mdiPencil, mdiPlusCircleOutline } from '@mdi/js';
 import { DefaultItem, PresetList, PresetObject } from '../presets';
-import { fireEvent } from '../util';
 
 import Sortable from 'sortablejs';
 import SortableCore, { OnSpill, AutoScroll, SortableEvent } from 'sortablejs/modular/sortable.core.esm';
+import { fireCustomEvent, fireEvent } from '../utils';
+
 
 SortableCore.mount(OnSpill, new AutoScroll());
 
@@ -76,45 +77,49 @@ export class ItemsEditor extends LitElement {
 
     return html`
       <h3>${localize('editor.settings.entities')}</h3>
-      <div class="entities">
-        ${repeat(
-          this.entities,
-          (entityConf) => this._getKey(entityConf),
-          (entityConf, index) => html`
-            <div class="entity">
-              <div class="handle">
-                <ha-icon icon="mdi:drag"></ha-icon>
+      <ha-sortable handle-selector=".handle" @item-moved=${this._rowMoved}>
+        <div class="entities">
+          ${repeat(
+            this.entities,
+            (entityConf) => this._getKey(entityConf),
+            (entityConf, index) => html`
+              <div class="entity">
+                <div class="handle">
+                  <ha-icon icon="mdi:drag"></ha-icon>
+                </div>
+                <ha-entity-picker
+                  label="Entity - ${entityConf.preset}"
+                  allow-custom-entity
+                  hideClearIcon
+                  .hass=${this.hass}
+                  .configValue=${'entity'}
+                  .value=${entityConf.entity}
+                  .index=${index}
+                  @value-changed=${this._valueChanged}
+                ></ha-entity-picker>
+
+                <ha-icon-button
+                  .label=${localize('editor.actions.remove')}
+                  .path=${mdiClose}
+                  class="remove-icon"
+                  .index=${index}
+                  @click=${this._removeRow}
+                ></ha-icon-button>
+
+                <ha-icon-button
+                  .label=${localize('editor.actions.edit')}
+                  .path=${mdiPencil}
+                  class="edit-icon"
+                  .index=${index}
+                  @click="${this._editRow}"
+                ></ha-icon-button>
               </div>
-              <ha-entity-picker
-                label="Entity - ${entityConf.preset}"
-                allow-custom-entity
-                hideClearIcon
-                .hass=${this.hass}
-                .configValue=${'entity'}
-                .value=${entityConf.entity}
-                .index=${index}
-                @value-changed=${this._valueChanged}
-              ></ha-entity-picker>
+            `,
+          )}
+        </div>
+      </ha-sortable>
 
-              <ha-icon-button
-                .label=${localize('editor.actions.remove')}
-                .path=${mdiClose}
-                class="remove-icon"
-                .index=${index}
-                @click=${this._removeRow}
-              ></ha-icon-button>
-
-              <ha-icon-button
-                .label=${localize('editor.actions.edit')}
-                .path=${mdiPencil}
-                class="edit-icon"
-                .index=${index}
-                @click="${this._editRow}"
-              ></ha-icon-button>
-            </div>
-          `,
-        )}
-      </div>
+      
       <div class="add-item row">
         <ha-select
           label="${localize('editor.settings.preset')}"
@@ -152,7 +157,7 @@ export class ItemsEditor extends LitElement {
       entity: value || '',
     };
 
-    fireEvent(this, 'config-changed', newConfigEntities);
+    fireCustomEvent<EntitySettings[]>(this, 'config-changed', newConfigEntities);
   }
 
   private _removeRow(ev: Event): void {
@@ -161,7 +166,7 @@ export class ItemsEditor extends LitElement {
     if (index != undefined) {
       const entities = this.entities!.concat();
       entities.splice(index, 1);
-      fireEvent<EntitySettings[]>(this, 'config-changed', entities);
+      fireCustomEvent<EntitySettings[]>(this, 'config-changed', entities);
     }
   }
 
@@ -170,7 +175,7 @@ export class ItemsEditor extends LitElement {
 
     const index = (ev.target as EditorTarget).index;
     if (index != undefined) {
-      fireEvent<number>(this, 'edit-item', index);
+      fireCustomEvent<number>(this, 'edit-item', index);
     }
   }
 
@@ -188,7 +193,7 @@ export class ItemsEditor extends LitElement {
       preset: entity_id == '' ? 'placeholder' : preset,
     });
 
-    fireEvent<EntitySettings[]>(this, 'config-changed', [...this.entities, item]);
+    fireCustomEvent<EntitySettings[]>(this, 'config-changed', [...this.entities, item]);
   }
 
   private _rowMoved(ev: SortableEvent): void {
@@ -198,7 +203,7 @@ export class ItemsEditor extends LitElement {
     const newEntities = this.entities.concat();
     newEntities.splice(ev.newIndex!, 0, newEntities.splice(ev.oldIndex!, 1)[0]);
 
-    fireEvent<EntitySettings[]>(this, 'config-changed', newEntities);
+    fireCustomEvent<EntitySettings[]>(this, 'config-changed', newEntities);
   }
 
   static get styles(): CSSResult {
@@ -329,3 +334,43 @@ export class ItemsEditor extends LitElement {
     `;
   }
 }
+
+// <div class="entities">
+//         ${repeat(
+//           this.entities,
+//           (entityConf) => this._getKey(entityConf),
+//           (entityConf, index) => html`
+//             <div class="entity">
+//               <div class="handle">
+//                 <ha-icon icon="mdi:drag"></ha-icon>
+//               </div>
+//               <ha-entity-picker
+//                 label="Entity - ${entityConf.preset}"
+//                 allow-custom-entity
+//                 hideClearIcon
+//                 .hass=${this.hass}
+//                 .configValue=${'entity'}
+//                 .value=${entityConf.entity}
+//                 .index=${index}
+//                 @value-changed=${this._valueChanged}
+//               ></ha-entity-picker>
+
+//               <ha-icon-button
+//                 .label=${localize('editor.actions.remove')}
+//                 .path=${mdiClose}
+//                 class="remove-icon"
+//                 .index=${index}
+//                 @click=${this._removeRow}
+//               ></ha-icon-button>
+
+//               <ha-icon-button
+//                 .label=${localize('editor.actions.edit')}
+//                 .path=${mdiPencil}
+//                 class="edit-icon"
+//                 .index=${index}
+//                 @click="${this._editRow}"
+//               ></ha-icon-button>
+//             </div>
+//           `,
+//         )}
+//       </div>

@@ -1,4 +1,4 @@
-import { LitElement, TemplateResult, html, css, CSSResultGroup } from 'lit';
+import { LitElement, TemplateResult, html, css, CSSResultGroup, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 
@@ -11,120 +11,227 @@ import {
   BarSettings,
   HassCustomElement,
   EntitySettings,
+  CustomValueEvent,
 } from '../types';
-import { localize } from '../localize/localize';
+import { computeLabel, localize } from '../localize/localize';
 
 import './item-editor';
 import './items-editor';
+import './bar-editor';
+
+import { loadHaComponents } from '../utils/ha-component-loader';
+import { HaFormSchema } from './ha-form';
 
 /**
  * Editor Settings
  */
 const animation = ['none', 'flash', 'slide'];
 const center = ['none', 'card', 'bars'];
-const bar_presets = ['autarky', 'ratio', ''];
+
 const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'none'];
+
+type EditorType = 'main' | 'item' | 'bars' | 'card';
+
+type Editor = {
+  type: EditorType;
+  index?: number;
+}
+
+const SCHEMA: HaFormSchema[] = [
+  { name: 'title', selector: { text: {} } },
+  { name: 'animation', selector: { select: { options: animation, mode: 'dropdown' } }, required: true },
+];
 
 @customElement('power-distribution-card-editor')
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
   @property({ attribute: false }) public hass?: HomeAssistant;
-  @state() private _config!: PDCConfig;
 
-  public async setConfig(config: PDCConfig): Promise<void> {
+  @state() private _config!: PDCConfig;
+  @state() private _activeEditor: Editor = { type: 'main' };
+
+  public setConfig(config: PDCConfig) {
     this._config = config;
   }
 
-  /**
-   * This Preloads all standard hass components which are not natively avaiable
-   * https://discord.com/channels/330944238910963714/351047592588869643/783477690036125747 for more info
-   * Update 2022-11-22 : Visual editors in homeassistant have primarily changed to use the ha-form component!
-   */
-  protected async firstUpdated(): Promise<void> {
-    if (!customElements.get('ha-form') || !customElements.get('hui-action-editor')) {
-      (customElements.get('hui-button-card') as HassCustomElement)?.getConfigElement();
-    }
-
-    if (!customElements.get('ha-entity-picker')) {
-      (customElements.get('hui-entities-card') as HassCustomElement)?.getConfigElement();
-    }
-
-    console.log(this.hass);
+  protected firstUpdated() {
+    loadHaComponents();
   }
 
-  protected render(): TemplateResult | void {
-    if (!this.hass) return html``;
-    if (this._subElementEditor) return this._renderSubElementEditor();
+  protected render() {
+    if (!this.hass || !this._config) return nothing;
+
+    if (this._activeEditor.type === 'main') {
+      return this._renderMainEditor();
+    }
+
+    // All Subpages get an additional header
+    const content: (TemplateResult | typeof nothing)[] = [
+      html`
+        <div class="header">
+          <div class="back-title">
+            <mwc-icon-button @click=${this._goBack}>
+              <ha-icon icon="mdi:arrow-left"></ha-icon>
+            </mwc-icon-button>
+          </div>
+        </div>`,
+    ];
+
+    switch (this._activeEditor.type) {
+      case 'item':
+        content.push(this._renderItemEditor());
+        break;
+      case 'bars':
+        content.push(this._renderBarEditor());
+        break;
+      case 'card':
+        return this._renderCardEditor();
+    }
+    return html`${content}`;
+  }
+
+  protected _enableCenterEditor(ev: any): void {
+    ev.stopPropagation();
+
+    this._activeEditor = { type: ev.currentTarget.value };
+  }
+
+  protected _enableItemEditor(ev: any): void {
+    ev.stopPropagation();
+
+    this._activeEditor = {
+      type: 'item',
+      index: ev.detail,
+    };
+  }
+
+  protected _goBack(): void {
+    this._activeEditor = { type: 'main' };
+  }
+
+  protected _valueChanged(ev: CustomValueEvent<unknown>) {
+    ev.stopPropagation();
+    if (!this._config || !this.hass) {
+      return;
+    }
+
+    const target = ev.target;
+    const detail = ev.detail;
+    if (target && detail) {
+      if (target.configValue) {
+        let value: any = detail;
+
+        // Specific Case
+        if (target.configValue == 'center.type') {
+          value = target.value;
+        }
+
+        // We split the target configValue by '.' to allow for nested config values of depth 1
+        const configValues = target.configValue.split('.');
+
+        this._config = {
+          ...this._config,
+          [configValues[0]]: configValues.length > 1 ? {
+            ...this._config[configValues[0]],
+            [configValues[1]]: value,
+          } : value,
+        };
+
+      } else {
+        // Assuming a return from ha-form
+        this._config = detail.value as PDCConfig;
+      }
+      console.log("New Config:");
+      console.log(this._config);
+
+      fireEvent(this, 'config-changed', { config: this._config });
+    }
+  }
+
+
+  protected _renderMainEditor(): TemplateResult {
+
     return html`
-      <div class="card-config">
-        <ha-textfield
-          label="${localize('editor.settings.title')} (${localize('editor.optional')})"
-          .value=${this._config?.title || ''}
-          .configValue=${'title'}
-          @input=${this._valueChanged}
-        ></ha-textfield>
+      <ha-form
+        .hass=${this.hass}
+        .data=${this._config}
+        .schema=${SCHEMA}
+        .computeLabel=${computeLabel}
+        @value-changed=${this._valueChanged}
+      ></ha-form>
+
+      <br />
+      <div class="entity row">
         <ha-select
-          naturalMenuWidth
-          fixedMenuPosition
-          label="${localize('editor.settings.animation')}"
-          .configValue=${'animation'}
-          .value=${this._config?.animation || 'flash'}
+          label="${localize('editor.settings.center')}"
+          .configValue=${'center.type'}
           @selected=${this._valueChanged}
-          @closed=${(ev: Event) => ev.stopPropagation()}
+          @closed=${(ev) => ev.stopPropagation()}
+          .value=${this._config?.center?.type || 'none'}
         >
-          ${animation.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
+          ${center.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
         </ha-select>
-        <br />
-        <div class="entity row">
-          <ha-select
-            label="${localize('editor.settings.center')}"
-            .configValue=${'type'}
-            @selected=${this._centerChanged}
-            @closed=${(ev) => ev.stopPropagation()}
-            .value=${this._config?.center?.type || 'none'}
-          >
-            ${center.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
-          </ha-select>
-          ${this._config?.center?.type == 'bars' || this._config?.center?.type == 'card'
-            ? html`<ha-icon-button
-                class="edit-icon"
-                .value=${this._config?.center?.type}
-                .path=${mdiPencil}
-                @click="${this._editCenter}"
-              ></ha-icon-button>`
-            : ''}
+        ${this._config?.center?.type != 'none'
+        ? html`<ha-icon-button
+              class="edit-icon"
+              .value=${this._config?.center?.type}
+              .path=${mdiPencil}
+              @click="${this._enableCenterEditor}"
+            ></ha-icon-button>`
+        : ''}
         </div>
         <br />
         <power-distribution-card-items-editor
           .hass=${this.hass}
           .entities=${this._config.entities}
-          @edit-item=${this._edit_item}
-          @config-changed=${this._entitiesChanged}
+          .configValue=${'entities'}
+          @edit-item=${this._enableItemEditor}
+          @config-changed=${this._valueChanged}
         >
         </power-distribution-card-items-editor>
       </div>
     `;
   }
 
-  private _entitiesChanged(ev: CustomEvent<EntitySettings[]>): void {
-    ev.stopPropagation();
-    if (!this._config || !this.hass) {
-      return;
+  protected _renderItemEditor() {
+    const index = this._activeEditor.index;
+    if (index == undefined) {
+      return nothing;
     }
-    fireEvent(this, 'config-changed', { config: { ...this._config, entities: ev.detail } as PDCConfig });
+
+    return html`
+      <power-distribution-card-item-editor
+        .hass=${this.hass}
+        .config=${this._config.entities[index]}
+        @config-changed=${this._itemChanged}
+      >
+      </power-distribution-card-item-editor>
+    `;
   }
 
-  private _edit_item(ev: CustomEvent<number>): void {
-    ev.stopPropagation();
-    if (!this._config || !this.hass) {
-      return;
-    }
-    const index = ev.detail;
-
-    this._subElementEditor = {
-      type: 'entity',
-      index: index,
-    };
+  /**
+   * Bar Editor
+   * -------------------
+   * This Bar Editor allows the user to easily add and remove new bars.
+   */
+  protected _renderBarEditor() {
+    return html`
+      <power-distribution-card-bar-editor
+        .hass=${this.hass}
+        .config=${this._config.center.content as BarSettings[]}
+        .configValue=${'center.content'}
+        @config-changed=${this._valueChanged}
+      >
+      </power-distribution-card-bar-editor>
+    `;
   }
+
+  protected log(ev) {
+    console.log("PRTN", ev);
+    console.log(ev.target);
+    console.log(ev.detail);
+    console.log(ev.target.configValue);
+  }
+
 
   /**
    * SubElementEditor
@@ -149,7 +256,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         subel.push(html`
           <power-distribution-card-item-editor
             .hass=${this.hass}
-            .config=${ this._config.entities[this._subElementEditor?.index || 0]}
+            .config=${this._config.entities[this._subElementEditor?.index || 0]}
             @config-changed=${this._itemChanged}
           >
           </power-distribution-card-item-editor>
@@ -165,14 +272,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     return html`${subel}`;
   }
 
-  private _goBack(): void {
-    this._subElementEditor = undefined;
-    // Resetting the entities sortable list
-    // this._sortable?.destroy();
-    // this._sortable = undefined;
-    // this._sortable = this._createSortable();
-  }
-
   private _itemChanged(ev: CustomEvent<EntitySettings>) {
     ev.stopPropagation();
     if (!this._config || !this.hass) {
@@ -182,7 +281,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     if (index != undefined) {
       const entities = [...this._config.entities];
       entities[index] = ev.detail;
-      fireEvent(this, 'config-changed', { config : { ...this._config, entities: entities }});
+      fireEvent(this, 'config-changed', { config: { ...this._config, entities: entities } });
     }
   }
 
@@ -209,165 +308,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     fireEvent(this, 'config-changed', { config: this._config });
   }
 
-  private _editCenter(ev: any): void {
-    if (ev.currentTarget) {
-      this._subElementEditor = {
-        type: <'card' | 'bars'>ev.currentTarget.value,
-      };
-    }
-  }
-
-
-  /**
-   * Bar Editor
-   * -------------------
-   * This Bar Editor allows the user to easily add and remove new bars.
-   */
-
-  private _barChanged(ev: any): void {
-    if (!ev.target) return;
-    const target = ev.target;
-    if (!target.configValue) return;
-    let content: BarSettings[];
-    if (target.configValue == 'content') {
-      content = target.value as BarSettings[];
-    } else {
-      content = [...(this._config.center.content as BarSettings[])];
-      const index = target.i || this._subElementEditor?.index || 0;
-      content[index] = {
-        ...content[index],
-        [target.configValue]: target.checked != undefined ? target.checked : target.value,
-      };
-    }
-
-    this._config = { ...this._config, center: { type: 'bars', content: content } };
-    fireEvent(this, 'config-changed', { config: this._config });
-  }
-
-  private _removeBar(ev: any): void {
-    const index = ev.currentTarget?.i || 0;
-    const newBars = [...(this._config.center.content as BarSettings[])];
-    newBars.splice(index, 1);
-
-    this._barChanged({ target: { configValue: 'content', value: newBars } });
-  }
-
-  private async _addBar(): Promise<void> {
-    const item = Object.assign({}, { name: 'Name', preset: 'custom' });
-    const newBars = [...((this._config.center.content as BarSettings[]) || []), <BarSettings>item];
-    //This basically fakes a event object
-    this._barChanged({ target: { configValue: 'content', value: newBars } });
-  }
-
-  private _barEditor(): TemplateResult {
-    const editor: TemplateResult[] = [];
-    if (this._config.center.content) {
-      (this._config.center.content as BarSettings[]).forEach((e, i) =>
-        editor.push(html`
-        <div class="bar-editor">
-          <h3 style="margin-bottom:6px;">Bar ${i + 1}
-          <ha-icon-button
-            label=${localize('editor.actions.remove')}
-            class="remove-icon"
-            .i=${i}
-            .path=${mdiClose}
-            @click=${this._removeBar}
-            >
-          </ha-icon-button>
-          </h4>
-          <div class="side-by-side">
-            <ha-textfield
-              label="${localize('editor.settings.name')} (${localize('editor.optional')})"
-              .value=${e.name || ''}
-              .configValue=${'name'}
-              @input=${this._barChanged}
-              .i=${i}
-            ></ha-textfield>
-            <ha-entity-picker
-              label="${localize('editor.settings.entity')}"
-              allow-custom-entity
-              hideClearIcon
-              .hass=${this.hass}
-              .configValue=${'entity'}
-              .value=${e.entity}
-              @value-changed=${this._barChanged}
-              .i=${i}
-            ></ha-entity-picker>
-          </div>
-          <div class="side-by-side">
-            <div class="checkbox">
-              <input
-                type="checkbox"
-                id="invert-value"
-                .checked="${e.invert_value || false}"
-                .configValue=${'invert_value'}
-                @change=${this._barChanged}
-                .i=${i}
-              />
-              <label for="invert-value"> ${localize('editor.settings.invert-value')}</label>
-            </div>
-            <div>
-            <ha-select
-              label="${localize('editor.settings.preset')}"
-              .configValue=${'preset'}
-              .value=${e.preset || ''}
-              @selected=${this._barChanged}
-              @closed=${(ev) => ev.stopPropagation()}
-              .i=${i}
-            >
-              ${bar_presets.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
-            </ha-select>
-          </div>
-          </div>
-          <div class="side-by-side">
-            <ha-textfield
-              label="${localize('editor.settings.color')}"
-              .value=${e.bar_color || ''}
-              .configValue=${'bar_color'}
-              @input=${this._barChanged}
-              .i=${i}
-            ></ha-textfield>
-            <ha-textfield
-              .label="${localize('editor.settings.background_color')}"
-              .value=${e.bar_bg_color || ''}
-              .configValue=${'bar_bg_color'}
-              @input=${this._barChanged}
-              .i=${i}
-            ></ha-textfield>
-          </div>
-          <h3>${localize('editor.settings.action_settings')}</h3>
-      <div class="side-by-side">
-        <hui-action-editor
-          .hass=${this.hass}
-          .config=${e.tap_action}
-          .actions=${actions}
-          .configValue=${'tap_action'}
-          @value-changed=${this._barChanged}
-          .i=${i}
-        >
-        </hui-action-editor>
-        <hui-action-editor
-          .hass=${this.hass}
-          .config=${e.double_tap_action}
-          .actions=${actions}
-          .configValue=${'double_tap_action'}
-          @value-changed=${this._barChanged}
-          .i=${i}
-        >
-        </hui-action-editor>
-      </div>
-        </div>
-        <br/>
-      `),
-      );
-    }
-    editor.push(html`
-      <mwc-icon-button aria-label=${localize('editor.actions.add')} class="add-icon" @click="${this._addBar}">
-        <ha-icon icon="mdi:plus-circle-outline"></ha-icon>
-      </mwc-icon-button>
-    `);
-    return html`${editor.map((e) => html`${e}`)}`;
-  }
 
   /**
    * Card Editor
@@ -395,23 +335,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       >
       to check out the latest and best way to add it.
     `;
-  }
-
-
-  private _valueChanged(ev: any): void {
-    if (!this._config || !this.hass) {
-      return;
-    }
-    if (ev.target) {
-      const target = ev.target;
-      if (target.configValue) {
-        this._config = {
-          ...this._config,
-          [target.configValue]: target.checked !== undefined ? target.checked : target.value,
-        };
-      }
-    }
-    fireEvent(this, 'config-changed', { config: this._config });
   }
 
   /**
