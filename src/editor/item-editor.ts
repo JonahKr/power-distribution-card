@@ -47,12 +47,13 @@ const  SCHEMA: HaFormSchema[] = [
     type: "expandable",
     title: localize('editor.settings.secondary_info', true),
     schema: [
+      { name: "secondary_info_entity",
+        selector: { entity: { domain: "sensor"} } },
       {
         type: "grid",
         name: "",
         schema: [
-            { name: "secondary_info_entity", selector: { entity: { domain: "sensor"} } },
-            { name: "secondary_info_attribute", selector: { attribute: {}}, context: { filter_entity: "secondary_info_entity" } },
+            { name: "secondary_info_attribute", selector: { attribute: {}}, context: { filter_entity: "secondary_info_entity" }},
             { name: "secondary_info_replace_name", type: "boolean"},
         ]
       }
@@ -82,7 +83,7 @@ const  SCHEMA: HaFormSchema[] = [
   {
     name: "Color Settings",
     type: "expandable",
-    title: localize('editor.settings.color-settings', true),
+    title: localize('editor.settings.color_settings', true),
     schema: [
       {
         type: "grid",
