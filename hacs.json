@@ -1,6 +1,6 @@
 {
-  "name": "power-distribution-card",
+  "name": "Power Distribution Card",
+  "filename": "power-distribution-card.js",
   "render_readme": true,
-  "content_in_root": false,
-  "filename": "power-distribution-card.js"
+  "homeassistant": "2025.7"
 }

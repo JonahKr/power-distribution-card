@@ -1,6 +1,7 @@
 import * as en from './languages/en.json';
 import * as de from './languages/de.json';
 import * as sk from './languages/sk.json';
+import { HaFormSchema } from '../editor/ha-form';
 
 const languages = {
   en: en,
@@ -36,6 +37,11 @@ export function localize(string: string, capitalized = false, search = '', repla
   return capitalized ? capitalizeFirstLetter(translated) : translated;
 }
 
-function capitalizeFirstLetter(string) {
+function capitalizeFirstLetter(string: string) {
+  if (!string) return "";
   return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+export function computeLabel(schema: HaFormSchema) {
+  return `${localize('editor.settings.' + schema.name)} ${!schema.required ? `(${localize('editor.optional')})` : ''}`;
 }

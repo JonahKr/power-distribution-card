@@ -1,14 +1,99 @@
-import { LitElement, TemplateResult, html } from 'lit';
+import { LitElement, TemplateResult, html, css, CSSResult, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { HomeAssistant } from 'custom-card-helpers';
-
-import { fireEvent } from '../util';
 import { EditorTarget, EntitySettings } from '../types';
-import { localize } from '../localize/localize';
+import { computeLabel, localize } from '../localize/localize';
 import { PresetList } from '../presets';
 import { actions } from '../action-handler';
-import { css, CSSResult } from 'lit';
+import { HaFormSchema } from './ha-form';
+import { HomeAssistant } from '../utils';
+
+const  SCHEMA: HaFormSchema[] = [
+  {
+    name: "entity",
+    selector: { entity: { domain: "sensor"} }
+  },
+  {
+    type: "grid",
+    name: "",
+    schema: [
+        { name: "name", selector: { text: {} } },
+        { name: "icon", selector: { icon: {} } },
+        { name: "attribute", selector: { attribute: {}}, context: { filter_entity: "entity" } },
+        { name: "preset", selector: { select: { options: PresetList as any as string[], mode: 'dropdown' } } },
+    ]
+  },
+  {
+    name: "Value Settings",
+    type: "expandable",
+    title: localize('editor.settings.value', true) + " " +localize('editor.settings.settings', true),
+    schema: [
+      {
+        type: "grid",
+        name: "",
+        schema: [
+            { name: "unit_of_display", selector: { text: {} } },
+            { name: "decimals", selector: { number: { step: 1} } },
+            { name: "invert_value", type: "boolean"},
+            { name: "display_abs", type: "boolean"},
+            { name: "calc_excluded", type: "boolean"},
+            { name: "threshold", selector: { number: { } } },
+        ]
+      }
+    ]
+  },
+  {
+    name: "Secondary Info",
+    type: "expandable",
+    title: localize('editor.settings.secondary_info', true),
+    schema: [
+      { name: "secondary_info_entity",
+        selector: { entity: { domain: "sensor"} } },
+      {
+        type: "grid",
+        name: "",
+        schema: [
+            { name: "secondary_info_attribute", selector: { attribute: {}}, context: { filter_entity: "secondary_info_entity" }},
+            { name: "secondary_info_replace_name", type: "boolean"},
+        ]
+      }
+    ]
+  },
+  {
+    name: "Action Settings",
+    type: "expandable",
+    title: localize('editor.settings.action_settings', true),
+    schema: [
+      {
+        type: "grid",
+        name: "",
+        schema: [
+          {
+            name: "tap_action",
+            selector: { ui_action: {} },
+        },
+        {
+            name: "double_tap_action",
+            selector: { ui_action: {} },
+        }
+        ]
+      }
+    ]
+  },
+  {
+    name: "Color Settings",
+    type: "expandable",
+    title: localize('editor.settings.color_settings', true),
+    schema: [
+      {
+        type: "grid",
+        name: "",
+        schema: [
+        ]
+      }
+    ]
+  }
+];
 
 @customElement('power-distribution-card-item-editor')
 export class ItemEditor extends LitElement {
@@ -16,24 +101,22 @@ export class ItemEditor extends LitElement {
 
   @property({ attribute: false }) hass?: HomeAssistant;
 
-  protected render(): TemplateResult {
+  protected render() {
     // If its a placeholder, don't render anything
     if (!this.hass || !this.config || this.config.preset == 'placeholder') {
-      return html``;
+      return nothing;
     }
     const item = this.config;
 
-    // Attributes for the selection drop down panel
-    // TODO!: Why destructure the object
-    let attributes: string[] = [];
-    if (item.entity) {
-      attributes = Object.keys({ ...this.hass?.states[item.entity || 0].attributes }) || [];
-    }
-
-    let secondary_info_attributes: string[] = [];
-    if (item.secondary_info_entity) {
-      secondary_info_attributes = Object.keys({ ...this.hass?.states[item.secondary_info_entity].attributes }) || [];
-    }
+    return html`
+      <ha-form
+        .hass=${this.hass}
+        .data=${this.config}
+        .schema=${SCHEMA}
+        .computeLabel=${computeLabel}
+        @value-changed=${console.log}
+      ></ha-form>
+    `;
 
     return html`
       <div class="side-by-side">
@@ -363,7 +446,7 @@ export class ItemEditor extends LitElement {
     // Split configvalue
     const [thing, step] = configValue.split('.');
 
-    const color_set = { ...this.config[thing] } || {};
+    const color_set = { ...this.config[thing] };
     color_set[step] = value;
 
     // Skip if no configValue or value is the same
