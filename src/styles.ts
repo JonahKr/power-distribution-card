@@ -113,7 +113,7 @@ export const styles = css`
     width: 24px;
     margin: 0 auto;
 
-    color: var(--paper-item-icon-color);
+    color: var(--state-icon-color);
   }
 
   .secondary {
