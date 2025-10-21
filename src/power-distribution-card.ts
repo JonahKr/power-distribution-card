@@ -333,9 +333,21 @@ export class PowerDistributionCard extends LitElement {
         secondary_info =
           this._state({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute }) + '';
       } else {
-        secondary_info = `${this._state({ entity: item.secondary_info_entity })}${
-          this._state({ entity: item.secondary_info_entity, attribute: 'unit_of_measurement' }) || ''
-        }`;
+        const secondary_value = this._state({ entity: item.secondary_info_entity });
+        const secondary_unit =
+          this._state({ entity: item.secondary_info_entity, attribute: 'unit_of_measurement' }) || '';
+
+        // Apply decimal formatting if secondary_info_decimals is set
+        if (typeof secondary_value === 'number' && item.secondary_info_decimals !== undefined) {
+          const secDecFakTen =
+            10 **
+            (item.secondary_info_decimals || item.secondary_info_decimals == 0 ? item.secondary_info_decimals : 2);
+          const rounded_value = Math.round(secondary_value * secDecFakTen) / secDecFakTen;
+          const formatted_value = formatNumber(rounded_value, this.hass.locale);
+          secondary_info = `${formatted_value}${secondary_unit}`;
+        } else {
+          secondary_info = `${secondary_value}${secondary_unit}`;
+        }
       }
     }
     // Secondary info replace name

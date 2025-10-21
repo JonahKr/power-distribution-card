@@ -106,6 +106,6 @@ export const deepEqual = (a: any, b: any): boolean => {
   }
 
   // true if both NaN, false otherwise
-  // eslint-disable-next-line no-self-compare
+
   return a !== a && b !== b;
 };

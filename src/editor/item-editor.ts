@@ -185,6 +185,14 @@ export class ItemEditor extends LitElement {
         />
         <label for="secondary_info_replace_name"> ${localize('editor.settings.replace_name')}</label>
       </div>
+      <ha-textfield
+        auto-validate
+        pattern="[0-9]"
+        label="${localize('editor.settings.secondary_info_decimals')}"
+        .value=${item.secondary_info_decimals !== undefined ? item.secondary_info_decimals : ''}
+        .configValue=${'secondary_info_decimals'}
+        @input=${this._valueChanged}
+      ></ha-textfield>
       <br />
       <h3>${localize('editor.settings.color-settings', true)}</h3>
       <ha-textfield

@@ -325,6 +325,7 @@ There are alot of settings you can customize your sensors with:
 | `name`                     | string        | dishwasher                   | Feel free to change the displayed name of the element. |
 | `secondary_info_attribute` | string        | min_temp                     | Requires Entity. Instead of Sensor, the Attribute Value gets displayed.  |
 | `secondary_info_entity`    | string        | sensor.e3dc_grid             | entity_id of the secondary info sensor |
+| `secondary_info_decimals`  | number        | 2                            | The Number of Decimals shown for secondary info entity. (optional) |
 | `secondary_info_replace_name` | bool       | true                         | This will replace the name of the item with the secondary info. |
 | `tap_action`               | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Single tap action for item. |
 | `threshold`                | number        | 2                            | Ignoring all abolute values smaller than threshold. |

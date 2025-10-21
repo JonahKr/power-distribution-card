@@ -29,6 +29,7 @@ export interface EntitySettings extends presetFeatures {
   secondary_info_attribute?: string;
   secondary_info_entity?: string;
   secondary_info_replace_name?: boolean;
+  secondary_info_decimals?: number;
   tap_action?: ActionConfig;
   threshold?: number;
   unit_of_display?: string;

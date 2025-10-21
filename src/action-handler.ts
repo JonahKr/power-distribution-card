@@ -36,7 +36,6 @@ class ActionHandler extends HTMLElement implements ActionHandlerMock {
     }
 
     if (element.actionHandler) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       element.removeEventListener('click', element.actionHandler.end!);
     }
     element.actionHandler = { options };
@@ -100,7 +99,7 @@ export const actionHandler = directive(
       actionHandlerBind(part.element as ActionHandlerElement, options);
       return noChange;
     }
-    // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     render(_options?: ActionHandlerOptions) {}
   },
 );
