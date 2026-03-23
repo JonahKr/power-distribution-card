@@ -63,23 +63,21 @@ export class ItemEditor extends LitElement {
         return html`
             <div class="card-config">
                 <div class="toolbar">
-                <paper-tabs
-                    .selected=${selected}
-                    scrollable
-                    @iron-activate=${this._selectBar}
-                >
+                <ha-tab-group @wa-tab-show=${this._selectBar}>
                     ${this.config.map(
-            (_card, i) => html` <paper-tab> ${i + 1} </paper-tab> `
+            (_card, i) => html`
+                        <ha-tab-group-tab
+                            slot="nav"
+                            .panel=${i}
+                            .active=${i === selected}
+                        >${i + 1}</ha-tab-group-tab>`
         )}
-                </paper-tabs>
-                <paper-tabs
+                </ha-tab-group>
+                <ha-icon-button
                     id="add-bar"
-                    @iron-activate=${this._addBar}
-                >
-                    <paper-tab>
-                    <ha-svg-icon .path=${mdiPlus}></ha-svg-icon>
-                    </paper-tab>
-                </paper-tabs>
+                    .path=${mdiPlus}
+                    @click=${this._addBar}
+                ></ha-icon-button>
                 </div>
             </div>
 
@@ -150,8 +148,8 @@ export class ItemEditor extends LitElement {
         fireCustomEvent(this, "config-changed", this.config);
     }
 
-    protected _selectBar(ev: CustomEvent<{ selected: string }>) {
-        this._selectedCard = parseInt(ev.detail.selected, 10);
+    protected _selectBar(ev: CustomEvent<{ name: string }>) {
+        this._selectedCard = parseInt(ev.detail.name, 10);
     }
 
     protected _moveRight() {
@@ -194,17 +192,13 @@ export class ItemEditor extends LitElement {
             css`
             .toolbar {
               display: flex;
-              --paper-tabs-selection-bar-color: var(--primary-color);
-              --paper-tab-ink: var(--primary-color);
+              justify-content: space-between;
+              align-items: center;
             }
-            paper-tabs {
-              display: flex;
-              font-size: 14px;
+            ha-tab-group {
               flex-grow: 1;
-            }
-            #add-bar {
-              max-width: 32px;
-              padding: 0;
+              min-width: 0;
+              --ha-tab-track-color: var(--card-background-color);
             }
     
             #bar-options {
