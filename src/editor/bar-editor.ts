@@ -1,5 +1,6 @@
 import { LitElement, html, css, nothing, CSSResultGroup } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
+import { BAR_EDITOR_TAG } from '../card-tags';
 
 import { HomeAssistant } from 'custom-card-helpers';
 
@@ -42,7 +43,6 @@ const SCHEMA: HaFormSchema[] = [
 
 
 
-@customElement('power-distribution-card-bar-editor')
 export class ItemEditor extends LitElement {
 
     @property({ attribute: false }) hass?: HomeAssistant;
@@ -227,3 +227,5 @@ export class ItemEditor extends LitElement {
     }
 
 }
+
+customElements.define(BAR_EDITOR_TAG, ItemEditor);

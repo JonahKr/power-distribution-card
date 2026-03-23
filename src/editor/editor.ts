@@ -1,5 +1,7 @@
 import { LitElement, TemplateResult, html, css, CSSResultGroup, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { html as staticHtml, unsafeStatic } from 'lit/static-html.js';
+import { property, state } from 'lit/decorators.js';
+import { EDITOR_TAG, ITEM_EDITOR_TAG, BAR_EDITOR_TAG, ITEMS_EDITOR_TAG } from '../card-tags';
 
 
 import { mdiClose, mdiPencil } from '@mdi/js';
@@ -42,7 +44,6 @@ const SCHEMA: HaFormSchema[] = [
   { name: 'animation', selector: { select: { options: animation, mode: 'dropdown' } }, required: true },
 ];
 
-@customElement('power-distribution-card-editor')
 export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
   @property({ attribute: false }) public hass?: HomeAssistant;
 
@@ -122,7 +123,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
 
         // Specific Case
         if (target.configValue == 'center.type') {
-          value = target.value;
+          value = detail.value;
         }
 
         // We split the target configValue by '.' to allow for nested config values of depth 1
@@ -165,11 +166,9 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
           label="${localize('editor.settings.center')}"
           .configValue=${'center.type'}
           @selected=${this._valueChanged}
-          @closed=${(ev) => ev.stopPropagation()}
           .value=${this._config?.center?.type || 'none'}
-        >
-          ${center.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
-        </ha-select>
+          .options=${center.map((val) => ({ value: val, label: val }))}
+        ></ha-select>
         ${this._config?.center?.type != 'none'
         ? html`<ha-icon-button
               class="edit-icon"
@@ -180,14 +179,13 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         : ''}
         </div>
         <br />
-        <power-distribution-card-items-editor
+        ${staticHtml`<${unsafeStatic(ITEMS_EDITOR_TAG)}
           .hass=${this.hass}
           .entities=${this._config.entities}
           .configValue=${'entities'}
           @edit-item=${this._enableItemEditor}
           @config-changed=${this._valueChanged}
-        >
-        </power-distribution-card-items-editor>
+        ></${unsafeStatic(ITEMS_EDITOR_TAG)}>`}
       </div>
     `;
   }
@@ -198,14 +196,11 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       return nothing;
     }
 
-    return html`
-      <power-distribution-card-item-editor
-        .hass=${this.hass}
-        .config=${this._config.entities[index]}
-        @config-changed=${this._itemChanged}
-      >
-      </power-distribution-card-item-editor>
-    `;
+    return staticHtml`<${unsafeStatic(ITEM_EDITOR_TAG)}
+      .hass=${this.hass}
+      .config=${this._config.entities[index]}
+      @config-changed=${this._itemChanged}
+    ></${unsafeStatic(ITEM_EDITOR_TAG)}>`;
   }
 
   /**
@@ -214,15 +209,12 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
    * This Bar Editor allows the user to easily add and remove new bars.
    */
   protected _renderBarEditor() {
-    return html`
-      <power-distribution-card-bar-editor
-        .hass=${this.hass}
-        .config=${this._config.center.content as BarSettings[]}
-        .configValue=${'center.content'}
-        @config-changed=${this._valueChanged}
-      >
-      </power-distribution-card-bar-editor>
-    `;
+    return staticHtml`<${unsafeStatic(BAR_EDITOR_TAG)}
+      .hass=${this.hass}
+      .config=${this._config.center.content as BarSettings[]}
+      .configValue=${'center.content'}
+      @config-changed=${this._valueChanged}
+    ></${unsafeStatic(BAR_EDITOR_TAG)}>`;
   }
 
   protected log(ev) {
@@ -253,14 +245,11 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     const index = this._subElementEditor?.index;
     switch (this._subElementEditor?.type) {
       case 'entity':
-        subel.push(html`
-          <power-distribution-card-item-editor
-            .hass=${this.hass}
-            .config=${this._config.entities[this._subElementEditor?.index || 0]}
-            @config-changed=${this._itemChanged}
-          >
-          </power-distribution-card-item-editor>
-          `);
+        subel.push(staticHtml`<${unsafeStatic(ITEM_EDITOR_TAG)}
+          .hass=${this.hass}
+          .config=${this._config.entities[this._subElementEditor?.index || 0]}
+          @config-changed=${this._itemChanged}
+        ></${unsafeStatic(ITEM_EDITOR_TAG)}>`);
         break;
       case 'bars':
         subel.push(this._barEditor());
@@ -402,3 +391,5 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     ];
   }
 }
+
+customElements.define(EDITOR_TAG, PowerDistributionCardEditor);

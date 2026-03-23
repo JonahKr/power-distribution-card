@@ -22,7 +22,8 @@
   },
   "homepage": "https://github.com/JonahKr/power-distribution-card#readme",
   "scripts": {
-    "start": "rollup -c --watch",
+    "start": "BUILD_DEV=true rollup -c --watch",
+    "serve": "http-server dist/ --cors -p 5000",
     "build": "pnpm run rollup",
     "lint": "eslint src/*.ts",
     "rollup": "rollup -c"
@@ -42,6 +43,7 @@
     "@rollup/plugin-commonjs": "25.0.7",
     "@rollup/plugin-json": "6.1.0",
     "@rollup/plugin-node-resolve": "16.0.3",
+    "@rollup/plugin-replace": "^6.0.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.5",
     "@types/sortablejs": "^1.15.7",
@@ -52,6 +54,7 @@
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-import": "2.29.1",
     "eslint-plugin-prettier": "5.1.2",
+    "http-server": "^14.1.1",
     "prettier": "3.1.1",
     "rollup": "4.9.3",
     "typescript": "5.3.3"

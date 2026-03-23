@@ -18,9 +18,8 @@ import { actionHandler } from './action-handler';
 
 import './editor/editor';
 
-
 import { ActionHandlerEvent, handleAction, hasAction, HomeAssistant, LovelaceCard, LovelaceCardConfig, registerCustomCard } from './utils';
-
+import { CARD_TAG, EDITOR_TAG } from './card-tags';
 
 console.info(
   `%c POWER-DISTRIBUTION-CARD %c ${version} `,
@@ -28,18 +27,16 @@ console.info(
   `font-weight: 500; color: #f6aa1c; background: #220901;`,
 );
 
-const CARD_NAME = 'power-distribution-card';
+registerCustomCard(CARD_TAG, 'Power Distribution Card', localize('common.description'));
 
-registerCustomCard(CARD_NAME, 'Power Distribution Card', localize('common.description'));
-
-@customElement(CARD_NAME)
+@customElement(CARD_TAG)
 export class PowerDistributionCard extends LitElement {
   /**
    * Function for creating the editor for the power-distribution-card
    */
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
     await import('./editor/editor');
-    return document.createElement('power-distribution-card-editor') as LovelaceCardEditor;
+    return document.createElement(EDITOR_TAG) as LovelaceCardEditor;
   }
 
   /**

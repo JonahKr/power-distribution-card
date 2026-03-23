@@ -3,7 +3,8 @@ import { LitElement, html } from 'lit';
 import { HomeAssistant } from 'custom-card-helpers';
 import { EditorTarget, EntitySettings, HTMLElementValue } from '../types';
 import { localize } from '../localize/localize';
-import { customElement, property } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
+import { ITEMS_EDITOR_TAG } from '../card-tags';
 import { repeat } from 'lit/directives/repeat.js';
 import { css, CSSResult, nothing } from 'lit';
 import { mdiClose, mdiPencil, mdiPlusCircleOutline } from '@mdi/js';
@@ -16,11 +17,12 @@ import { fireCustomEvent, fireEvent } from '../utils';
 
 SortableCore.mount(OnSpill, new AutoScroll());
 
-@customElement('power-distribution-card-items-editor')
 export class ItemsEditor extends LitElement {
   @property({ attribute: false }) entities?: EntitySettings[];
 
   @property({ attribute: false }) hass?: HomeAssistant;
+
+  @state() private _selectedPreset: string = PresetList[0];
 
   private _sortable?: Sortable;
 
@@ -88,7 +90,6 @@ export class ItemsEditor extends LitElement {
                   <ha-icon icon="mdi:drag"></ha-icon>
                 </div>
                 <ha-entity-picker
-                  label="Entity - ${entityConf.preset}"
                   allow-custom-entity
                   hideClearIcon
                   .hass=${this.hass}
@@ -123,14 +124,11 @@ export class ItemsEditor extends LitElement {
       <div class="add-item row">
         <ha-select
           label="${localize('editor.settings.preset')}"
-          name="preset"
           class="add-preset"
-          naturalMenuWidth
-          fixedMenuPosition
-          @closed=${(ev) => ev.stopPropagation()}
-        >
-          ${PresetList.map((val) => html`<mwc-list-item .value=${val}>${val}</mwc-list-item>`)}
-        </ha-select>
+          .value=${this._selectedPreset}
+          .options=${PresetList.map((val) => ({ value: val, label: val }))}
+          @selected=${(ev: CustomEvent<{ value: string }>) => { this._selectedPreset = ev.detail.value; }}
+        ></ha-select>
 
         <ha-entity-picker .hass=${this.hass} name="entity" class="add-entity"></ha-entity-picker>
 
@@ -185,7 +183,7 @@ export class ItemsEditor extends LitElement {
       return;
     }
 
-    const preset = (this.shadowRoot!.querySelector('.add-preset') as HTMLElementValue).value || 'placeholder';
+    const preset = this._selectedPreset || 'placeholder';
     const entity_id = (this.shadowRoot!.querySelector('.add-entity') as HTMLElementValue).value;
 
     const item = Object.assign({}, DefaultItem, PresetObject[preset], {
@@ -334,6 +332,8 @@ export class ItemsEditor extends LitElement {
     `;
   }
 }
+
+customElements.define(ITEMS_EDITOR_TAG, ItemsEditor);
 
 // <div class="entities">
 //         ${repeat(

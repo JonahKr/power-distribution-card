@@ -1,12 +1,13 @@
 import { LitElement, TemplateResult, html, css, CSSResult, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
+import { ITEM_EDITOR_TAG } from '../card-tags';
 
 import { EditorTarget, EntitySettings } from '../types';
 import { computeLabel, localize } from '../localize/localize';
 import { PresetList } from '../presets';
 import { actions } from '../action-handler';
 import { HaFormSchema } from './ha-form';
-import { HomeAssistant } from '../utils';
+import { fireEvent, HomeAssistant } from '../utils';
 
 const  SCHEMA: HaFormSchema[] = [
   {
@@ -95,7 +96,6 @@ const  SCHEMA: HaFormSchema[] = [
   }
 ];
 
-@customElement('power-distribution-card-item-editor')
 export class ItemEditor extends LitElement {
   @property({ attribute: false }) config?: EntitySettings;
 
@@ -421,7 +421,7 @@ export class ItemEditor extends LitElement {
       return;
     }
 
-    fireEvent<EntitySettings>(this, 'config-changed', { ...this.config, [configValue]: value });
+    fireEvent<any>(this, 'config-changed', { ...this.config, [configValue]: value });
   }
 
   private _colorChanged(ev: CustomEvent): void {
@@ -444,7 +444,7 @@ export class ItemEditor extends LitElement {
     // Skip if no configValue or value is the same
     if (!configValue || this.config[thing] === color_set) return;
 
-    fireEvent<EntitySettings>(this, 'config-changed', { ...this.config, [thing]: color_set });
+    fireEvent<any>(this, 'config-changed', { ...this.config, [thing]: color_set });
   }
 
   static get styles(): CSSResult {
@@ -478,3 +478,5 @@ export class ItemEditor extends LitElement {
     `;
   }
 }
+
+customElements.define(ITEM_EDITOR_TAG, ItemEditor);
