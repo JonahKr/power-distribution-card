@@ -70,9 +70,8 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       html`
         <div class="header">
           <div class="back-title">
-            <mwc-icon-button @click=${this._goBack}>
-              <ha-icon icon="mdi:arrow-left"></ha-icon>
-            </mwc-icon-button>
+            <ha-icon-button-arrow-prev @click=${this._goBack}>
+            </ha-icon-button-arrow-prev>
           </div>
         </div>`,
     ];
@@ -236,9 +235,9 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       html`
         <div class="header">
           <div class="back-title">
-            <mwc-icon-button @click=${this._goBack}>
+            <ha-icon-button @click=${this._goBack}>
               <ha-icon icon="mdi:arrow-left"></ha-icon>
-            </mwc-icon-button>
+            </ha-icon-button>
           </div>
         </div>`,
     ];
