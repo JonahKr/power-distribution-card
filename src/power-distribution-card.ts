@@ -21,6 +21,7 @@ import './editor/editor';
 
 import { ActionHandlerEvent, handleAction, hasAction, HomeAssistant, LovelaceCard, LovelaceCardConfig, registerCustomCard } from './utils';
 import { CARD_TAG, EDITOR_TAG } from './card-tags';
+import { computeCssColor } from './utils/compute-color';
 
 console.info(
   `%c POWER-DISTRIBUTION-CARD %c ${version} `,
@@ -88,7 +89,6 @@ export class PowerDistributionCard extends LitElement {
 
   public firstUpdated(): void {
     const _config = this._config;
-    console.log("firstUpdated");
 
     //unit-of-measurement Auto Configuration from hass element
     _config.entities.forEach((item, index) => {
@@ -383,6 +383,7 @@ export class PowerDistributionCard extends LitElement {
       if (state > ct) icon_color = item.icon_color.bigger;
       if (state < ct) icon_color = item.icon_color.smaller;
       if (state == ct) icon_color = item.icon_color.equal;
+      if (icon_color) icon_color = computeCssColor(icon_color);
     }
     // Arrow color
     let arrow_color: string | undefined;
@@ -390,6 +391,7 @@ export class PowerDistributionCard extends LitElement {
       if (state > ct) arrow_color = item.arrow_color.bigger;
       if (state < ct) arrow_color = item.arrow_color.smaller;
       if (state == ct) arrow_color = item.arrow_color.equal;
+      if (arrow_color) arrow_color = computeCssColor(arrow_color);
     }
 
     //NaNFlag for Offline Sensors for example
@@ -492,8 +494,8 @@ export class PowerDistributionCard extends LitElement {
           style="${element.tap_action || element.double_tap_action ? 'cursor: pointer;' : ''}"
         >
           <p class="bar-percentage">${value}${element.unit_of_measurement || '%'}</p>
-          <div class="bar-wrapper" style="${element.bar_bg_color ? `background-color:${element.bar_bg_color};` : ''}">
-            <bar style="height:${value}%; background-color:${element.bar_color};" />
+          <div class="bar-wrapper" style="${element.bar_bg_color ? `background-color:${computeCssColor(element.bar_bg_color)};` : ''}">
+            <bar style="height:${value}%; background-color:${element.bar_color ? computeCssColor(element.bar_color) : ''};" />
           </div>
           <p>${element.name || ''}</p>
         </div>
