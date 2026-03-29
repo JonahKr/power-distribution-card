@@ -5,9 +5,9 @@ import { BAR_EDITOR_TAG } from '../card-tags';
 import { HomeAssistant } from 'custom-card-helpers';
 
 import { BarSettings } from '../types';
-import { computeLabel } from '../localize/localize';
-import { mdiDelete, mdiPlus } from '@mdi/js';
+import { localize } from '../localize/localize';
 import { HaFormSchema } from './ha-form';
+import { mdiDelete, mdiPlus } from '@mdi/js';
 import { deepEqual } from '../deep-equal';
 import { fireCustomEvent } from '../utils';
 
@@ -19,16 +19,16 @@ const SCHEMA: HaFormSchema[] = [
         name: "",
         schema: [
             { name: "entity", selector: { entity: {} } },
-            { name: "name", selector: { text: {} } },
             { name: "preset", selector: { select: { options: BAR_PRESETS, mode: 'dropdown' } } },
         ]
     },
+    { name: "name", selector: { text: {} } },
     {
         type: "grid",
         name: "",
         schema: [
-            { name: "color", selector: { text: {} } },
-            { name: "background_color", selector: { text: {}, } },
+            { name: "bar_color", selector: { ui_color: {} } },
+            { name: "bar_bg_color", selector: { ui_color: {} } },
         ]
     },
     {
@@ -50,6 +50,15 @@ export class ItemEditor extends LitElement {
     @property({ attribute: false }) config?: BarSettings[];
 
     @state() protected _selectedCard = 0;
+
+    private _computeLabel = (schema: HaFormSchema) => {
+        const nameMap: Record<string, string> = {
+            bar_color: 'color',
+            bar_bg_color: 'background_color',
+        };
+        const name = nameMap[schema.name] ?? schema.name;
+        return localize('editor.settings.' + name);
+    };
 
     protected render() {
 
@@ -114,7 +123,7 @@ export class ItemEditor extends LitElement {
                     .hass=${this.hass}
                     .data=${this.config[selected]}
                     .schema=${SCHEMA}
-                    .computeLabel=${computeLabel}
+                    .computeLabel=${this._computeLabel}
                     @value-changed=${this.valueChanged}
                 ></ha-form>
             </div>

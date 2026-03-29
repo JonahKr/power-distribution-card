@@ -27,6 +27,7 @@ const  SCHEMA: HaFormSchema[] = [
   {
     name: "Value Settings",
     type: "expandable",
+    flatten: true,
     title: localize('editor.settings.value', true) + " " +localize('editor.settings.settings', true),
     schema: [
       {
@@ -39,6 +40,7 @@ const  SCHEMA: HaFormSchema[] = [
             { name: "display_abs", type: "boolean"},
             { name: "calc_excluded", type: "boolean"},
             { name: "threshold", selector: { number: { } } },
+            { name: "color_threshold", selector: { number: { } } },
         ]
       }
     ]
@@ -46,6 +48,7 @@ const  SCHEMA: HaFormSchema[] = [
   {
     name: "Secondary Info",
     type: "expandable",
+    flatten: true,
     title: localize('editor.settings.secondary_info', true),
     schema: [
       { name: "secondary_info_entity",
@@ -54,15 +57,16 @@ const  SCHEMA: HaFormSchema[] = [
         type: "grid",
         name: "",
         schema: [
-            { name: "secondary_info_attribute", selector: { attribute: {}}, context: { filter_entity: "secondary_info_entity" }},
-            { name: "secondary_info_replace_name", type: "boolean"},
+            { name: "secondary_info_attribute", selector: { attribute: {}}},
         ]
-      }
+      },
+      { name: "secondary_info_replace_name", type: "boolean"},
     ]
   },
   {
     name: "Action Settings",
     type: "expandable",
+    flatten: true,
     title: localize('editor.settings.action_settings', true),
     schema: [
       {
@@ -84,37 +88,57 @@ const  SCHEMA: HaFormSchema[] = [
   {
     name: "Color Settings",
     type: "expandable",
+    flatten: true,
     title: localize('editor.settings.color_settings', true),
     schema: [
       {
         type: "grid",
         name: "",
         schema: [
+          { name: "icon_color_bigger", selector: { ui_color: {} } },
+          { name: "icon_color_equal", selector: { ui_color: {} } },
+          { name: "icon_color_smaller", selector: { ui_color: {} } },
+          { name: "arrow_color_bigger", selector: { ui_color: {} } },
+          { name: "arrow_color_equal", selector: { ui_color: {} } },
+          { name: "arrow_color_smaller", selector: { ui_color: {} } },
         ]
       }
     ]
   }
 ];
 
+
 export class ItemEditor extends LitElement {
   @property({ attribute: false }) config?: EntitySettings;
 
   @property({ attribute: false }) hass?: HomeAssistant;
+
+  private get _flatConfig() {
+    const c = this.config!;
+    return {
+      ...c,
+      icon_color_bigger: c.icon_color?.bigger,
+      icon_color_equal: c.icon_color?.equal,
+      icon_color_smaller: c.icon_color?.smaller,
+      arrow_color_bigger: c.arrow_color?.bigger,
+      arrow_color_equal: c.arrow_color?.equal,
+      arrow_color_smaller: c.arrow_color?.smaller,
+    };
+  }
 
   protected render() {
     // If its a placeholder, don't render anything
     if (!this.hass || !this.config || this.config.preset == 'placeholder') {
       return nothing;
     }
-    const item = this.config;
 
     return html`
       <ha-form
         .hass=${this.hass}
-        .data=${this.config}
+        .data=${this._flatConfig}
         .schema=${SCHEMA}
         .computeLabel=${computeLabel}
-        @value-changed=${console.log}
+        @value-changed=${this._formValueChanged}
       ></ha-form>
     `;
   }
@@ -160,6 +184,26 @@ export class ItemEditor extends LitElement {
       default:
         return html``;
     }
+  }
+
+  private _formValueChanged(ev: CustomEvent): void {
+    ev.stopPropagation();
+    if (!this.config || !this.hass) return;
+
+    const {
+      icon_color_bigger, icon_color_equal, icon_color_smaller,
+      arrow_color_bigger, arrow_color_equal, arrow_color_smaller,
+      ...rest
+    } = ev.detail.value;
+
+    const icon_color = (icon_color_bigger || icon_color_equal || icon_color_smaller)
+      ? { bigger: icon_color_bigger || undefined, equal: icon_color_equal || undefined, smaller: icon_color_smaller || undefined }
+      : undefined;
+    const arrow_color = (arrow_color_bigger || arrow_color_equal || arrow_color_smaller)
+      ? { bigger: arrow_color_bigger || undefined, equal: arrow_color_equal || undefined, smaller: arrow_color_smaller || undefined }
+      : undefined;
+
+    fireEvent<any>(this, 'config-changed', { ...rest, icon_color, arrow_color });
   }
 
   private _valueChanged(ev: CustomEvent): void {

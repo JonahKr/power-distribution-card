@@ -150,6 +150,7 @@ export type Selector =
   | BooleanSelector
   | ColorRGBSelector
   | ColorTempSelector
+  | UiColorSelector
   | DateSelector
   | DateTimeSelector
   | DeviceSelector
@@ -210,6 +211,11 @@ export interface BooleanSelector {
 export interface ColorRGBSelector {
   // eslint-disable-next-line @typescript-eslint/ban-types
   color_rgb: {};
+}
+
+export interface UiColorSelector {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  ui_color: {};
 }
 
 export interface ColorTempSelector {
