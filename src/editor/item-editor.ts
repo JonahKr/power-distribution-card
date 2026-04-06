@@ -46,6 +46,7 @@ const BASE_SCHEMA: HaFormSchema[] = [
             { name: "decimals", selector: { number: { step: 1} } },
             { name: "invert_value", type: "boolean"},
             { name: "display_abs", type: "boolean"},
+            { name: "hide_arrows", type: "boolean"},
             { name: "calc_excluded", type: "boolean"},
             { name: "threshold", selector: { number: { } } },
         ]

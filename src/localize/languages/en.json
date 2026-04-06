@@ -1,19 +1,14 @@
 {
   "common": {
-    "version": "Version",
-    "description": "A Lovelace Card for visualizing power distributions.",
-    "invalid_configuration": "Invalid configuration",
-    "show_warning": "Show Warning"
+    "description": "A Lovelace Card for visualizing power distributions."
   },
   "editor": {
     "actions": {
       "add": "Add",
       "edit": "Edit",
-      "remove": "Remove",
-      "save": "Save"
+      "remove": "Remove"
     },
     "optional": "Optional",
-    "required": "Required",
     "settings": {
       "action_settings": "Action Settings",
       "animation": "Animation",
@@ -21,7 +16,12 @@
       "attribute": "Attribute",
       "background_color": "Background Color",
       "battery_percentage": "Battery Charge %",
-      "bigger": "Bigger",
+      "arrow_color_bigger": "Arrow - Bigger",
+      "arrow_color_equal": "Arrow - Equal",
+      "arrow_color_smaller": "Arrow - Smaller",
+      "icon_color_bigger": "Icon - Bigger",
+      "icon_color_equal": "Icon - Equal",
+      "icon_color_smaller": "Icon - Smaller",
       "calc_excluded": "Excluded from Calculations",
       "center": "Center",
       "color": "Color",
@@ -32,22 +32,21 @@
       "double_tap_action": "Double Tap Action",
       "entities": "Entities",
       "entity": "Entity",
-      "equal": "Equal",
+      "general_settings": "General Settings",
       "grid_buy": "Grid Buy",
       "grid_sell": "Grid Sell",
       "hide_arrows": "Hide Arrows",
+      "preset_settings": "Preset Settings",
       "icon": "Icon",
       "invert_value": "Invert Value",
       "name": "Name",
       "preset": "Preset",
       "ratio": "ratio",
-      "replace_name": "Replace Name",
       "secondary_info": "Secondary Info",
       "secondary_info_entity": "Entity",
       "secondary_info_attribute": "Attribute",
       "secondary_info_replace_name": "Replace Name",
       "settings": "Settings",
-      "smaller": "Smaller",
       "tap_action": "Tap Action",
       "threshold": "Threshold",
       "title": "Title",
