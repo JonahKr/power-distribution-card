@@ -166,6 +166,16 @@ export class PowerDistributionCard extends LitElement {
     this._narrow = card.offsetWidth < 400;
   }
 
+
+  private _formatValue(rawValue: number, entity?: string, decimals?: number):  [string, number] {
+    const precision = decimals != null
+      ? decimals
+      : (entity ? (this.hass.entities[entity]?.display_precision ?? 2) : 2);
+    const factor = 10 ** precision;
+    const rounded = Math.round(rawValue * factor) / factor;
+    return [formatNumber(rounded, this.hass.locale), rounded];
+  }
+
   /**
    * Retrieving the sensor value of hass for a Item as a number
    * @param item a Settings object
@@ -304,16 +314,17 @@ export class PowerDistributionCard extends LitElement {
       }
     }
 
-    //Decimal Precision
-    const haDisplayPrecision = item.entity ? (this.hass.entities[item.entity]?.display_precision ?? 2) : 2;
-    const decFakTen = 10 ** (item.decimals != null ? item.decimals : haDisplayPrecision);
-    math_value = Math.round(math_value * decFakTen) / decFakTen;
     // Arrow directions
     const state = item.invert_arrow ? math_value * -1 : math_value;
-    //Toggle Absolute Values
+
+    // Toggle Absolute Values
     math_value = item.display_abs ? Math.abs(math_value) : math_value;
-    //Format Number
-    const formatValue = formatNumber(math_value, this.hass.locale);
+
+    // Decimal Precision
+    let [formatValue, formatted_math_value] = this._formatValue(math_value, item.entity, item.decimals);
+
+    //NaNFlag for Offline Sensors for example
+    const NanFlag = isNaN(formatted_math_value);
 
     // Secondary info
     let secondary_info: string | undefined;
@@ -323,12 +334,7 @@ export class PowerDistributionCard extends LitElement {
           this._state({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute }) + '';
       } else {
         const siRaw = this._state({ entity: item.secondary_info_entity }) as number;
-        const siPrecision = item.secondary_info_decimals != null
-          ? item.secondary_info_decimals
-          : (this.hass.entities[item.secondary_info_entity]?.display_precision ?? 2);
-        const siFakTen = 10 ** siPrecision;
-        const siValue = Math.round(siRaw * siFakTen) / siFakTen;
-        secondary_info = `${formatNumber(siValue, this.hass.locale)}${this._state({ entity: item.secondary_info_entity, attribute: 'unit_of_measurement' }) || ''}`;
+        secondary_info = `${this._formatValue(siRaw, item.secondary_info_entity, item.secondary_info_decimals)[0]}${this._state({ entity: item.secondary_info_entity, attribute: 'unit_of_measurement' }) || ''}`;
       }
     }
     // Secondary info replace name
@@ -357,12 +363,20 @@ export class PowerDistributionCard extends LitElement {
     let grid_buy_sell = html``;
     if (item.preset === 'grid' && (item.grid_buy_entity || item.grid_sell_entity)) {
       nameReplaceFlag = true;
+
+      const gridBuyValue = item.grid_buy_entity
+        ? this._formatValue(this._val({ entity: item.grid_buy_entity }), item.grid_buy_entity, item.decimals)[0]
+        : undefined;
+      const gridSellValue = item.grid_sell_entity
+        ? this._formatValue(this._val({ entity: item.grid_sell_entity }), item.grid_sell_entity, item.decimals)[0]
+        : undefined;
+
       grid_buy_sell = html`
         <div class="buy-sell">
           ${item.grid_buy_entity
           ? html`<div class="grid-buy">
                 B:
-                ${this._val({ entity: item.grid_buy_entity })}${this._state({
+                ${gridBuyValue}${this._state({
             entity: item.grid_buy_entity,
             attribute: 'unit_of_measurement',
           }) || undefined}
@@ -371,7 +385,7 @@ export class PowerDistributionCard extends LitElement {
           ${item.grid_sell_entity
           ? html`<div class="grid-sell">
                 S:
-                ${this._val({ entity: item.grid_sell_entity })}${this._state({
+                ${gridSellValue}${this._state({
             entity: item.grid_sell_entity,
             attribute: 'unit_of_measurement',
           }) || undefined}
@@ -399,9 +413,6 @@ export class PowerDistributionCard extends LitElement {
       if (state == ct) arrow_color = item.arrow_color.equal;
       if (arrow_color) arrow_color = computeCssColor(arrow_color);
     }
-
-    //NaNFlag for Offline Sensors for example
-    const NanFlag = isNaN(math_value);
 
     return html`
       <item
