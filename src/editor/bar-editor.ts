@@ -14,15 +14,15 @@ import { fireCustomEvent } from '../utils';
 const BAR_PRESETS = ['autarky', 'ratio', ''];
 
 const SCHEMA: HaFormSchema[] = [
+    { name: "entity", selector: { entity: {} } },
     {
         type: "grid",
         name: "",
         schema: [
-            { name: "entity", selector: { entity: {} } },
+            { name: "name", selector: { text: {} } },
             { name: "preset", selector: { select: { options: BAR_PRESETS, mode: 'dropdown' } } },
         ]
     },
-    { name: "name", selector: { text: {} } },
     {
         type: "grid",
         name: "",
@@ -94,7 +94,7 @@ export class ItemEditor extends LitElement {
                 <div id="bar-options">
                     <ha-icon-button-arrow-prev
                         .disabled=${selected === 0}
-                        .label=${this.hass!.localize(
+                        .label=${this.hass.localize(
             "ui.panel.lovelace.editor.edit_card.move_before"
         )}
                         @click=${this._moveLeft}
@@ -102,7 +102,7 @@ export class ItemEditor extends LitElement {
                     ></ha-icon-button-arrow-prev>
 
                     <ha-icon-button-arrow-next
-                        .label=${this.hass!.localize(
+                        .label=${this.hass.localize(
             "ui.panel.lovelace.editor.edit_card.move_after"
         )}
                         .disabled=${selected === numBars - 1}
@@ -111,7 +111,7 @@ export class ItemEditor extends LitElement {
                     ></ha-icon-button-arrow-next>
 
                     <ha-icon-button
-                        .label=${this.hass!.localize(
+                        .label=${this.hass.localize(
             "ui.panel.lovelace.editor.edit_card.delete"
         )}
                         .path=${mdiDelete}
