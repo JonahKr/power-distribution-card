@@ -502,7 +502,7 @@ export class PowerDistributionCard extends LitElement {
       })}
           style="${element.tap_action || element.double_tap_action ? 'cursor: pointer;' : ''}"
         >
-          <p class="bar-percentage">${rawValue}${element.unit_of_measurement || '%'}</p>
+          <p class="bar-percentage">${Math.round(barHeight)}${element.unit_of_measurement || '%'}</p>
           <div class="bar-wrapper" style="${element.bar_bg_color ? `background-color:${computeCssColor(element.bar_bg_color)};` : ''}">
             <bar style="height:${barHeight}%; background-color:${element.bar_color ? computeCssColor(element.bar_color) : ''};" />
           </div>
