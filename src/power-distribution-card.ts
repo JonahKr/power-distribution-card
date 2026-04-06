@@ -101,7 +101,7 @@ export class PowerDistributionCard extends LitElement {
 
     //unit-of-measurement Auto Configuration from hass element
     _config.entities.forEach((item, index) => {
-      if (item.entity && item.unit_of_measurement) {
+      if (item.entity && !item.unit_of_measurement) {
         const hass_uom = this._state({ entity: item.entity, attribute: 'unit_of_measurement' }) as string;
         this._config.entities[index].unit_of_measurement = hass_uom || 'W';
       }
@@ -130,8 +130,6 @@ export class PowerDistributionCard extends LitElement {
     //Resize Observer
     this._adjustWidth();
     this._attachObserver();
-    //This is needed to prevent Rendering without the unit_of_measurements
-    this.requestUpdate();
   }
 
   protected updated(changedProps: PropertyValues): void {
@@ -347,8 +345,9 @@ export class PowerDistributionCard extends LitElement {
       }
     }
     // Secondary info replace name
+    let displayName = item.name;
     if (item.secondary_info_replace_name) {
-      item.name = secondary_info;
+      displayName = secondary_info;
       secondary_info = undefined;
     }
 
@@ -432,13 +431,13 @@ export class PowerDistributionCard extends LitElement {
         .actionHandler=${actionHandler({
       hasDoubleClick: hasAction(item.double_tap_action),
     })}
-    ">
+      >
         <badge>
           <icon>
             <ha-icon icon="${icon}" style="${icon_color ? `color:${icon_color};` : ''}"></ha-icon>
             ${secondary_info ? html`<p class="secondary">${secondary_info}</p>` : null}
           </icon>
-          ${nameReplaceFlag ? grid_buy_sell : html`<p class="subtitle">${item.name}</p>`}
+          ${nameReplaceFlag ? grid_buy_sell : html`<p class="subtitle">${displayName}</p>`}
         </badge>
         <value>
           <p>${NanFlag ? `` : formatValue} ${NanFlag ? `` : unit_of_display}</p>
@@ -458,7 +457,7 @@ export class PowerDistributionCard extends LitElement {
         )
         : html``
       }
-        <value
+        </value>
       </item>
     `;
   }
@@ -530,7 +529,7 @@ export class PowerDistributionCard extends LitElement {
         </div>
       `);
     });
-    return html`${bars.map((e) => html`${e}`)}`;
+    return html`${bars}`;
   }
 
   private _createCardElement(cardConfig: LovelaceCardConfig) {
