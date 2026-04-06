@@ -31,8 +31,7 @@
   "dependencies": {
     "@formatjs/intl-numberformat": "^9.3.1",
     "@mdi/js": "^7.4.47",
-    "lit": "3.3.2",
-    "sortablejs": "1.15.7"
+    "lit": "3.3.2"
   },
   "devDependencies": {
     "@babel/core": "7.29.0",
@@ -45,7 +44,6 @@
     "@rollup/plugin-replace": "^6.0.3",
     "@rollup/plugin-terser": "^1.0.0",
     "@rollup/plugin-typescript": "^12.3.0",
-    "@types/sortablejs": "^1.15.9",
     "@typescript-eslint/eslint-plugin": "8.57.2",
     "@typescript-eslint/parser": "8.57.2",
     "eslint": "10.1.0",

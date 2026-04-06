@@ -9,12 +9,7 @@ import { css, CSSResult, nothing } from 'lit';
 import { mdiClose, mdiPencil, mdiPlusCircleOutline } from '@mdi/js';
 import { DefaultItem, PresetList, PresetObject } from '../presets';
 
-import Sortable from 'sortablejs';
-import SortableCore, { OnSpill, AutoScroll, SortableEvent } from 'sortablejs/modular/sortable.core.esm';
-import { fireCustomEvent, fireEvent, HomeAssistant } from '../utils';
-
-
-SortableCore.mount(OnSpill, new AutoScroll());
+import { fireCustomEvent, HomeAssistant } from '../utils';
 
 export class ItemsEditor extends LitElement {
   @property({ attribute: false }) entities?: EntitySettings[];
@@ -22,8 +17,6 @@ export class ItemsEditor extends LitElement {
   @property({ attribute: false }) hass?: HomeAssistant;
 
   @state() private _selectedPreset: string = PresetList[0];
-
-  private _sortable?: Sortable;
 
   private _entityKeys = new WeakMap<EntitySettings, string>();
 
@@ -36,39 +29,7 @@ export class ItemsEditor extends LitElement {
   }
 
   public disconnectedCallback() {
-    this._destroySortable();
-  }
-
-  private _destroySortable() {
-    this._sortable?.destroy();
-    this._sortable = undefined;
-  }
-
-  protected async firstUpdated(): Promise<void> {
-    this._createSortable();
-  }
-
-  /**
-   * Creating the Sortable Element (https://github.com/SortableJS/sortablejs) used as a foundation
-   */
-  private _createSortable(): void {
-    this._sortable = new Sortable(this.shadowRoot!.querySelector('.entities')!, {
-      animation: 150,
-      fallbackClass: 'sortable-fallback',
-      handle: '.handle',
-      onChoose: (evt: SortableEvent) => {
-        (evt.item as any).placeholder = document.createComment('sort-placeholder');
-        evt.item.after((evt.item as any).placeholder);
-      },
-      onEnd: (evt: SortableEvent) => {
-        // put back in original location
-        if ((evt.item as any).placeholder) {
-          (evt.item as any).placeholder.replaceWith(evt.item);
-          delete (evt.item as any).placeholder;
-        }
-        this._rowMoved(evt);
-      },
-    });
+    super.disconnectedCallback();
   }
 
   protected render() {
@@ -193,71 +154,19 @@ export class ItemsEditor extends LitElement {
     fireCustomEvent<EntitySettings[]>(this, 'config-changed', [...this.entities, item]);
   }
 
-  private _rowMoved(ev: SortableEvent): void {
+  private _rowMoved(ev: CustomEvent<{ oldIndex: number; newIndex: number }>): void {
     ev.stopPropagation();
-    if (ev.oldIndex === ev.newIndex || !this.entities) return;
+    const { oldIndex, newIndex } = ev.detail;
+    if (oldIndex === newIndex || !this.entities) return;
 
     const newEntities = this.entities.concat();
-    newEntities.splice(ev.newIndex!, 0, newEntities.splice(ev.oldIndex!, 1)[0]);
+    newEntities.splice(newIndex, 0, newEntities.splice(oldIndex, 1)[0]);
 
     fireCustomEvent<EntitySettings[]>(this, 'config-changed', newEntities);
   }
 
   static get styles(): CSSResult {
     return css`
-      #sortable a:nth-of-type(2n) paper-icon-item {
-        animation-name: keyframes1;
-        animation-iteration-count: infinite;
-        transform-origin: 50% 10%;
-        animation-delay: -0.75s;
-        animation-duration: 0.25s;
-      }
-      #sortable a:nth-of-type(2n-1) paper-icon-item {
-        animation-name: keyframes2;
-        animation-iteration-count: infinite;
-        animation-direction: alternate;
-        transform-origin: 30% 5%;
-        animation-delay: -0.5s;
-        animation-duration: 0.33s;
-      }
-      #sortable a {
-        height: 48px;
-        display: flex;
-      }
-      #sortable {
-        outline: none;
-        display: block !important;
-      }
-      .sortable-fallback {
-        display: none;
-      }
-      .sortable-ghost {
-        opacity: 0.4;
-      }
-      .sortable-fallback {
-        opacity: 0;
-      }
-      @keyframes keyframes1 {
-        0% {
-          transform: rotate(-1deg);
-          animation-timing-function: ease-in;
-        }
-        50% {
-          transform: rotate(1.5deg);
-          animation-timing-function: ease-out;
-        }
-      }
-      @keyframes keyframes2 {
-        0% {
-          transform: rotate(1deg);
-          animation-timing-function: ease-in;
-        }
-        50% {
-          transform: rotate(-1.5deg);
-          animation-timing-function: ease-out;
-        }
-      }
-
       .entity,
       .add-item {
         display: flex;
