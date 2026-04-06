@@ -70,18 +70,19 @@ export class ItemEditor extends LitElement {
 
     protected render() {
 
-        if (!this.hass || !this.config) {
+        if (!this.hass) {
             return nothing;
         }
 
-        const selected = this._selectedCard!;
-        const numBars = this.config.length;
+        const config = this.config ?? [];
+        const selected = this._selectedCard;
+        const numBars = config.length;
 
         return html`
             <div class="card-config">
                 <div class="toolbar">
                 <ha-tab-group @wa-tab-show=${this._selectBar}>
-                    ${this.config.map(
+                    ${config.map(
             (_card, i) => html`
                         <ha-tab-group-tab
                             slot="nav"
@@ -98,6 +99,7 @@ export class ItemEditor extends LitElement {
                 </div>
             </div>
 
+            ${numBars > 0 ? html`
             <div id="editor">
                 <div id="bar-options">
                     <ha-icon-button-arrow-prev
@@ -129,12 +131,13 @@ export class ItemEditor extends LitElement {
 
                 <ha-form
                     .hass=${this.hass}
-                    .data=${this.config[selected]}
+                    .data=${config[selected]}
                     .schema=${SCHEMA}
                     .computeLabel=${this._computeLabel}
                     @value-changed=${this.valueChanged}
                 ></ha-form>
             </div>
+            ` : nothing}
         `;
     }
 
@@ -199,6 +202,10 @@ export class ItemEditor extends LitElement {
         const newConfig = this.config.slice();
         newConfig.splice(this._selectedCard, 1);
         this.config = newConfig;
+
+        if (this._selectedCard >= newConfig.length && newConfig.length > 0) {
+            this._selectedCard = newConfig.length - 1;
+        }
 
         fireCustomEvent(this, "config-changed", this.config);
     }

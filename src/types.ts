@@ -46,7 +46,8 @@ export interface EntitySettings extends presetFeatures {
 
 export interface center {
   type: 'none' | 'card' | 'bars';
-  content?: LovelaceCardConfig | BarSettings[];
+  bars?: BarSettings[];
+  card?: LovelaceCardConfig;
 }
 
 export interface presetFeatures {

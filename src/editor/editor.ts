@@ -9,7 +9,6 @@ import { mdiPencil } from '@mdi/js';
 import { getLovelace } from '../utils';
 import {
   PDCConfig,
-  BarSettings,
   EntitySettings,
   CustomValueEvent,
 } from '../types';
@@ -48,7 +47,23 @@ export class PowerDistributionCardEditor extends LitElement implements LitElemen
   @state() private _activeEditor: Editor = { type: 'main' };
 
   public setConfig(config: PDCConfig) {
-    this._config = config;
+    // Migrate old format: center.content -> center.bars or center.card
+    if (config.center && 'content' in config.center) {
+      const oldContent = (config.center as any).content;
+      const { content: _removed, ..._centerWithoutContent } = config.center as any;
+      let newCenter: PDCConfig['center'];
+      if (config.center.type === 'bars') {
+        newCenter = { ..._centerWithoutContent, bars: oldContent };
+      } else if (config.center.type === 'card') {
+        newCenter = { ..._centerWithoutContent, card: oldContent };
+      } else {
+        newCenter = _centerWithoutContent;
+      }
+      this._config = { ...config, center: newCenter };
+      fireEvent(this, 'config-changed', { config: this._config });
+    } else {
+      this._config = config;
+    }
   }
 
   protected firstUpdated() {
@@ -209,8 +224,8 @@ export class PowerDistributionCardEditor extends LitElement implements LitElemen
   protected _renderBarEditor() {
     return staticHtml`<${unsafeStatic(BAR_EDITOR_TAG)}
       .hass=${this.hass}
-      .config=${this._config.center.content as BarSettings[]}
-      .configValue=${'center.content'}
+      .config=${this._config.center.bars}
+      .configValue=${'center.bars'}
       @config-changed=${this._valueChanged}
     ></${unsafeStatic(BAR_EDITOR_TAG)}>`;
   }
@@ -253,7 +268,7 @@ export class PowerDistributionCardEditor extends LitElement implements LitElemen
 
 
   private _renderCardEditor(): TemplateResult {
-    const card = this._config?.center?.content as import('../utils').LovelaceCardConfig | undefined;
+    const card = this._config?.center?.card;
 
     if (!card) {
       return html`
@@ -280,7 +295,7 @@ export class PowerDistributionCardEditor extends LitElement implements LitElemen
     if (!this._config || !this.hass) return;
     this._config = {
       ...this._config,
-      center: { ...this._config.center, content: ev.detail.config },
+      center: { ...this._config.center, card: ev.detail.config },
     };
     fireEvent(this, 'config-changed', { config: this._config });
   }
@@ -290,7 +305,7 @@ export class PowerDistributionCardEditor extends LitElement implements LitElemen
     if (!this._config || !this.hass) return;
     this._config = {
       ...this._config,
-      center: { ...this._config.center, content: ev.detail.config },
+      center: { ...this._config.center, card: ev.detail.config },
     };
     fireEvent(this, 'config-changed', { config: this._config });
   }

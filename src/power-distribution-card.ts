@@ -46,7 +46,7 @@ export class PowerDistributionCard extends LitElement {
       entities: [],
       center: {
         type: 'bars',
-        content: [
+        bars: [
           { preset: 'autarky', name: localize('editor.settings.autarky') },
           { preset: 'ratio', name: localize('editor.settings.ratio') },
         ],
@@ -70,6 +70,19 @@ export class PowerDistributionCard extends LitElement {
   public async setConfig(config: PDCConfig): Promise<void> {
     //The Addition of the last object is needed to override the entities array for the preset settings
     const _config = Object.assign({}, DefaultConfig, config);
+
+    // Migrate old format: center.content -> center.bars or center.card
+    if (_config.center && 'content' in _config.center) {
+      const oldContent = (_config.center as any).content;
+      const { content: _removed, ..._centerWithoutContent } = _config.center as any;
+      if (_config.center.type === 'bars') {
+        _config.center = { ..._centerWithoutContent, bars: oldContent as BarSettings[] };
+      } else if (_config.center.type === 'card') {
+        _config.center = { ..._centerWithoutContent, card: oldContent as import('./utils').LovelaceCardConfig };
+      } else {
+        _config.center = _centerWithoutContent;
+      }
+    }
 
     // Applying Defaults depending on preset
     _config.entities = config.entities.map((item) => {
@@ -95,10 +108,10 @@ export class PowerDistributionCard extends LitElement {
     });
 
     // Applying the same to bars
-    if (_config.center.type == 'bars') {
-      const content = (_config.center.content as BarSettings[]).map((item) => {
+    if (_config.center.type == 'bars' && _config.center.bars) {
+      const bars = _config.center.bars.map((item) => {
         if (item.unit_of_measurement) return item;
-        
+
         let hass_uom = '%';
         if (item.entity) {
           hass_uom = this._state({ entity: item.entity, attribute: 'unit_of_measurement' }) as string;
@@ -108,10 +121,10 @@ export class PowerDistributionCard extends LitElement {
 
       this._config.center = {
           ...this._config.center,
-          content: content,
+          bars: bars,
       };
-    } else if (this._config.center.type == 'card') {
-      this._card = this._createCardElement(this._config.center.content as LovelaceCardConfig);
+    } else if (this._config.center.type == 'card' && this._config.center.card) {
+      this._card = this._createCardElement(this._config.center.card);
     }
 
     //Resize Observer
@@ -479,8 +492,8 @@ export class PowerDistributionCard extends LitElement {
    */
   private _render_bars(consumption: number, production: number): TemplateResult {
     const bars: TemplateResult[] = [];
-    if (!this._config.center.content || (this._config.center.content as BarSettings[]).length == 0) return html``;
-    (this._config.center.content as BarSettings[]).forEach((element) => {
+    if (!this._config.center.bars || this._config.center.bars.length == 0) return html``;
+    this._config.center.bars.forEach((element) => {
       let value = -1;
 
       switch (element.preset) {
