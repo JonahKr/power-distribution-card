@@ -3,7 +3,9 @@ import { ActionConfig, LovelaceCardConfig } from './utils';
 
 declare global {
   interface HASSDomEvents {
-    
+    "config-changed": { config: any };
+    "ll-rebuild": Record<string, unknown>;
+    "ll-upgrade": Record<string, unknown>;
   }
 }
 

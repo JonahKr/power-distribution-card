@@ -15,6 +15,7 @@ const BASE_SCHEMA: HaFormSchema[] = [
     flatten: true,
     expanded: true,
     title: localize('editor.settings.general_settings', true),
+    icon: "mdi:text",
     schema: [
       {
         name: "entity",
@@ -37,6 +38,7 @@ const BASE_SCHEMA: HaFormSchema[] = [
     type: "expandable",
     flatten: true,
     title: localize('editor.settings.value', true) + " " +localize('editor.settings.settings', true),
+    icon: "mdi:numeric",
     schema: [
       {
         type: "grid",
@@ -58,6 +60,7 @@ const BASE_SCHEMA: HaFormSchema[] = [
     type: "expandable",
     flatten: true,
     title: localize('editor.settings.secondary_info', true),
+    icon: "mdi:attachment-plus",
     schema: [
       { name: "secondary_info_entity",
         selector: { entity: { domain: "sensor"} } },
@@ -71,6 +74,7 @@ const BASE_SCHEMA: HaFormSchema[] = [
     type: "expandable",
     flatten: true,
     title: localize('editor.settings.action_settings', true),
+    icon: "mdi:gesture-tap",
     schema: [
       {
         type: "grid",
@@ -93,6 +97,7 @@ const BASE_SCHEMA: HaFormSchema[] = [
     type: "expandable",
     flatten: true,
     title: localize('editor.settings.color_settings', true),
+    icon: "mdi:palette",
     schema: [
       { name: "color_threshold", selector: { number: { } } },
       {
@@ -156,6 +161,7 @@ export class ItemEditor extends LitElement {
       type: 'expandable',
       flatten: true,
       title: localize('editor.settings.preset_settings', true),
+      icon: "mdi:shape",
       schema: presetFields,
     };
     return [BASE_SCHEMA[0], presetSection, ...BASE_SCHEMA.slice(1)];

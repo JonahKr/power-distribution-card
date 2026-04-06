@@ -29,10 +29,9 @@
     "rollup": "rollup -c"
   },
   "dependencies": {
+    "@formatjs/intl-numberformat": "^9.3.1",
     "@mdi/js": "^7.4.47",
-    "custom-card-helpers": "2.0.0",
     "lit": "3.3.2",
-    "resize-observer-polyfill": "1.5.1",
     "sortablejs": "1.15.7"
   },
   "devDependencies": {

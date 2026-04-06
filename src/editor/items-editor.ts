@@ -1,6 +1,5 @@
 import { LitElement, html } from 'lit';
 
-import { HomeAssistant } from 'custom-card-helpers';
 import { EditorTarget, EntitySettings, HTMLElementValue } from '../types';
 import { localize } from '../localize/localize';
 import { property, state } from 'lit/decorators.js';
@@ -12,7 +11,7 @@ import { DefaultItem, PresetList, PresetObject } from '../presets';
 
 import Sortable from 'sortablejs';
 import SortableCore, { OnSpill, AutoScroll, SortableEvent } from 'sortablejs/modular/sortable.core.esm';
-import { fireCustomEvent, fireEvent } from '../utils';
+import { fireCustomEvent, fireEvent, HomeAssistant } from '../utils';
 
 
 SortableCore.mount(OnSpill, new AutoScroll());

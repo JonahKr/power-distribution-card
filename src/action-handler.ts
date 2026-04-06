@@ -1,9 +1,9 @@
-import { fireEvent } from 'custom-card-helpers';
 import { noChange } from 'lit';
 import { AttributePart, directive, Directive, DirectiveParameters } from 'lit/directive.js';
 
 import { deepEqual } from './deep-equal';
 import { ACTION_HANDLER_TAG } from './card-tags';
+import { fireEvent } from './utils';
 
 export const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'none'] as const;
 

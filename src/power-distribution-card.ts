@@ -2,12 +2,7 @@ import { LitElement, html, TemplateResult, PropertyValues, CSSResultGroup } from
 
 import { customElement, property, state } from 'lit/decorators.js';
 
-import {
-  createThing,
-  debounce,
-  formatNumber,
-  LovelaceCardEditor,
-} from 'custom-card-helpers';
+import { createThing } from './utils';
 
 import { version } from '../package.json';
 
@@ -19,9 +14,10 @@ import { actionHandler } from './action-handler';
 
 import './editor/editor';
 
-import { ActionHandlerEvent, handleAction, hasAction, HomeAssistant, LovelaceCard, LovelaceCardConfig, registerCustomCard } from './utils';
+import { ActionHandlerEvent, handleAction, hasAction, HomeAssistant, LovelaceCard, LovelaceCardConfig, registerCustomCard, formatNumber } from './utils';
 import { CARD_TAG, EDITOR_TAG } from './card-tags';
 import { computeCssColor } from './utils/compute-color';
+import { debounce } from './utils/debounce';
 
 console.info(
   `%c POWER-DISTRIBUTION-CARD %c ${version} `,
@@ -36,9 +32,9 @@ export class PowerDistributionCard extends LitElement {
   /**
    * Function for creating the editor for the power-distribution-card
    */
-  public static async getConfigElement(): Promise<LovelaceCardEditor> {
+  public static async getConfigElement(): Promise<LitElement> {
     await import('./editor/editor');
-    return document.createElement(EDITOR_TAG) as LovelaceCardEditor;
+    return document.createElement(EDITOR_TAG) as LitElement;
   }
 
   /**

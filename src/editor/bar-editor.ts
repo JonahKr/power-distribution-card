@@ -2,14 +2,14 @@ import { LitElement, html, css, nothing, CSSResultGroup } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { BAR_EDITOR_TAG } from '../card-tags';
 
-import { HomeAssistant } from 'custom-card-helpers';
+
 
 import { BarSettings } from '../types';
 import { localize } from '../localize/localize';
 import { HaFormSchema } from './ha-form';
 import { mdiDelete, mdiPlus } from '@mdi/js';
 import { deepEqual } from '../deep-equal';
-import { fireCustomEvent } from '../utils';
+import { fireCustomEvent, HomeAssistant } from '../utils';
 
 const BAR_PRESETS = ['autarky', 'ratio', ''];
 

@@ -6,7 +6,7 @@ import { EDITOR_TAG, ITEM_EDITOR_TAG, BAR_EDITOR_TAG, ITEMS_EDITOR_TAG } from '.
 
 import { mdiPencil } from '@mdi/js';
 
-import { fireEvent, HomeAssistant, LovelaceCardEditor, getLovelace } from 'custom-card-helpers';
+import { getLovelace } from '../utils';
 import {
   PDCConfig,
   BarSettings,
@@ -21,6 +21,7 @@ import './bar-editor';
 
 import { loadHaComponents } from '../utils/ha-component-loader';
 import { HaFormSchema } from './ha-form';
+import { fireEvent, HomeAssistant } from '../utils';
 
 /**
  * Editor Settings
@@ -40,7 +41,7 @@ const SCHEMA: HaFormSchema[] = [
   { name: 'animation', selector: { select: { options: animation, mode: 'dropdown' } }, required: true },
 ];
 
-export class PowerDistributionCardEditor extends LitElement implements LovelaceCardEditor {
+export class PowerDistributionCardEditor extends LitElement implements LitElement {
   @property({ attribute: false }) public hass?: HomeAssistant;
 
   @state() private _config!: PDCConfig;
