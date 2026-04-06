@@ -1,27 +1,35 @@
-import { LitElement, TemplateResult, html, css, CSSResult, nothing } from 'lit';
+import { LitElement, html, css, CSSResult, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { ITEM_EDITOR_TAG } from '../card-tags';
 
-import { EditorTarget, EntitySettings } from '../types';
-import { computeLabel, localize } from '../localize/localize';
+import { EntitySettings } from '../types';
+import { localize } from '../localize/localize';
 import { PresetList } from '../presets';
-import { actions } from '../action-handler';
 import { HaFormSchema } from './ha-form';
 import { fireEvent, HomeAssistant } from '../utils';
 
-const  SCHEMA: HaFormSchema[] = [
+const BASE_SCHEMA: HaFormSchema[] = [
   {
-    name: "entity",
-    selector: { entity: { domain: "sensor"} }
-  },
-  {
-    type: "grid",
-    name: "",
+    name: "general",
+    type: "expandable",
+    flatten: true,
+    expanded: true,
+    title: localize('editor.settings.general_settings', true),
     schema: [
-        { name: "name", selector: { text: {} } },
-        { name: "icon", selector: { icon: {} } },
-        { name: "attribute", selector: { attribute: {}}, context: { filter_entity: "entity" } },
-        { name: "preset", selector: { select: { options: PresetList as any as string[], mode: 'dropdown' } } },
+      {
+        name: "entity",
+        selector: { entity: { domain: "sensor"} }
+      },
+      {
+        type: "grid",
+        name: "",
+        schema: [
+            { name: "name", selector: { text: {} } },
+            { name: "icon", selector: { icon: {} } },
+            { name: "attribute", selector: { attribute: {}}, context: { filter_entity: "entity" } },
+            { name: "preset", selector: { select: { options: PresetList as any as string[], mode: 'dropdown' } } },
+        ]
+      },
     ]
   },
   {
@@ -40,7 +48,6 @@ const  SCHEMA: HaFormSchema[] = [
             { name: "display_abs", type: "boolean"},
             { name: "calc_excluded", type: "boolean"},
             { name: "threshold", selector: { number: { } } },
-            { name: "color_threshold", selector: { number: { } } },
         ]
       }
     ]
@@ -53,13 +60,7 @@ const  SCHEMA: HaFormSchema[] = [
     schema: [
       { name: "secondary_info_entity",
         selector: { entity: { domain: "sensor"} } },
-      {
-        type: "grid",
-        name: "",
-        schema: [
-            { name: "secondary_info_attribute", selector: { attribute: {}}},
-        ]
-      },
+      { name: "secondary_info_attribute", selector: { attribute: {}}, context: { filter_entity: "secondary_info_entity" }},
       { name: "secondary_info_replace_name", type: "boolean"},
     ]
   },
@@ -91,21 +92,28 @@ const  SCHEMA: HaFormSchema[] = [
     flatten: true,
     title: localize('editor.settings.color_settings', true),
     schema: [
+      { name: "color_threshold", selector: { number: { } } },
       {
         type: "grid",
         name: "",
         schema: [
           { name: "icon_color_bigger", selector: { ui_color: {} } },
-          { name: "icon_color_equal", selector: { ui_color: {} } },
-          { name: "icon_color_smaller", selector: { ui_color: {} } },
           { name: "arrow_color_bigger", selector: { ui_color: {} } },
+          { name: "icon_color_equal", selector: { ui_color: {} } },
           { name: "arrow_color_equal", selector: { ui_color: {} } },
+          { name: "icon_color_smaller", selector: { ui_color: {} } },
           { name: "arrow_color_smaller", selector: { ui_color: {} } },
         ]
       }
     ]
   }
 ];
+
+const PRESET_LABEL_MAP: Record<string, string> = {
+  battery_percentage_entity: 'battery_percentage',
+  grid_buy_entity: 'grid_buy',
+  grid_sell_entity: 'grid_sell',
+};
 
 
 export class ItemEditor extends LitElement {
@@ -126,6 +134,35 @@ export class ItemEditor extends LitElement {
     };
   }
 
+  private get _schema(): HaFormSchema[] {
+    const preset = this.config?.preset;
+    const presetFields: HaFormSchema[] =
+      preset === 'battery'
+        ? [{ name: 'battery_percentage_entity', selector: { entity: {} } }]
+        : preset === 'grid'
+        ? [
+            { name: 'grid_buy_entity', selector: { entity: {} } },
+            { name: 'grid_sell_entity', selector: { entity: {} } },
+          ]
+        : [];
+
+    if (presetFields.length === 0) return BASE_SCHEMA;
+
+    const presetSection: HaFormSchema = {
+      name: 'preset_section',
+      type: 'expandable',
+      flatten: true,
+      title: localize('editor.settings.preset_settings', true),
+      schema: presetFields,
+    };
+    return [BASE_SCHEMA[0], presetSection, ...BASE_SCHEMA.slice(1)];
+  }
+
+  private _computeLabel = (schema: HaFormSchema) => {
+    const key = PRESET_LABEL_MAP[schema.name] ?? schema.name;
+    return `${localize('editor.settings.' + key)} ${!schema.required ? `(${localize('editor.optional')})` : ''}`;
+  };
+
   protected render() {
     // If its a placeholder, don't render anything
     if (!this.hass || !this.config || this.config.preset == 'placeholder') {
@@ -136,54 +173,11 @@ export class ItemEditor extends LitElement {
       <ha-form
         .hass=${this.hass}
         .data=${this._flatConfig}
-        .schema=${SCHEMA}
-        .computeLabel=${computeLabel}
+        .schema=${this._schema}
+        .computeLabel=${this._computeLabel}
         @value-changed=${this._formValueChanged}
       ></ha-form>
     `;
-  }
-
-  private _renderPresetFeatures(): TemplateResult {
-    if (!this.config || !this.hass) return html``;
-
-    const preset = this.config.preset;
-    switch (preset) {
-      case 'battery':
-        return html`
-          <ha-entity-picker
-            label="${localize('editor.settings.battery_percentage')} (${localize('editor.optional')})"
-            allow-custom-entity
-            hideClearIcon
-            .hass=${this.hass}
-            .configValue=${'battery_percentage_entity'}
-            .value=${this.config.battery_percentage_entity || ''}
-            @value-changed=${this._valueChanged}
-          ></ha-entity-picker>
-        `;
-      case 'grid':
-        return html`
-          <ha-entity-picker
-            label="${localize('editor.settings.grid-buy')} (${localize('editor.optional')})"
-            allow-custom-entity
-            hideClearIcon
-            .hass=${this.hass}
-            .configValue=${'grid_buy_entity'}
-            .value=${this.config.grid_buy_entity || ''}
-            @value-changed=${this._valueChanged}
-          ></ha-entity-picker>
-          <ha-entity-picker
-            label="${localize('editor.settings.grid-sell')} (${localize('editor.optional')})"
-            allow-custom-entity
-            hideClearIcon
-            .hass=${this.hass}
-            .configValue=${'grid_sell_entity'}
-            .value=${this.config.grid_sell_entity || ''}
-            @value-changed=${this._valueChanged}
-          ></ha-entity-picker>
-        `;
-      default:
-        return html``;
-    }
   }
 
   private _formValueChanged(ev: CustomEvent): void {
@@ -204,47 +198,6 @@ export class ItemEditor extends LitElement {
       : undefined;
 
     fireEvent<any>(this, 'config-changed', { ...rest, icon_color, arrow_color });
-  }
-
-  private _valueChanged(ev: CustomEvent): void {
-    ev.stopPropagation();
-    if (!this.config || !this.hass) {
-      return;
-    }
-
-    const target = ev.target! as EditorTarget;
-
-    const value = target.checked !== undefined ? target.checked : ev.detail.value || target.value || ev.detail.config;
-    const configValue = target.configValue;
-    // Skip if no configValue or value is the same
-    if (!configValue || this.config[configValue] === value) {
-      return;
-    }
-
-    fireEvent<any>(this, 'config-changed', { ...this.config, [configValue]: value });
-  }
-
-  private _colorChanged(ev: CustomEvent): void {
-    ev.stopPropagation();
-    if (!this.config || !this.hass) {
-      return;
-    }
-
-    const target = ev.target! as EditorTarget;
-
-    const value = target.value;
-    const configValue = target.configValue;
-    if (!configValue) return;
-    // Split configvalue
-    const [thing, step] = configValue.split('.');
-
-    const color_set = { ...this.config[thing] };
-    color_set[step] = value;
-
-    // Skip if no configValue or value is the same
-    if (!configValue || this.config[thing] === color_set) return;
-
-    fireEvent<any>(this, 'config-changed', { ...this.config, [thing]: color_set });
   }
 
   static get styles(): CSSResult {
