@@ -62,6 +62,7 @@ const BASE_SCHEMA: HaFormSchema[] = [
       { name: "secondary_info_entity",
         selector: { entity: { domain: "sensor"} } },
       { name: "secondary_info_attribute", selector: { attribute: {}}, context: { filter_entity: "secondary_info_entity" }},
+      { name: "secondary_info_decimals", selector: { number: { step: 1 } } },
       { name: "secondary_info_replace_name", type: "boolean"},
     ]
   },
@@ -114,6 +115,7 @@ const PRESET_LABEL_MAP: Record<string, string> = {
   battery_percentage_entity: 'battery_percentage',
   grid_buy_entity: 'grid_buy',
   grid_sell_entity: 'grid_sell',
+  secondary_info_decimals: 'decimals',
 };
 
 

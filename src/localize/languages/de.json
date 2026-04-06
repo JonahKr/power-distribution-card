@@ -36,6 +36,8 @@
       "grid_buy": "Netz Ankauf",
       "grid_sell": "Netz Verkauf",
       "hide_arrows": "Pfeile Verstecken",
+      "lower_bound": "Untere Grenze",
+      "upper_bound": "Obere Grenze",
       "preset_settings": "Vorlagen Einstellungen",
       "icon": "Symbol",
       "invert_value": "Wert Invertieren",

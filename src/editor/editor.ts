@@ -4,14 +4,12 @@ import { property, state } from 'lit/decorators.js';
 import { EDITOR_TAG, ITEM_EDITOR_TAG, BAR_EDITOR_TAG, ITEMS_EDITOR_TAG } from '../card-tags';
 
 
-import { mdiClose, mdiPencil } from '@mdi/js';
+import { mdiPencil } from '@mdi/js';
 
-import { fireEvent, HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
+import { fireEvent, HomeAssistant, LovelaceCardEditor, getLovelace } from 'custom-card-helpers';
 import {
   PDCConfig,
-  SubElementConfig,
   BarSettings,
-  HassCustomElement,
   EntitySettings,
   CustomValueEvent,
 } from '../types';
@@ -29,8 +27,6 @@ import { HaFormSchema } from './ha-form';
  */
 const animation = ['none', 'flash', 'slide'];
 const center = ['none', 'card', 'bars'];
-
-const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'none'];
 
 type EditorType = 'main' | 'item' | 'bars' | 'card';
 
@@ -84,7 +80,8 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         content.push(this._renderBarEditor());
         break;
       case 'card':
-        return this._renderCardEditor();
+        content.push(this._renderCardEditor());
+        break;
     }
     return html`${content}`;
   }
@@ -113,9 +110,11 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     if (!this._config || !this.hass) {
       return;
     }
-
+    console.log("value changed")
     const target = ev.target;
+    console.log(target)
     const detail = ev.detail;
+    console.log(detail)
     if (target && detail) {
       if (target.configValue) {
         let value: any = detail;
@@ -140,8 +139,6 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
         // Assuming a return from ha-form
         this._config = detail.value as PDCConfig;
       }
-      console.log("New Config:");
-      console.log(this._config);
 
       fireEvent(this, 'config-changed', { config: this._config });
     }
@@ -162,6 +159,7 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
       <br />
       <div class="entity row">
         <ha-select
+          style="flex-grow: 1"
           label="${localize('editor.settings.center')}"
           .configValue=${'center.type'}
           @selected=${this._valueChanged}
@@ -216,56 +214,12 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
     ></${unsafeStatic(BAR_EDITOR_TAG)}>`;
   }
 
-  protected log(ev) {
-    console.log("PRTN", ev);
-    console.log(ev.target);
-    console.log(ev.detail);
-    console.log(ev.target.configValue);
-  }
-
-
-  /**
-   * SubElementEditor
-   */
-
-  @state() private _subElementEditor: SubElementConfig | undefined = undefined;
-
-  private _renderSubElementEditor(): TemplateResult {
-    const subel: TemplateResult[] = [
-      html`
-        <div class="header">
-          <div class="back-title">
-            <ha-icon-button @click=${this._goBack}>
-              <ha-icon icon="mdi:arrow-left"></ha-icon>
-            </ha-icon-button>
-          </div>
-        </div>`,
-    ];
-    const index = this._subElementEditor?.index;
-    switch (this._subElementEditor?.type) {
-      case 'entity':
-        subel.push(staticHtml`<${unsafeStatic(ITEM_EDITOR_TAG)}
-          .hass=${this.hass}
-          .config=${this._config.entities[this._subElementEditor?.index || 0]}
-          @config-changed=${this._itemChanged}
-        ></${unsafeStatic(ITEM_EDITOR_TAG)}>`);
-        break;
-      case 'bars':
-        subel.push(this._barEditor());
-        break;
-      case 'card':
-        subel.push(this._cardEditor());
-        break;
-    }
-    return html`${subel}`;
-  }
-
   private _itemChanged(ev: CustomEvent<EntitySettings>) {
     ev.stopPropagation();
     if (!this._config || !this.hass) {
       return;
     }
-    const index = this._subElementEditor?.index;
+    const index = this._activeEditor.index;
     if (index != undefined) {
       const entities = [...this._config.entities];
       entities[index] = ev.detail;
@@ -297,32 +251,47 @@ export class PowerDistributionCardEditor extends LitElement implements LovelaceC
   }
 
 
-  /**
-   * Card Editor
-   * -----------
-   * The Following is needed to implement the Card editor inside of the editor
-   * <hui-card-element-editor
-   *    .hass=${this.hass}
-   *    .value=${card}
-   *    .lovelace=${getLovelace()}
-   *    @config-changed=${this._centerChanged}
-   *  ></hui-card-element-editor>
-   */
+  private _renderCardEditor(): TemplateResult {
+    const card = this._config?.center?.content as import('../utils').LovelaceCardConfig | undefined;
 
-  //@query('hui-card-element-editor')
-  //private _cardEditorEl?;
+    if (!card) {
+      return html`
+        <hui-card-picker
+          .hass=${this.hass}
+          .lovelace=${getLovelace()}
+          @config-changed=${this._cardSelected}
+        ></hui-card-picker>
+      `;
+    }
 
-  private _cardEditor(): TemplateResult {
-    //const card = this._subElementEditor?.element;
     return html`
-      Sadly you cannot edit cards from the visual editor yet.
-      <p />
-      Check out the
-      <a target="_blank" rel="noopener noreferrer" href="https://github.com/JonahKr/power-distribution-card#cards-"
-        >Readme</a
-      >
-      to check out the latest and best way to add it.
+      <hui-card-element-editor
+        .hass=${this.hass}
+        .value=${card}
+        .lovelace=${getLovelace()}
+        @config-changed=${this._cardChanged}
+      ></hui-card-element-editor>
     `;
+  }
+
+  private _cardSelected(ev: CustomEvent): void {
+    ev.stopPropagation();
+    if (!this._config || !this.hass) return;
+    this._config = {
+      ...this._config,
+      center: { ...this._config.center, content: ev.detail.config },
+    };
+    fireEvent(this, 'config-changed', { config: this._config });
+  }
+
+  private _cardChanged(ev: CustomEvent): void {
+    ev.stopPropagation();
+    if (!this._config || !this.hass) return;
+    this._config = {
+      ...this._config,
+      center: { ...this._config.center, content: ev.detail.config },
+    };
+    fireEvent(this, 'config-changed', { config: this._config });
   }
 
   /**

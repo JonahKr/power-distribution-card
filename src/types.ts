@@ -33,6 +33,7 @@ export interface EntitySettings extends presetFeatures {
   preset?: PresetType;
   producer?: boolean;
   secondary_info_attribute?: string;
+  secondary_info_decimals?: number;
   secondary_info_entity?: string;
   secondary_info_replace_name?: boolean;
   tap_action?: ActionConfig;
@@ -56,10 +57,12 @@ export interface BarSettings {
   bar_bg_color?: string;
   entity?: string;
   invert_value?: boolean;
+  lower_bound?: number;
   name?: string | undefined;
   preset?: 'autarky' | 'ratio' | '';
   tap_action?: ActionConfig;
   unit_of_measurement?: string;
+  upper_bound?: number;
   double_tap_action?: ActionConfig;
 }
 

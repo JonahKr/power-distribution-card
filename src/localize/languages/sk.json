@@ -36,6 +36,8 @@
       "grid_buy": "Sieť nákup",
       "grid_sell": "Sieť predaj",
       "hide_arrows": "Skryť šípky",
+      "lower_bound": "Dolná hranica",
+      "upper_bound": "Horná hranica",
       "preset_settings": "Nastavenia predvoľby",
       "icon": "Ikona",
       "invert_value": "Invertovať hodnotu",

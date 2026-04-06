@@ -36,6 +36,8 @@
       "grid_buy": "Grid Buy",
       "grid_sell": "Grid Sell",
       "hide_arrows": "Hide Arrows",
+      "lower_bound": "Lower Bound",
+      "upper_bound": "Upper Bound",
       "preset_settings": "Preset Settings",
       "icon": "Icon",
       "invert_value": "Invert Value",

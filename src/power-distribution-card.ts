@@ -305,7 +305,8 @@ export class PowerDistributionCard extends LitElement {
     }
 
     //Decimal Precision
-    const decFakTen = 10 ** (item.decimals || item.decimals == 0 ? item.decimals : 2);
+    const haDisplayPrecision = item.entity ? (this.hass.entities[item.entity]?.display_precision ?? 2) : 2;
+    const decFakTen = 10 ** (item.decimals != null ? item.decimals : haDisplayPrecision);
     math_value = Math.round(math_value * decFakTen) / decFakTen;
     // Arrow directions
     const state = item.invert_arrow ? math_value * -1 : math_value;
@@ -321,8 +322,13 @@ export class PowerDistributionCard extends LitElement {
         secondary_info =
           this._state({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute }) + '';
       } else {
-        secondary_info = `${formatNumber(this._state({ entity: item.secondary_info_entity }) as number)}${this._state({ entity: item.secondary_info_entity, attribute: 'unit_of_measurement' }) || ''
-          }`;
+        const siRaw = this._state({ entity: item.secondary_info_entity }) as number;
+        const siPrecision = item.secondary_info_decimals != null
+          ? item.secondary_info_decimals
+          : (this.hass.entities[item.secondary_info_entity]?.display_precision ?? 2);
+        const siFakTen = 10 ** siPrecision;
+        const siValue = Math.round(siRaw * siFakTen) / siFakTen;
+        secondary_info = `${formatNumber(siValue, this.hass.locale)}${this._state({ entity: item.secondary_info_entity, attribute: 'unit_of_measurement' }) || ''}`;
       }
     }
     // Secondary info replace name
@@ -480,7 +486,10 @@ export class PowerDistributionCard extends LitElement {
             value = production != 0 ? Math.min(Math.round((Math.abs(consumption) * 100) / production), 100) : 0;
           break;
       }
-      if (value < 0) value = Math.min(parseInt(this._val(element).toFixed(0), 10), 100);
+      const rawValue = value < 0 ? parseInt(this._val(element).toFixed(0), 10) : value;
+      const lb = element.lower_bound ?? 0;
+      const ub = element.upper_bound ?? 100;
+      const barHeight = Math.min(Math.max(((rawValue - lb) / (ub - lb)) * 100, 0), 100);
       bars.push(html`
         <div
           class="bar-element"
@@ -493,9 +502,9 @@ export class PowerDistributionCard extends LitElement {
       })}
           style="${element.tap_action || element.double_tap_action ? 'cursor: pointer;' : ''}"
         >
-          <p class="bar-percentage">${value}${element.unit_of_measurement || '%'}</p>
+          <p class="bar-percentage">${rawValue}${element.unit_of_measurement || '%'}</p>
           <div class="bar-wrapper" style="${element.bar_bg_color ? `background-color:${computeCssColor(element.bar_bg_color)};` : ''}">
-            <bar style="height:${value}%; background-color:${element.bar_color ? computeCssColor(element.bar_color) : ''};" />
+            <bar style="height:${barHeight}%; background-color:${element.bar_color ? computeCssColor(element.bar_color) : ''};" />
           </div>
           <p>${element.name || ''}</p>
         </div>

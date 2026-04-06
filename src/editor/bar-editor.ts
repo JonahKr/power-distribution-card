@@ -27,6 +27,14 @@ const SCHEMA: HaFormSchema[] = [
         type: "grid",
         name: "",
         schema: [
+            { name: "lower_bound", selector: { number: {} } },
+            { name: "upper_bound", selector: { number: {} } },
+        ]
+    },
+    {
+        type: "grid",
+        name: "",
+        schema: [
             { name: "bar_color", selector: { ui_color: {} } },
             { name: "bar_bg_color", selector: { ui_color: {} } },
         ]
