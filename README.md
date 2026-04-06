@@ -226,7 +226,7 @@ entities:
     preset: battery
 center:
   type: bars
-  content:
+  bars:
     - preset: autarky
       name: autarky
     - preset: ratio
@@ -267,15 +267,17 @@ the *void*
 Bars have the following Settings:
 | Setting               | type          | example           | description  |
 | --------------------- |:-------------:|:-----------------:| :------------|
-| `bar_color`           | string        | red, #C1C1C1      |You can pass any string that CSS will accept as a color. |
-| `bar_bg_color`        | string        | red, #C1C1C1      |The Background Color of the Bar. You can pass any string that CSS will accept as a color. |
-| `entity`              | string        | sensor.ln_autarky | You can specify the entity_id here aswell. |
-| `invert_value`        | bool          | false             | This will invert the value recieved from HASS. This affects calculations aswell! |
+| `bar_color`           | string        | red, #C1C1C1      | You can pass any string that CSS will accept as a color. |
+| `bar_bg_color`        | string        | red, #C1C1C1      | The Background Color of the Bar. You can pass any string that CSS will accept as a color. |
+| `entity`              | string        | sensor.ln_autarky | You can specify the entity_id here as well. Required when `preset` is not `autarky` or `ratio`. |
+| `invert_value`        | bool          | false             | This will invert the value received from HASS. |
+| `lower_bound`         | number        | 0                 | Lower bound for bar fill scaling (default: 0). Values at or below this show an empty bar. |
 | `name`                | string        | Eigenstrom        | Feel free to change the displayed name of the element. |
-| `preset`              | 'ratio' 'autarky' 'custom'        | all in type        | Option to autocalc ratio/autarky. |
+| `preset`              | `'autarky'` \| `'ratio'` \| `''` | `autarky` | `autarky`/`ratio` auto-calculate from entity totals. Use `''` (empty string) with an `entity` for a custom bar. |
 | `tap_action`          | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Single tap action for item. |
 | `double_tap_action`   | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Double tap action for item. |
 | `unit_of_measurement` | string        | *W* , *kW*        | Default: %; The Unit of the sensor value. **Should be detected automatically!** |
+| `upper_bound`         | number        | 100               | Upper bound for bar fill scaling (default: 100). Values at or above this show a full bar. |
 
 <br/>
 
@@ -293,7 +295,7 @@ For example you could insert a glance card:
 ```yaml
 center:
   type: card
-  content:
+  card:
     type: glance
     entities:
       - sensor.any_Sensor
@@ -311,24 +313,27 @@ There are alot of settings you can customize your sensors with:
 | -------------------------- |:-------------:|:----------------------------:| :------------|
 | `attribute`                | string        | deferredWatts                | A Sensor can have multiple attributes. If one of them is your desired value to display, add it here. |
 | `arrow_color`              | object        | {smaller:'red'}              | You can Change the Color of the arrow dependant on the value. (Bigger, Equal and Smaller) |
-| `calc_excluded`            | boolean       | true                         | If the Item should be excluded from ratio/autarky calculations |
-| `color_threshold`          | number        | 0, -100, 420.69              | The value at which the coloring logic your switch on. (default: 0) |
+| `calc_excluded`            | boolean       | true                         | If the Item should be excluded from ratio/autarky calculations. |
+| `color_threshold`          | number        | 0, -100, 420.69              | The value at which the coloring logic switches on. (default: 0) |
+| `consumer`                 | boolean       | true                         | Marks this entity as a power consumer. Negative values contribute to the consumption total used by autarky/ratio bars. |
 | `decimals`                 | number        | 0, 2                         | The Number of Decimals shown. (default: 2) |
-| `display_abs`              | boolean       | false                        | Values are displayed absolute per default. |
+| `display_abs`              | boolean       | true                         | Display values as absolute (non-negative) numbers. Defaults to `true` when a preset is used. |
 | `double_tap_action`        | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Double tap action for item. |
-| `entity`                   | string        | sensor.e3dc_grid             | You can specify the entity_id here aswell. |
-| `hide_arrows`              | bool          | true                         | Toggeling the visibility od the *arrows*. |
+| `entity`                   | string        | sensor.e3dc_grid             | You can specify the entity_id here as well. |
+| `hide_arrows`              | bool          | true                         | Toggles the visibility of the *arrows*. |
 | `icon`                     | string        | mdi:dishwasher               | Why not change the displayed Icon to any [MDI](https://pictogrammers.com/library/mdi/) one? |
 | `icon_color`               | object        | {smaller:'red'}              | You can Change the Color of the icon dependant on the value. (Bigger, Equal and Smaller) |
-| `invert_arrow`             | bool          | true                         | This will change the *arrows* direction to the oposite one. |
-| `invert_value`             | bool          | false                        | This will invert the value recieved from HASS. This affects calculations aswell! |
+| `invert_arrow`             | bool          | true                         | This will change the *arrows* direction to the opposite one. |
+| `invert_value`             | bool          | false                        | This will invert the value received from HASS. This affects calculations as well! |
 | `name`                     | string        | dishwasher                   | Feel free to change the displayed name of the element. |
-| `secondary_info_attribute` | string        | min_temp                     | Requires Entity. Instead of Sensor, the Attribute Value gets displayed.  |
-| `secondary_info_entity`    | string        | sensor.e3dc_grid             | entity_id of the secondary info sensor |
+| `producer`                 | boolean       | true                         | Marks this entity as a power producer. Positive values contribute to the production total used by autarky/ratio bars. |
+| `secondary_info_attribute` | string        | min_temp                     | Requires `secondary_info_entity`. Displays the attribute value instead of the sensor state. |
+| `secondary_info_decimals`  | number        | 1                            | Number of decimals for the secondary info value. |
+| `secondary_info_entity`    | string        | sensor.e3dc_grid             | entity_id of the secondary info sensor. |
 | `secondary_info_replace_name` | bool       | true                         | This will replace the name of the item with the secondary info. |
 | `tap_action`               | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Single tap action for item. |
-| `threshold`                | number        | 2                            | Ignoring all abolute values smaller than threshold. |
-| `unit_of_display`          | string        | *W* , *kW* , *adaptive*      | The Unit the value is displayed in (default: W). Adaptive will show kW for values >= 1kW |
+| `threshold`                | number        | 2                            | Ignoring all absolute values smaller than threshold. |
+| `unit_of_display`          | string        | *W* , *kW* , *adaptive*      | The Unit the value is displayed in (default: W). Adaptive will show kW for values >= 1kW. |
 | `unit_of_measurement`      | string        | *W* , *kW*                   | The Unit of the sensor value. **Should be detected automatically!** |
 <p> 
 
