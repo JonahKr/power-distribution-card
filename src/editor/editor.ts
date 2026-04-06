@@ -126,11 +126,8 @@ export class PowerDistributionCardEditor extends LitElement implements LitElemen
     if (!this._config || !this.hass) {
       return;
     }
-    console.log("value changed")
     const target = ev.target;
-    console.log(target)
     const detail = ev.detail;
-    console.log(detail)
     if (target && detail) {
       if (target.configValue) {
         let value: any = detail;
@@ -243,30 +240,6 @@ export class PowerDistributionCardEditor extends LitElement implements LitElemen
     }
   }
 
-  /**
-   * TODO: Get rid of duplicated Updating functions
-   * Custom handeling for Center panel
-   */
-  private _centerChanged(ev: any): void {
-    if (!this._config || !this.hass) {
-      return;
-    }
-    if (ev.target) {
-      const target = ev.target;
-      if (target.configValue) {
-        this._config = {
-          ...this._config,
-          center: {
-            ...this._config.center,
-            [target.configValue]: target.checked !== undefined ? target.checked : target.value,
-          },
-        };
-      }
-    }
-    fireEvent(this, 'config-changed', { config: this._config });
-  }
-
-
   private _renderCardEditor(): TemplateResult {
     const card = this._config?.center?.card;
 
@@ -275,7 +248,7 @@ export class PowerDistributionCardEditor extends LitElement implements LitElemen
         <hui-card-picker
           .hass=${this.hass}
           .lovelace=${getLovelace()}
-          @config-changed=${this._cardSelected}
+          @config-changed=${this._cardChanged}
         ></hui-card-picker>
       `;
     }
@@ -288,16 +261,6 @@ export class PowerDistributionCardEditor extends LitElement implements LitElemen
         @config-changed=${this._cardChanged}
       ></hui-card-element-editor>
     `;
-  }
-
-  private _cardSelected(ev: CustomEvent): void {
-    ev.stopPropagation();
-    if (!this._config || !this.hass) return;
-    this._config = {
-      ...this._config,
-      center: { ...this._config.center, card: ev.detail.config },
-    };
-    fireEvent(this, 'config-changed', { config: this._config });
   }
 
   private _cardChanged(ev: CustomEvent): void {
