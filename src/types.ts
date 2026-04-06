@@ -1,11 +1,17 @@
 import { PresetType } from './presets';
 import { ActionConfig, LovelaceCardConfig } from './utils';
+import { NavigateOptions } from './utils/hass-types/navigate';
 
 declare global {
   interface HASSDomEvents {
+    "action": { action: string };
     "config-changed": { config: any };
+    "hass-more-info": { entityId: string };
+    "ll-custom": ActionConfig;
     "ll-rebuild": Record<string, unknown>;
     "ll-upgrade": Record<string, unknown>;
+    "show-dialog": { dialogTag: string; dialogParams: unknown; dialogImport?: () => Promise<void>; addHistory?: boolean };
+    "location-changed": NavigateOptions;
   }
 }
 
@@ -95,12 +101,7 @@ export interface EditorTarget extends EventTarget {
   checked?: boolean;
   configValue?: string;
   type?: HTMLInputElement['type'];
-  config: ActionConfig;
-}
-
-export interface SubElementConfig {
-  type: 'entity' | 'bars' | 'card';
-  index?: number;
+  config?: ActionConfig;
 }
 
 export interface HTMLElementValue extends HTMLElement {
@@ -118,6 +119,3 @@ declare global {
   }
 }
 
-export interface HassCustomElement extends CustomElementConstructor {
-  getConfigElement(): Promise<unknown>;
-}
