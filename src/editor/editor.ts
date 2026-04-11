@@ -40,7 +40,7 @@ const SCHEMA: HaFormSchema[] = [
   { name: 'animation', selector: { select: { options: animation, mode: 'dropdown' } }, required: true },
 ];
 
-export class PowerDistributionCardEditor extends LitElement implements LitElement {
+export class PowerDistributionCardEditor extends LitElement {
   @property({ attribute: false }) public hass?: HomeAssistant;
 
   @state() private _config!: PDCConfig;
@@ -241,25 +241,15 @@ export class PowerDistributionCardEditor extends LitElement implements LitElemen
   }
 
   private _renderCardEditor(): TemplateResult {
-    const card = this._config?.center?.card;
-
-    if (!card) {
-      return html`
-        <hui-card-picker
-          .hass=${this.hass}
-          .lovelace=${getLovelace()}
-          @config-changed=${this._cardChanged}
-        ></hui-card-picker>
-      `;
-    }
-
     return html`
-      <hui-card-element-editor
-        .hass=${this.hass}
-        .value=${card}
-        .lovelace=${getLovelace()}
-        @config-changed=${this._cardChanged}
-      ></hui-card-element-editor>
+      <p />
+      Card configuration is only editable via yaml.
+      <p />
+      Check out the
+      <a target="_blank" rel="noopener noreferrer" href="https://github.com/JonahKr/power-distribution-card#cards-"
+        >Readme</a
+      >
+      to check out the latest and best way to add it.
     `;
   }
 
