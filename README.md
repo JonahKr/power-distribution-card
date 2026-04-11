@@ -184,7 +184,7 @@ The easiest way to get your Card up and running, is by defining the entities for
 <br/>
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/38377070/102943002-25464c00-44b7-11eb-8566-0a82c80ae96d.gif"/>
+<img src="https://github.com/user-attachments/assets/d83e941c-0436-4efc-8060-ba3cbcd457d1" />
 </p>
 <br/>
 
@@ -194,7 +194,7 @@ The easiest way to get your Card up and running, is by defining the entities for
 ```
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/38377070/102943049-44dd7480-44b7-11eb-9a42-912cac357299.gif"/>
+<img src="https://github.com/user-attachments/assets/e3b25a1f-3438-4b04-8174-9093473ec05b"/>
 </p>
 
 
@@ -278,6 +278,12 @@ Bars have the following Settings:
 | `double_tap_action`   | Action Config | [Configuration](https://www.home-assistant.io/lovelace/actions/#configuration-variables) | Double tap action for item. |
 | `unit_of_measurement` | string        | *W* , *kW*        | Default: %; The Unit of the sensor value. **Should be detected automatically!** |
 | `upper_bound`         | number        | 100               | Upper bound for bar fill scaling (default: 100). Values at or above this show a full bar. |
+
+<br/>
+
+<p align="center">
+<img src="https://github.com/user-attachments/assets/b56a9980-5248-4c7f-a029-161920bc68d2"/>
+</p>
 
 <br/>
 
