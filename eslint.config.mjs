@@ -1,3 +1,4 @@
+import { defineConfig } from "eslint/config";
 import tsParser from "@typescript-eslint/parser";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -12,11 +13,13 @@ const compat = new FlatCompat({
     allConfig: js.configs.all
 });
 
-export default [...compat.extends(
-    "plugin:@typescript-eslint/recommended",
-    "prettier",
-    "plugin:prettier/recommended",
-), {
+export default defineConfig([{
+    extends: compat.extends(
+        "plugin:@typescript-eslint/recommended",
+        "prettier",
+        "plugin:prettier/recommended",
+    ),
+
     languageOptions: {
         parser: tsParser,
         ecmaVersion: 2018,
@@ -30,4 +33,4 @@ export default [...compat.extends(
     rules: {
         "@typescript-eslint/camelcase": 0,
     },
-}];
+}]);

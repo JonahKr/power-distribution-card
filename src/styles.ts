@@ -133,10 +133,6 @@ export const styles = css`
     height: 1em;
   }
 
-  table {
-    width: 100%;
-  }
-
   /**************
   ARROW ANIMATION
   **************/

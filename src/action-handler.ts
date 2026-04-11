@@ -1,8 +1,9 @@
-import { fireEvent } from 'custom-card-helpers';
 import { noChange } from 'lit';
 import { AttributePart, directive, Directive, DirectiveParameters } from 'lit/directive.js';
 
 import { deepEqual } from './deep-equal';
+import { ACTION_HANDLER_TAG } from './card-tags';
+import { fireEvent } from './utils';
 
 export const actions = ['more-info', 'toggle', 'navigate', 'url', 'call-service', 'none'] as const;
 
@@ -72,15 +73,15 @@ class ActionHandler extends HTMLElement implements ActionHandlerMock {
   }
 }
 
-customElements.define('action-handler-power-distribution-card', ActionHandler);
+customElements.define(ACTION_HANDLER_TAG, ActionHandler);
 
 const getActionHandler = (): ActionHandler => {
   const body = document.body;
-  if (body.querySelector('action-handler-power-distribution-card')) {
-    return body.querySelector('action-handler-power-distribution-card') as ActionHandler;
+  if (body.querySelector(ACTION_HANDLER_TAG)) {
+    return body.querySelector(ACTION_HANDLER_TAG) as ActionHandler;
   }
 
-  const actionhandler = document.createElement('action-handler-power-distribution-card');
+  const actionhandler = document.createElement(ACTION_HANDLER_TAG);
   body.appendChild(actionhandler);
 
   return actionhandler as ActionHandler;
