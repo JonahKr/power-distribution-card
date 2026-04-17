@@ -340,8 +340,13 @@ export class PowerDistributionCard extends LitElement {
         secondary_info =
           this._state({ entity: item.secondary_info_entity, attribute: item.secondary_info_attribute }) + '';
       } else {
-        const siRaw = this._state({ entity: item.secondary_info_entity }) as number;
-        secondary_info = `${this._formatValue(siRaw, item.secondary_info_entity, item.secondary_info_decimals)[0]}${this._state({ entity: item.secondary_info_entity, attribute: 'unit_of_measurement' }) || ''}`;
+        const siRaw = this._state({ entity: item.secondary_info_entity });
+
+        if (typeof siRaw === 'number') {
+          secondary_info = `${this._formatValue(siRaw, item.secondary_info_entity, item.secondary_info_decimals)[0]}${this._state({ entity: item.secondary_info_entity, attribute: 'unit_of_measurement' }) || ''}`;
+        } else {
+          secondary_info = String(siRaw);
+        }
       }
     }
     // Secondary info replace name
