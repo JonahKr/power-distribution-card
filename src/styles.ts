@@ -12,7 +12,7 @@ export const styles = css`
 
   .card-content {
     display: grid;
-    grid-template-columns: 1.5fr 1fr 1.5fr;
+    grid-template-columns: minmax(0, 1.5fr) minmax(100px, 1fr) minmax(0, 1.5fr);
     column-gap: 10px;
   }
 
@@ -23,6 +23,11 @@ export const styles = css`
     grid-column: 2;
     flex-wrap: wrap;
     min-width: 100px;
+  }
+
+  #center-panel > * {
+    min-width: 0;
+    max-width: 100%;
   }
 
   #center-panel > div {
@@ -211,7 +216,7 @@ export const narrow_styles = html`
     Mobile View
     **********/
     .card-content {
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(100px, 1fr) minmax(0, 1fr);
     }
     .placeholder {
       height: 114px !important;
